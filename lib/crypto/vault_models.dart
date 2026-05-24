@@ -3,25 +3,30 @@ class EncryptedBlob {
     required this.algorithm,
     required this.nonceBase64,
     required this.ciphertextBase64,
+    required this.macBase64,
   });
 
   final String algorithm;
   final String nonceBase64;
   final String ciphertextBase64;
+  final String macBase64;
 
   Map<String, Object> toJson() {
     return {
       "algorithm":algorithm,
       "nonce": nonceBase64,
       "ciphertext": ciphertextBase64,
+      "mac": macBase64,
     };
   }
+
 
   factory EncryptedBlob.fromJson(Map<String, Object?> json) {
     return EncryptedBlob(
       algorithm: json["algorithm"] as String,
       nonceBase64: json["nonce"] as String,
       ciphertextBase64: json["ciphertext"] as String,
+      macBase64: json["mac"] as String,
     );
   }
 }

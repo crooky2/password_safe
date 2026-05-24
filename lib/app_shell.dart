@@ -13,11 +13,6 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int _selectedIndex = 0;
 
-  static const _titles = <String>[
-    'Home',
-    'Settings',
-  ];
-
   static const _pages = <Widget>[
     HomeScreen(),
     SettingsScreen(),
@@ -44,9 +39,6 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_titles[_selectedIndex]),
-      ),
       body: SafeArea(
         child: IndexedStack(
           index: _selectedIndex,

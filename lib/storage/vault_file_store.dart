@@ -45,4 +45,9 @@ class VaultFileStore {
       await file.delete();
     }
   }
+
+  Future<String> getDebugPath() async {
+    final file = await _getVaultFile();
+    return file.path;
+  }
 }

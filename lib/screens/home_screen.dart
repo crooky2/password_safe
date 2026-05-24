@@ -10,8 +10,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenFrame(
       title: 'Vault overview',
-      subtitle:
-          'A simple dashboard for the app entry points and future vault actions.',
+      enableSmallTitle: true,
       icon: Icons.dashboard_rounded,
       children: const [
         SectionCard(
