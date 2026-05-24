@@ -69,7 +69,6 @@ class _SetupVaultScreenState extends State<SetupScreen> {
 
     return ScreenFrame(
       title: "Setup Vault",
-      enableSmallTitle: true,
       icon: Icons.security_rounded,
       children: [
         Padding(

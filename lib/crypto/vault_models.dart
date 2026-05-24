@@ -106,4 +106,18 @@ class VaultFile {
       encryptedDatabase: EncryptedBlob.fromJson(json["encryptedDatabase"] as Map<String, Object?>),
     );
   }
+
+  VaultFile copyWith({
+    int? version,
+    KdfParams? kdf,
+    EncryptedBlob? wrappedVaultKey,
+    EncryptedBlob? encryptedDatabase,
+  }) {
+    return VaultFile(
+      version: version ?? this.version,
+      kdf: kdf ?? this.kdf,
+      wrappedVaultKey: wrappedVaultKey ?? this.wrappedVaultKey,
+      encryptedDatabase: encryptedDatabase ?? this.encryptedDatabase,
+    );
+  }
 }

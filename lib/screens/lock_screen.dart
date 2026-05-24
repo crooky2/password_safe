@@ -43,7 +43,6 @@ class _LockScreenState extends State<LockScreen> {
   Widget build(BuildContext context) {
     return ScreenFrame(
       title: 'App Locked',
-      enableSmallTitle: false,
       subtitle: "Enter your password to unlock.",
       icon: Icons.lock_rounded,
       children: [

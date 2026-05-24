@@ -103,4 +103,20 @@ class PasswordDatabase {
       ]
     );
   }
+
+  PasswordDatabase copyWith({
+    int? version,
+    List<PasswordEntry>? entries
+  }) {
+    return PasswordDatabase(
+      version: version ?? this.version,
+      entries: entries ?? this.entries,
+    );
+  }
+
+  PasswordDatabase addEntry(PasswordEntry entry) {
+    return copyWith(
+      entries: [...entries, entry],
+    );
+  }
 }

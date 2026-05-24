@@ -1,3 +1,5 @@
+import "dart:typed_data";
+
 import "text_bytes.dart";
 import "master_key_deriver.dart";
 import "vault_cipher.dart";
@@ -33,6 +35,25 @@ class VaultUnlocker {
     final databaseBytes = await cipher.decrypt(
       blob: vaultFile.encryptedDatabase,
       key: vaultKey,
+    );
+
+    final databaseText = bytesToText(databaseBytes);
+
+    return UnlockedVault(
+      vaultKey: vaultKey,
+      database: PasswordDatabase.fromJsonText(databaseText),
+    );
+  }
+
+  Future<UnlockedVault> unlockWithVaultKey({
+    required VaultFile vaultFile,
+    required Uint8List vaultKey,
+  }) async {
+    final cipher = VaultCipher();
+
+    final databaseBytes = await cipher.decrypt(
+      blob: vaultFile.encryptedDatabase,
+      key: vaultKey
     );
 
     final databaseText = bytesToText(databaseBytes);

@@ -9,9 +9,8 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenFrame(
-      title: 'Vault overview',
-      enableSmallTitle: true,
       icon: Icons.dashboard_rounded,
+      title: "Dashboard",
       children: const [
         SectionCard(
           title: 'Quick status',

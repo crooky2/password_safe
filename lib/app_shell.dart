@@ -3,8 +3,15 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
 
+import "auth/auth_controller.dart";
+
 class AppShell extends StatefulWidget {
-  const AppShell({super.key});
+  const AppShell({
+      super.key,
+      required this.authController,
+    });
+
+  final AuthController authController;
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -13,10 +20,13 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int _selectedIndex = 0;
 
-  static const _pages = <Widget>[
-    HomeScreen(),
-    SettingsScreen(),
-  ];
+  List<Widget> get _pages {
+    return [
+      const HomeScreen(),
+      // const InfoScreen(),
+      SettingsScreen(authController: widget.authController,),
+    ];
+  }
 
   static const _destinations = <NavigationDestination>[
     NavigationDestination(

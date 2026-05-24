@@ -15,7 +15,7 @@ class RootGate extends StatefulWidget {
 }
 
 class _RootGateState extends State<RootGate> {
-  final AuthController _authController = AuthController();
+  AuthController _authController = AuthController();
 
   @override
   void initState() {
@@ -58,7 +58,9 @@ class _RootGateState extends State<RootGate> {
             ),
           ),
 
-          AuthState.unlocked => const AppShell(),
+          AuthState.unlocked => AppShell(
+            authController: _authController,
+          ),
         };
       },
     );
