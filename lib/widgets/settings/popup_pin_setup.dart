@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
 import "../screen_popup.dart ";
+import "../secret_text_field.dart";
 
 class PinSetupPopup extends StatefulWidget {
   const PinSetupPopup({
@@ -58,20 +59,20 @@ class _PinSetupPopupState extends State<PinSetupPopup> {
       },
 
       children: [
-        TextField(
+        SecretTextField(
           controller: _pinController,
-          obscureText: true,
+          labelText: "PIN",
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: "PIN"),
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          enableBorder: false,
         ),
         const SizedBox(height: 12),
-        TextField(
+        SecretTextField(
           controller: _confirmController,
-          obscureText: true,
+          labelText: "Confirm PIN",
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: "Confirm PIN"),
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          enableBorder: false,
           onSubmitted: (_) => _submit(),
         ),
 

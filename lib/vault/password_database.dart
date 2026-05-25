@@ -9,6 +9,7 @@ class PasswordEntry {
     required this.password,
     this.notes = "",
     this.url = "",
+    this.isFavorite = false,
   });
 
   final String id;
@@ -17,6 +18,7 @@ class PasswordEntry {
   final String password;
   final String notes;
   final String url;
+  final bool isFavorite;
 
 
   Map<String, Object> toJson() {
@@ -27,6 +29,7 @@ class PasswordEntry {
       "password": password,
       "notes": notes,
       "url": url,
+      "isFavorite": isFavorite,
     };
   }
 
@@ -38,6 +41,27 @@ class PasswordEntry {
       password: json["password"] as String,
       notes: json["notes"] as String? ?? "",
       url: json["url"] as String? ?? "",
+      isFavorite: json["isFavorite"] as bool? ?? false,
+    );
+  }
+
+  PasswordEntry copyWith({
+    String? id,
+    String? title,
+    String? username,
+    String? password,
+    String? notes,
+    String? url,
+    bool? isFavorite,
+  }) {
+    return PasswordEntry(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      username: username ?? this.username,
+      password: password ?? this.password,
+      notes: notes ?? this.notes,
+      url: url ?? this.url,
+      isFavorite: isFavorite ?? this.isFavorite,
     );
   }
 }
@@ -85,22 +109,6 @@ class PasswordDatabase {
   factory PasswordDatabase.fromJsonText(String jsonText) {
     return PasswordDatabase.fromJson(
       jsonDecode(jsonText) as Map<String, Object?>,
-    );
-  }
-
-  factory PasswordDatabase.sample() {
-    return const PasswordDatabase(
-      version: 1,
-      entries: [
-      PasswordEntry(
-        id: "1",
-        title: "GitHub",
-        username: "chris@example.com",
-        password: "not-a-real-password",
-        url: "https://github.com",
-        notes: "Example entry for testing JSON",
-        ),
-      ]
     );
   }
 

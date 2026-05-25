@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import "package:flutter/services.dart";
 
 import '../widgets/screen_frame.dart';
+import "../widgets/secret_text_field.dart";
 
 class LockScreen extends StatefulWidget {
   const LockScreen({
@@ -96,16 +98,20 @@ class _LockScreenState extends State<LockScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextField(
+              SecretTextField(
                 controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  labelText: unlockLabel,
-                  hintText: unlockHint,
-                ),
+                labelText: unlockLabel,
+                hintText: unlockHint,
+                enableBorder: true,
+                keyboardType: _usePinUnlock 
+                    ? TextInputType.number 
+                    : TextInputType.text,
+
+                inputFormatters: _usePinUnlock 
+                    ? [FilteringTextInputFormatter.digitsOnly] 
+                    : null,
+
+                onSubmitted: (_) => _submit(),
               ),
               if (widget.errorMessage != null)
                 Padding(

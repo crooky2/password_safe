@@ -5,6 +5,8 @@ import "package:flutter/foundation.dart";
 import "../crypto/vault_builder.dart";
 import "../crypto/vault_unlocker.dart";
 import "../crypto/database_encrypter.dart";
+import "../crypto/master_key_deriver.dart";
+import "../crypto/vault_cipher.dart";
 
 import "../storage/vault_file_store.dart";
 
@@ -22,6 +24,7 @@ class AuthController extends ChangeNotifier {
     this.unlocker = const VaultUnlocker(),
     this.databaseEncrypter = const DatabaseEncrypter(),
     this.localUnlockService = const LocalUnlockService(),
+    this.masterKeyDeriver = const MasterKeyDeriver(),
   });
 
   final VaultFileStore store;
@@ -29,6 +32,7 @@ class AuthController extends ChangeNotifier {
   final VaultUnlocker unlocker;
   final DatabaseEncrypter databaseEncrypter;
   final LocalUnlockService localUnlockService;
+  final MasterKeyDeriver masterKeyDeriver;
 
   AuthState _state = AuthState.checking;
   UnlockedVault? _unlockedVault;
@@ -151,6 +155,62 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  Future<bool> changeMasterPassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final unlockedVault = _unlockedVault;
+
+    if (unlockedVault == null) {
+      _errorMessage = "Vault is locked.";
+      notifyListeners();
+      return false;
+    }
+
+    if (newPassword.length < 12) {
+      _errorMessage = "Use at least 12 characters for the password.";
+      notifyListeners();
+      return false;
+    }
+
+    try {
+      final vaultFile = await store.load();
+      await unlocker.unlock(
+        vaultFile: vaultFile,
+        masterPassword: currentPassword,
+      );
+
+      final newKdfParams = masterKeyDeriver.createDefaultParams();
+
+      final newKeyEncryptionKey = await masterKeyDeriver.deriveKey(
+        password: newPassword,
+        params: newKdfParams
+      );
+
+      final wrappedVaultKey = await VaultCipher().encrypt(
+        plaintext: unlockedVault.vaultKey,
+        key: newKeyEncryptionKey
+      );
+
+      final updatedVaultFile = vaultFile.copyWith(
+        kdf: newKdfParams,
+        wrappedVaultKey: wrappedVaultKey,
+      );
+
+      await store.save(updatedVaultFile);
+      await localUnlockService.disable();
+
+      _errorMessage = null;
+      notifyListeners();
+
+      return true;
+    } catch (_) {
+      _errorMessage = "Current password is incorrect or vault file is damaged.";
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<bool> isQuickUnlockEnabled() {
     return localUnlockService.isEnabled();
   }
@@ -191,6 +251,12 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  Future<void> disableQuickUnlock() async {
+    await localUnlockService.disable();
+    _errorMessage = null;
+    notifyListeners();
+  }
+
   Future<bool> unlockWithPin(String pin) async {
     _setBusy();
 
@@ -215,11 +281,5 @@ class AuthController extends ChangeNotifier {
 
       return false;
     }
-  }
-
-  Future<void> disableQuickUnlock() async {
-    await localUnlockService.disable();
-    _errorMessage = null;
-    notifyListeners();
   }
 }

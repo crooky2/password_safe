@@ -50,6 +50,16 @@ class AllEntriesTab extends StatelessWidget {
                 Expanded(
                   child: FilledButton.icon(
                     onPressed: () {
+                      Navigator.of(context).pop(_EntryPopupAction.clone);
+                    },
+                    icon: const Icon(Icons.copy_sharp, size: 18),
+                    label: const Text("Clone"),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () {
                       Navigator.of(context).pop(_EntryPopupAction.delete);
                     },
                     style: FilledButton.styleFrom(
@@ -60,22 +70,12 @@ class AllEntriesTab extends StatelessWidget {
                     label: const Text("Delete"),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop(_EntryPopupAction.clone);
-                    },
-                    icon: const Icon(Icons.copy_sharp, size: 18),
-                    label: const Text("Clone"),
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: 16),
 
             _EntryDetail(label: "Username", value: entry.username),
-            _EntryDetail(label: "Password", value: entry.password),
+            _EntrySecretDetail(label: "Password", value: entry.password),
             _EntryDetail(label: "URL", value: entry.url),
             _EntryDetail(label: "Notes", value: entry.notes),
           ],
@@ -164,6 +164,36 @@ class AllEntriesTab extends StatelessWidget {
                       title: entry.title,
                       subtitle: entry.username,
                       icon: Icons.key_rounded,
+                      additionalActionIconButton: IconButton(
+                        tooltip: entry.isFavorite
+                          ? "Remove from favorites"
+                          : "Add to favorites",
+                        onPressed: () {
+                          entryActions.toggleFavorite(context, entry: entry);
+                        },
+                        icon: Icon(
+                          entry.isFavorite
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
+                        ),
+                      ),
+                      contextMenuItems: [
+                        SectionCardMenuItem(
+                          label: "Clone",
+                          icon: Icons.copy_rounded,
+                          onSelected: () {
+                            entryActions.openEntryForm(context, entry: entry, clone: true);
+                          }
+                        ),
+                        SectionCardMenuItem(
+                          label: "Delete",
+                          icon: Icons.delete_rounded,
+                          isDestructive: true,
+                          onSelected: () {
+                            entryActions.deleteEntry(context, entry: entry);
+                          }
+                        ),
+                      ],
                       action: () {
                         _showEntryPopup(context, entry);
                       },
@@ -221,6 +251,87 @@ class _EntryDetail extends StatelessWidget {
           const Divider(height: 1, thickness: 1),
         ],
       ),
+    );
+  }
+}
+
+
+
+class _EntrySecretDetail extends StatefulWidget {
+  const _EntrySecretDetail({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  State<_EntrySecretDetail> createState() => _EntrySecretDetailState();
+}
+
+
+class _EntrySecretDetailState extends State<_EntrySecretDetail> {
+  bool _obscureText = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasValue = widget.value.trim().isNotEmpty;
+    final displayValue = hasValue 
+        ? _obscureText
+            ? "•" * widget.value.length
+            : widget.value
+      : "Not set";
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: SelectableText(displayValue)),
+              IconButton(
+                tooltip: _obscureText 
+                    ? "Show ${widget.label}" 
+                    : "Hide ${widget.label}",
+
+                onPressed: () {
+                  setState(() {
+                    _obscureText = !_obscureText;
+                  });
+                },
+
+                icon: Icon(
+                  _obscureText 
+                      ? Icons.visibility_rounded 
+                      : Icons.visibility_off_rounded, 
+                  size: 18
+                )
+              ),
+
+              IconButton(
+                tooltip: "Copy ${widget.label}",
+                onPressed: hasValue
+                    ? () async {
+                        await Clipboard.setData(ClipboardData(text: widget.value));
+
+                        if (!context.mounted) {
+                          return;
+                        }
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("${widget.label} copied.")),
+                        );
+                      }
+                    : null,
+                icon: const Icon(Icons.copy_rounded, size: 18),
+              )
+            ]
+          ),
+          const Divider(height: 1, thickness: 1),
+        ]
+      )
     );
   }
 }

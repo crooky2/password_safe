@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 
 import "../widgets/screen_frame.dart";
+import "../widgets/secret_text_field.dart";
 
 class SetupScreen extends StatefulWidget {
   const SetupScreen({
@@ -73,30 +74,18 @@ class _SetupVaultScreenState extends State<SetupScreen> {
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
-          child: TextField(
+          child: SecretTextField(
             controller: _passwordController,
-            obscureText: true,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              labelText: "Master password",
-              hintText: "At least 12 characters",
-            ),
+            labelText: "Master password",
+            hintText: "At least 12 characters",
           ),
         ),
 
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
-          child: TextField(
+          child: SecretTextField(
             controller: _confirmController,
-            obscureText: true,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              labelText: "Confirm password",
-            ),
+            labelText: "Confirm password",
             onSubmitted: (_) => _submit(),
           ),
         ),

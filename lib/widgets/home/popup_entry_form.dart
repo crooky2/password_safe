@@ -3,15 +3,10 @@ import "package:flutter/material.dart";
 import "../../vault/password_database.dart";
 
 import "../screen_popup.dart";
-
-
+import "../secret_text_field.dart";
 
 class EntryFormPopup extends StatefulWidget {
-  const EntryFormPopup({
-    super.key,
-    this.entry,
-    this.clone = false,
-  });
+  const EntryFormPopup({super.key, this.entry, this.clone = false});
 
   final PasswordEntry? entry;
   final bool clone;
@@ -71,8 +66,8 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
 
     final entry = PasswordEntry(
       id: _isEditing
-        ? widget.entry!.id
-        : DateTime.now().microsecondsSinceEpoch.toString(),
+          ? widget.entry!.id
+          : DateTime.now().microsecondsSinceEpoch.toString(),
       title: title,
       username: username,
       password: password,
@@ -86,8 +81,8 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
   @override
   Widget build(BuildContext context) {
     final title = _isEditing
-      ? "Edit entry"
-      : widget.clone
+        ? "Edit entry"
+        : widget.clone
         ? "Clone entry"
         : "New entry";
 
@@ -99,35 +94,23 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
       children: [
         TextField(
           controller: _titleController,
-          decoration: const InputDecoration(
-            labelText: 'Title',
-            border: OutlineInputBorder(),
-          ),
+          decoration: const InputDecoration(labelText: 'Title'),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _usernameController,
-          decoration: const InputDecoration(
-            labelText: 'Username',
-            border: OutlineInputBorder(),
-          ),
+          decoration: const InputDecoration(labelText: 'Username'),
         ),
         const SizedBox(height: 12),
-        TextField(
+        SecretTextField(
           controller: _passwordController,
-          obscureText: true,
-          decoration: const InputDecoration(
-            labelText: 'Password',
-            border: OutlineInputBorder(),
-          ),
+          labelText: "Password",
+          enableBorder: false,
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _urlController,
-          decoration: const InputDecoration(
-            labelText: 'URL',
-            border: OutlineInputBorder(),
-          ),
+          decoration: const InputDecoration(labelText: 'URL'),
         ),
         const SizedBox(height: 12),
         TextField(
@@ -135,7 +118,7 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
           maxLines: 4,
           decoration: const InputDecoration(
             labelText: 'Notes',
-            border: OutlineInputBorder(),
+            border: OutlineInputBorder(),  
           ),
         ),
 
@@ -143,9 +126,7 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
           const SizedBox(height: 12),
           Text(
             _errorMessage!,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.error,
-            ),
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
         ],
 
@@ -165,7 +146,6 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
           ),
           icon: const Icon(Icons.delete),
           label: Text("Discard"),
-          
         ),
       ],
     );

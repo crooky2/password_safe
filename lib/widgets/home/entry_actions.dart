@@ -4,7 +4,7 @@ import "../../auth/auth_controller.dart";
 
 import "../../vault/password_database.dart";
 
-import "entry_form_popup.dart";
+import "popup_entry_form.dart";
 
 class EntryActions {
   const EntryActions({
@@ -138,5 +138,39 @@ class EntryActions {
       const SnackBar(content: Text("Entry deleted.")),
     );
     return true;
+  }
+
+  Future<bool> toggleFavorite(BuildContext context, {
+    required PasswordEntry entry,
+  }) async {
+    final database = authController.database;
+
+    if (database == null) {
+      return false;
+    }
+
+    final updatedEntry = entry.copyWith(
+      isFavorite: !entry.isFavorite,
+    );
+
+    final updatedDatabase = database.updateEntry(updatedEntry);
+    final success = await authController.saveDatabase(updatedDatabase);
+
+    if (!context.mounted) {
+      return false;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success
+              ? (updatedEntry.isFavorite
+                  ? "Entry marked as favorite."
+                  : "Entry removed from favorites.")
+              : authController.errorMessage ?? "Failed to update entry.",
+        ),
+      ),
+    );
+    return success;
   }
 }

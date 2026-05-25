@@ -13,10 +13,7 @@ Future<void> main() async {
 }
 
 class PasswordSafeApp extends StatefulWidget {
-  const PasswordSafeApp({
-    super.key, 
-    required this.themeController
-  });
+  const PasswordSafeApp({super.key, required this.themeController});
 
   final ThemeController themeController;
 
@@ -25,7 +22,6 @@ class PasswordSafeApp extends StatefulWidget {
 }
 
 class _PasswordSafeAppState extends State<PasswordSafeApp> {
-
   @override
   void dispose() {
     widget.themeController.dispose();
@@ -37,9 +33,24 @@ class _PasswordSafeAppState extends State<PasswordSafeApp> {
     ThemeData buildTheme(Brightness brightness) {
       const seedColor = Color(0xFF1F6F78);
 
-      final colorScheme = ColorScheme.fromSeed(
+      final baseColorScheme = ColorScheme.fromSeed(
         seedColor: seedColor,
         brightness: brightness,
+      );
+
+      final colorScheme = baseColorScheme.copyWith(
+        error: brightness == Brightness.dark
+            ? const Color.fromARGB(255, 129, 25, 18)
+            : const Color.fromARGB(255, 214, 50, 38),
+        onError: brightness == Brightness.dark
+            ? Colors.white
+            : Colors.black,
+        errorContainer: brightness == Brightness.dark
+            ? const Color.fromARGB(255, 147, 0, 10)
+            : const Color.fromARGB(255, 255, 218, 214),
+        onErrorContainer: brightness == Brightness.dark
+            ? const Color.fromARGB(255, 255, 218, 214)
+            : const Color.fromARGB(255, 255, 218, 214),
       );
 
       return ThemeData(
