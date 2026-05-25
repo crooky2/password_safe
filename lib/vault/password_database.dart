@@ -119,4 +119,22 @@ class PasswordDatabase {
       entries: [...entries, entry],
     );
   }
+
+  PasswordDatabase updateEntry(PasswordEntry updatedEntry) {
+    return copyWith(
+      entries: entries.map((entry) {
+        if (entry.id == updatedEntry.id) {
+          return updatedEntry;
+        }
+
+        return entry;
+      }).toList(),
+    );
+  }
+
+  PasswordDatabase removeEntry(String id) {
+    return copyWith(
+      entries: entries.where((entry) => entry.id != id).toList(),
+    );
+  }
 }

@@ -3,33 +3,58 @@ import 'package:flutter/material.dart';
 import '../widgets/screen_frame.dart';
 import '../widgets/section_card.dart';
 
+import "../auth/auth_controller.dart";
+
+import "home/all_entries_tab.dart";
+
+import "../widgets/home/entry_actions.dart";
+
+
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({
+    super.key, 
+    required this.authController
+  });
+
+  final AuthController authController;
 
   @override
   Widget build(BuildContext context) {
+    final entryActions = EntryActions(authController: authController);
+    
     return ScreenFrame(
       icon: Icons.dashboard_rounded,
       title: "Dashboard",
-      children: const [
-        SectionCard(
-          title: 'Quick status',
-          subtitle:
-              'Show the current vault state here later, such as synced, locked, or ready.',
-          icon: Icons.shield_rounded,
+      headerActions: [
+        IconButton(
+          tooltip: "Add entry",
+          onPressed: () {
+            entryActions.openEntryForm(context);
+          },
+          icon: const Icon(Icons.add_rounded),
         ),
-        SectionCard(
-          title: 'Recent activity',
-          subtitle:
-              'Reserve this area for recent changes, opened entries, or important alerts.',
-          icon: Icons.history_rounded,
+        IconButton(
+          tooltip: "Search for entry",
+          onPressed: () {
+            // We will implement search here soon.
+          },
+          icon: const Icon(Icons.search),
         ),
+      ],
+      children: [
         SectionCard(
-          title: 'Fast actions',
-          subtitle:
-              'This space can later host the main shortcuts without changing the app layout.',
-          icon: Icons.flash_on_rounded,
+          title: 'All entries',
+          icon: Icons.list_rounded,
+          action: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => AllEntriesTab(authController: authController),
+              ),
+            );
+          },
         ),
+        SectionCard(title: 'Favorites', icon: Icons.star_rounded),
+        SectionCard(title: 'Folders', icon: Icons.folder_rounded),
       ],
     );
   }

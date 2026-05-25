@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import "../theme_controller.dart";
+
 import '../widgets/screen_frame.dart';
 import "../widgets/section_card.dart";
 
@@ -7,95 +9,89 @@ import "../auth/auth_controller.dart";
 
 import "../storage/vault_file_store.dart";
 
-import "../vault/password_database.dart";
-
-
 import "settings/security_tab.dart";
+import "settings/debug_tab.dart";
+import "settings/appearance.dart";
 
 class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key, required this.authController});
+  const SettingsScreen({
+    super.key, 
+    required this.authController,
+    required this.themeController,
+  });
 
   final AuthController authController;
+  final ThemeController themeController;
 
   @override
   Widget build(BuildContext context) {
     return ScreenFrame(
       title: 'Settings',
       icon: Icons.settings_rounded,
+      headerActions: [
+        FilledButton.icon(
+          onPressed: authController.lock,
+          icon: const Icon(Icons.lock_rounded),
+          label: const Text("Lock app"),
+          style: FilledButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.tertiary,
+            foregroundColor: Theme.of(context).colorScheme.onTertiary,
+          ),
+        ),
+      ],
       children: [
+        SectionCard(
+          title: "Appearance",
+          icon: Icons.palette_rounded,
+          action: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => AppearanceTab(
+                  themeController: themeController,
+                ),
+              ),
+            );
+          },
+        ),
+
+        SectionCard(
+          title: "Security",
+          icon: Icons.security_rounded,
+          action: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => SecurityTab(authController: authController),
+              ),
+            );
+          },
+        ),
+
+        SectionCard(
+          title: "Debug",
+          icon: Icons.bug_report_rounded,
+          action: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => DebugTab(authController: authController),
+              ),
+            );
+          },
+        ),
+
+
         FilledButton(
           onPressed: () async {
             await VaultFileStore().delete();
 
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text("Deleted.")));
+            ).showSnackBar(SnackBar(content: Text("Reset app data.")));
           },
-          child: const Text("Delete vault file"),
-        ),
-
-        FilledButton.icon(
-          onPressed: authController.lock,
-          icon: const Icon(Icons.lock_rounded),
-          label: const Text("Lock app"),
-        ),
-        FilledButton.icon(
-          onPressed: () async {
-            final database = authController.database;
-
-            if (database == null) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text("No vault loaded.")));
-              return;
-            }
-
-            final newEntry = PasswordEntry(
-              id: DateTime.now().microsecondsSinceEpoch.toString(),
-              title: "test entry",
-              username: "testuser",
-              password: "testpassword",
-              notes: "test entry notes",
-            );
-
-            final updatedDatabase = database.addEntry(newEntry);
-
-            final success = await authController.saveDatabase(updatedDatabase);
-
-            if (!context.mounted) {
-              return;
-            }
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  success
-                      ? 'Saved entries: ${updatedDatabase.entries.length}'
-                      : authController.errorMessage ?? 'Save failed.',
-                ),
-              ),
-            );
-          },
-          icon: const Icon(Icons.add_rounded),
-          label: const Text("Add test entry"),
-        ),
-
-        SectionCard(
-          title: "Security",
-          subtitle: "Manage security settings and preferences.",
-          icon: Icons.security_rounded,
-          children: [
-            FilledButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => SecurityTab(authController: authController),
-                  ),
-                );
-              },
-              child: const Text("Security"),
-            )
-          ],
+          style: FilledButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.error,
+            foregroundColor: Theme.of(context).colorScheme.onError,
+          ),
+          child: const Text("Reset App Data"),
         ),
       ],
     );

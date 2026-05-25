@@ -3,9 +3,17 @@ import 'package:flutter/material.dart';
 import '../widgets/screen_frame.dart';
 
 class LockScreen extends StatefulWidget {
-  const LockScreen({super.key, required this.onUnlock, this.errorMessage});
+  const LockScreen({
+    super.key, 
+    required this.onUnlock, 
+    required this.onUnlockWithPin,
+    required this.isQuickUnlockEnabled,
+    this.errorMessage
+  });
 
   final Future<bool> Function(String) onUnlock;
+  final Future<bool> Function(String) onUnlockWithPin;
+  final Future<bool> Function() isQuickUnlockEnabled;
   final String? errorMessage;
 
   @override
@@ -14,6 +22,15 @@ class LockScreen extends StatefulWidget {
 
 class _LockScreenState extends State<LockScreen> {
   final TextEditingController _passwordController = TextEditingController();
+
+  bool _isCheckingQuickUnlock = true;
+  bool _usePinUnlock = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadQuickUnlockMode();
+  }
 
   @override
   void dispose() {
@@ -28,7 +45,9 @@ class _LockScreenState extends State<LockScreen> {
       return;
     }
 
-    final success = await widget.onUnlock(password);
+    final success = _usePinUnlock
+        ? await widget.onUnlockWithPin(password)
+        : await widget.onUnlock(password);
 
     if (!mounted) {
       return;
@@ -39,11 +58,37 @@ class _LockScreenState extends State<LockScreen> {
     }
   }
 
+  Future<void> _loadQuickUnlockMode() async {
+    final enabled = await widget.isQuickUnlockEnabled();
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _usePinUnlock = enabled;
+      _isCheckingQuickUnlock = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_isCheckingQuickUnlock) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    final unlockLabel = _usePinUnlock ? "PIN" : "Password";
+    final unlockHint = _usePinUnlock ? "Enter your PIN" : "Enter your password";
+
     return ScreenFrame(
       title: 'App Locked',
-      subtitle: "Enter your password to unlock.",
+      subtitle: _usePinUnlock
+          ? "Enter your PIN to unlock."
+          : "Enter your password to unlock.",
       icon: Icons.lock_rounded,
       children: [
         Padding(
@@ -58,8 +103,8 @@ class _LockScreenState extends State<LockScreen> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  labelText: 'Password',
-                  hintText: 'Enter your password',
+                  labelText: unlockLabel,
+                  hintText: unlockHint,
                 ),
               ),
               if (widget.errorMessage != null)
@@ -80,6 +125,17 @@ class _LockScreenState extends State<LockScreen> {
           icon: const Icon(Icons.lock_open_rounded),
           label: const Text('Unlock'),
         ),
+        
+        if (_usePinUnlock)
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _usePinUnlock = false;
+                _passwordController.clear();
+              });
+            },
+            child: const Text("Use master password"),
+          ),
       ],
     );
   }

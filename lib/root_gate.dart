@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_shell.dart';
+import "theme_controller.dart";
 
 import 'screens/lock_screen.dart';
 import "screens/setup_screen.dart";
@@ -8,7 +9,12 @@ import "screens/setup_screen.dart";
 import "auth/auth_controller.dart";
 
 class RootGate extends StatefulWidget {
-  const RootGate({super.key});
+  const RootGate({
+    super.key,
+    required this.themeController,
+  });
+
+  final ThemeController themeController;
 
   @override
   State<RootGate> createState() => _RootGateState();
@@ -53,6 +59,8 @@ class _RootGateState extends State<RootGate> {
             body: SafeArea(
               child: LockScreen(
                 onUnlock: _authController.unlock,
+                onUnlockWithPin: _authController.unlockWithPin,
+                isQuickUnlockEnabled: _authController.isQuickUnlockEnabled,
                 errorMessage: _authController.errorMessage,
               ),
             ),
@@ -60,6 +68,7 @@ class _RootGateState extends State<RootGate> {
 
           AuthState.unlocked => AppShell(
             authController: _authController,
+            themeController: widget.themeController,
           ),
         };
       },

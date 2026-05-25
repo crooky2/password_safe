@@ -3,8 +3,13 @@ import "package:flutter/services.dart";
 
 import "../../widgets/screen_frame.dart";
 import "../../widgets/section_card.dart";
+import "../../widgets/screen_popup.dart";
+import "../../widgets/settings/settings_dropdown.dart";
+import "../../widgets/settings/pin_setup_popup.dart";
 
 import "../../auth/auth_controller.dart";
+
+enum QuickUnlockMode { disabled, pin }
 
 class SecurityTab extends StatefulWidget {
   const SecurityTab({super.key, required this.authController});
@@ -16,53 +21,69 @@ class SecurityTab extends StatefulWidget {
 }
 
 class _SecurityTabState extends State<SecurityTab> {
-  final TextEditingController _pinController = TextEditingController();
-  final TextEditingController _confirmController = TextEditingController();
-
-  bool _isSaving = false;
   String? _message;
+
+  QuickUnlockMode _quickUnlockMode = QuickUnlockMode.disabled;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadQuickUnlockMode();
+  }
 
   @override
   void dispose() {
-    _pinController.dispose();
-    _confirmController.dispose();
     super.dispose();
   }
 
-  Future<void> _enableQuickUnlock() async {
-    final pin = _pinController.text;
-    final confirm = _confirmController.text;
-
-    if (pin != confirm) {
-      setState(() {
-        _message = "PINs do not match.";
-      });
+  Future<void> _changeQuickUnlockMode(QuickUnlockMode mode) async {
+    if (mode == _quickUnlockMode) {
       return;
     }
 
-    setState(() {
-      _isSaving = true;
-      _message = null;
-    });
-
-    final success = await widget.authController.enableQuickUnlock(pin);
+    if (mode == QuickUnlockMode.disabled) {
+      await widget.authController.disableQuickUnlock();
 
     if (!mounted) {
       return;
     }
 
     setState(() {
-      _isSaving = false;
-      _message = success
-          ? "Quick unlock enabled."
-          : widget.authController.errorMessage ??
-                "Failed to enable quick unlock.";
+      _quickUnlockMode = QuickUnlockMode.disabled;
     });
-
-    if (success) {
-      _pinController.clear();
-      _confirmController.clear();
+    return;
     }
+
+    final pin = await showGeneralDialog<String>(
+        context: context,
+        barrierDismissible: true,
+        barrierLabel: "Close PIN setup",
+        barrierColor: Colors.transparent,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return const PinSetupPopup();
+        }
+      );
+
+      if (!mounted) {
+        return;
+      }
+      if (pin == null) {
+        return;
+      }
+
+      final success = await widget.authController.enableQuickUnlock(pin);
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _quickUnlockMode = success
+            ? QuickUnlockMode.pin
+            : QuickUnlockMode.disabled;
+        _message = success
+            ? null
+            : "Failed to enable quick unlock.";
+      });
   }
 
   @override
@@ -74,63 +95,58 @@ class _SecurityTabState extends State<SecurityTab> {
       body: SafeArea(
         child: ScreenFrame(
           title: "Security",
-          icon: Icons.security_rounded,
           enableReturnButton: true,
           returnButtonAction: () {
             Navigator.of(context).pop();
           },
           children: [
             SectionCard(
-              title: "PIN quick unlock",
+              title: "Quick unlock",
               subtitle:
-                  "Use an at least 4 digit PIN to unlock this device. Your master password is still required on new devices.",
+                  "Use quick unlock for faster access.",
               icon: Icons.pin_rounded,
               children: [
-                TextField(
-                  controller: _pinController,
-                  obscureText: true,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: const InputDecoration(
-                    labelText: "PIN",
-                    border: OutlineInputBorder(),
-                  ),
+                SettingsDropdown<QuickUnlockMode>(
+                  title: "Type",
+                  value: _quickUnlockMode,
+                  options: const [
+                    SettingsDropdownOption(
+                      label: "Disabled",
+                      value: QuickUnlockMode.disabled,
+                    ),
+                    SettingsDropdownOption(
+                      label: "PIN",
+                      value: QuickUnlockMode.pin,
+                    ),
+                  ],
+                  onChanged: _changeQuickUnlockMode,
                 ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _confirmController,
-                  obscureText: true,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: const InputDecoration(
-                    labelText: "Confirm PIN",
-                    border: OutlineInputBorder(),
-                  ),
-                  onSubmitted: (_) => _enableQuickUnlock(),
-                ),
-
                 if (_message != null) ...[
                   const SizedBox(height: 12),
-                  Text(_message!),
-                ],
-
-                const SizedBox(height: 12),
-                FilledButton.icon(
-                  onPressed: _isSaving ? null : _enableQuickUnlock,
-                  icon: _isSaving
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.lock_rounded),
-                  label: Text(_isSaving ? "Saving..." : "Enable PIN"),
-                ),
+                  Text(
+                    _message!,
+                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  ),
+                ]
               ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _loadQuickUnlockMode() async {
+    final enabled = await widget.authController.isQuickUnlockEnabled();
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _quickUnlockMode = enabled
+          ? QuickUnlockMode.pin
+          : QuickUnlockMode.disabled;
+    });
   }
 }
