@@ -7,6 +7,7 @@ class SecureStore {
 
   static const String deviceSecretKey = "device_secret";
   static const String quickUnlockRecordKey = "quick_unlock_record";
+  static const String quickUnlockThrottleKey = "quick_unlock_throttle";
 
   final FlutterSecureStorage _storage;
 
@@ -33,5 +34,18 @@ class SecureStore {
   Future<void> deleteQuickUnlockRecord() async {
     await _storage.delete(key: quickUnlockRecordKey);
     await _storage.delete(key: deviceSecretKey);
+    await _storage.delete(key: quickUnlockThrottleKey);
+  }
+
+  Future<void> writeQuickUnlockThrottle(String value) {
+    return _storage.write(key: quickUnlockThrottleKey, value: value);
+  }
+
+  Future<String?> readQuickUnlockThrottle() {
+    return _storage.read(key: quickUnlockThrottleKey);
+  }
+
+  Future<void> deleteQuickUnlockThrottle() {
+    return _storage.delete(key: quickUnlockThrottleKey);
   }
 }

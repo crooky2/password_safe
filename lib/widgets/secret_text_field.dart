@@ -12,6 +12,7 @@ class SecretTextField extends StatefulWidget {
     this.onSubmitted,
     this.borderRadius = 12,
     this.enableBorder = false,
+    this.enabled = true,
   });
 
   final TextEditingController controller;
@@ -22,6 +23,7 @@ class SecretTextField extends StatefulWidget {
   final ValueChanged<String>? onSubmitted;
   final double borderRadius;
   final bool enableBorder;
+  final bool enabled;
 
   @override
   State<SecretTextField> createState() => _SecretTextFieldState();
@@ -38,6 +40,7 @@ class _SecretTextFieldState extends State<SecretTextField> {
       keyboardType: widget.keyboardType,
       inputFormatters: widget.inputFormatters,
       onSubmitted: widget.onSubmitted,
+      enabled: widget.enabled,
       decoration: InputDecoration(
         labelText: widget.labelText,
         hintText: widget.hintText,
@@ -48,16 +51,20 @@ class _SecretTextFieldState extends State<SecretTextField> {
             : null,
         suffixIcon: IconButton(
           tooltip: _obscureText ? "Show" : "Hide",
-          onPressed: () {
-            setState(() {
-              _obscureText = !_obscureText;
-            });
-          },
+          onPressed: widget.enabled
+              ? () {
+                  setState(() {
+                    _obscureText = !_obscureText;
+                  });
+                }
+              : null,
           icon: Icon(
-            _obscureText ? Icons.visibility_rounded : Icons.visibility_off_rounded,
+            _obscureText
+                ? Icons.visibility_rounded
+                : Icons.visibility_off_rounded,
           ),
-        )
-      )
+        ),
+      ),
     );
   }
 }

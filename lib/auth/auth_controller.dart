@@ -14,6 +14,7 @@ import "../vault/password_database.dart";
 import "../vault/unlocked_vault.dart";
 
 import "local_unlock_service.dart";
+import "local_unlock_models.dart";
 
 enum AuthState { checking, needsSetup, locked, unlocked, busy }
 
@@ -37,11 +38,16 @@ class AuthController extends ChangeNotifier {
   AuthState _state = AuthState.checking;
   UnlockedVault? _unlockedVault;
   String? _errorMessage;
+  DateTime? _unlockBlockedUntil;
+  bool _unlockBlockedRequiresMasterPassword = false;
 
   AuthState get state => _state;
   UnlockedVault? get unlockedVault => _unlockedVault;
   PasswordDatabase? get database => _unlockedVault?.database;
   String? get errorMessage => _errorMessage;
+  DateTime? get unlockBlockedUntil => _unlockBlockedUntil;
+  bool get unlockBlockedRequiresMasterPassword =>
+      _unlockBlockedRequiresMasterPassword;
 
   void _setState(AuthState newState) {
     _state = newState;
@@ -58,6 +64,45 @@ class AuthController extends ChangeNotifier {
     _unlockedVault = null;
     _errorMessage = null;
     _setState(AuthState.locked);
+  }
+
+  String _formatDuration(Duration duration) {
+    final minutes = duration.inMinutes;
+    final seconds = duration.inSeconds.remainder(60);
+
+    if (minutes > 0 && seconds > 0) {
+      return "$minutes minute(s) and $seconds second(s)";
+    }
+    if (minutes > 0) {
+      return "$minutes minute(s)";
+    }
+    return "$seconds second(s)";
+  }
+
+  void _setUnlockBlock(
+    Duration remaining, {
+    required bool requiresMasterPassword,
+  }) {
+    _unlockBlockedUntil = remaining <= Duration.zero
+        ? null
+        : DateTime.now().add(remaining);
+    _unlockBlockedRequiresMasterPassword = requiresMasterPassword;
+  }
+
+  void _clearUnlockBlock() {
+    _unlockBlockedUntil = null;
+    _unlockBlockedRequiresMasterPassword = false;
+  }
+
+  Future<void> refreshUnlockBlock() async {
+    final state = await localUnlockService.readThrottleState();
+    final now = DateTime.now();
+
+    _unlockBlockedUntil = state.isLocked(now)
+        ? DateTime.fromMillisecondsSinceEpoch(state.lockedUntilMs)
+        : null;
+    _unlockBlockedRequiresMasterPassword = state.requiresMasterPassword;
+    notifyListeners();
   }
 
   Future<void> initialize() async {
@@ -99,16 +144,33 @@ class AuthController extends ChangeNotifier {
     _setBusy();
 
     try {
+      await localUnlockService.ensureMasterUnlockAllowed();
+
       final vaultFile = await store.load();
       _unlockedVault = await unlocker.unlock(
         vaultFile: vaultFile,
         masterPassword: masterPassword,
       );
 
+      await localUnlockService.clearThrottleState();
+      _clearUnlockBlock();
       _errorMessage = null;
       _setState(AuthState.unlocked);
 
       return true;
+    } on QuickUnlockLockedException catch (error) {
+      _setUnlockBlock(
+        error.remainingLockTime,
+        requiresMasterPassword: error.requiresMasterPassword,
+      );
+
+      _unlockedVault?.clearSecrets();
+      _unlockedVault = null;
+      _errorMessage =
+          "Too many PIN attempts. Try again in ${_formatDuration(error.remainingLockTime)}.";
+      _setState(AuthState.locked);
+
+      return false;
     } catch (_) {
       _unlockedVault?.clearSecrets();
       _unlockedVault = null;
@@ -184,12 +246,12 @@ class AuthController extends ChangeNotifier {
 
       final newKeyEncryptionKey = await masterKeyDeriver.deriveKey(
         password: newPassword,
-        params: newKdfParams
+        params: newKdfParams,
       );
 
       final wrappedVaultKey = await VaultCipher().encrypt(
         plaintext: unlockedVault.vaultKey,
-        key: newKeyEncryptionKey
+        key: newKeyEncryptionKey,
       );
 
       final updatedVaultFile = vaultFile.copyWith(
@@ -237,7 +299,10 @@ class AuthController extends ChangeNotifier {
     }
 
     try {
-      await localUnlockService.enableQuickUnlock(pin: pin, vaultKey: unlockedVault.vaultKey);
+      await localUnlockService.enableQuickUnlock(
+        pin: pin,
+        vaultKey: unlockedVault.vaultKey,
+      );
 
       _errorMessage = null;
       notifyListeners();
@@ -268,11 +333,71 @@ class AuthController extends ChangeNotifier {
         vaultFile: vaultFile,
         vaultKey: vaultKey,
       );
+      
+      _clearUnlockBlock();
 
       _errorMessage = null;
       _setState(AuthState.unlocked);
 
+      
+
       return true;
+    } on QuickUnlockLockedException catch (error) {
+      _unlockedVault?.clearSecrets();
+      _unlockedVault = null;
+      if (error.requiresMasterPassword) {
+        _errorMessage =
+            "Too many PIN attempts. Wait ${_formatDuration(error.remainingLockTime)}, then use your master password.";
+      } else {
+        _errorMessage =
+            "Too many PIN attempts. Try again in ${_formatDuration(error.remainingLockTime)}.";
+      }
+
+      _setState(AuthState.locked);
+
+      _setUnlockBlock(
+        error.remainingLockTime,
+        requiresMasterPassword: error.requiresMasterPassword,
+      );
+
+      return false;
+    } on QuickUnlockMasterPasswordRequiredException {
+      _unlockedVault?.clearSecrets();
+      _unlockedVault = null;
+      _errorMessage = "Quick unlock is disabled. Use your master password.";
+
+      _setState(AuthState.locked);
+
+      _unlockBlockedUntil = null;
+      _unlockBlockedRequiresMasterPassword = true;
+
+      return false;
+    } on QuickUnlockRejectedException catch (error) {
+      _unlockedVault?.clearSecrets();
+      _unlockedVault = null;
+
+      if (error.requiresMasterPassword) {
+        _errorMessage =
+            "Too many PIN attempts. Wait ${_formatDuration(error.cooldown!)}, then use your master password.";
+      } else if (error.cooldown != null) {
+        _errorMessage =
+            "Wrong PIN. Try again in ${_formatDuration(error.cooldown!)}.";
+      } else {
+        _errorMessage = "Wrong PIN.";
+      }
+
+      _setState(AuthState.locked);
+
+      if (error.cooldown != null) {
+        _setUnlockBlock(
+          error.cooldown!,
+          requiresMasterPassword: error.requiresMasterPassword,
+        );
+      } else {
+        _clearUnlockBlock();
+      }
+
+      return false;
     } catch (_) {
       _unlockedVault?.clearSecrets();
       _unlockedVault = null;

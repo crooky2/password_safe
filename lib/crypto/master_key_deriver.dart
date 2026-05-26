@@ -14,9 +14,9 @@ class MasterKeyDeriver {
   KdfParams createDefaultParams() {
     return KdfParams(
       algorithm: "argon2id",
-      memoryKb: 19456,
-      iterations: 2,
-      parallelism: 1,
+      memoryKb: 131072,
+      iterations: 3,
+      parallelism: 2,
       saltBase64: bytesToBase64(generateRandomBytes(16)),
     );
   }
@@ -26,7 +26,7 @@ class MasterKeyDeriver {
     required KdfParams params,
   }) async {
     if (params.algorithm != "argon2id") {
-      throw UnsupportedError("Unsupported KDF: $password");
+      throw UnsupportedError("Unsupported KDF algorithm: ${params.algorithm}");
     }
 
     final algorithm = Argon2id(
