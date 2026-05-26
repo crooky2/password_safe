@@ -112,7 +112,7 @@ class AuthController extends ChangeNotifier {
     } catch (_) {
       _unlockedVault?.clearSecrets();
       _unlockedVault = null;
-      _errorMessage = "Wrong password or damaged vault file.";
+      _errorMessage = "Wrong password.";
       _setState(AuthState.locked);
 
       return false;

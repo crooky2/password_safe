@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import "context_menu_coordinator.dart";
+
 class SectionCard extends StatelessWidget {
   const SectionCard({
     super.key,
@@ -29,14 +31,19 @@ class SectionCard extends StatelessWidget {
     final hasIcon = icon != null;
     final hasHeaderContent =
         hasTitle || hasSubtitle || hasIcon || isInteractive;
+    final menuController = MenuController();
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: MenuAnchor(
+        controller: menuController,
         menuChildren: [
           for (final item in contextMenuItems)
             MenuItemButton(
-              onPressed: item.onSelected,
+              onPressed: () {
+                ContextMenuCoordinator.close(menuController);
+                item.onSelected();
+              },
               leadingIcon: item.icon == null
                   ? null
                   : Icon(
@@ -60,24 +67,28 @@ class SectionCard extends StatelessWidget {
           return Card(
             clipBehavior: Clip.antiAlias,
             child: InkWell(
-              onTap: action,
+              onTap: isInteractive
+                  ? () {
+                      ContextMenuCoordinator.closeOpenMenu();
+                      action!();
+                    }
+                  : null,
               onTapDown: hasContextMenu
                   ? (details) {
-                    menuPosition = details.localPosition;
-                  }
+                      menuPosition = details.localPosition;
+                    }
                   : null,
-              
+
               onLongPress: hasContextMenu
                   ? () {
-                      controller.open(
-                        position: menuPosition ?? Offset.zero,
-                      );
+                      controller.open(position: menuPosition ?? Offset.zero);
                     }
                   : null,
 
               onSecondaryTapDown: hasContextMenu
                   ? (details) {
-                      controller.open(
+                      ContextMenuCoordinator.open(
+                        menuController,
                         position: details.localPosition,
                       );
                     }

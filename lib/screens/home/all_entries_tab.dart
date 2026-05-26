@@ -5,6 +5,7 @@ import "../../auth/auth_controller.dart";
 
 import "../../widgets/screen_frame.dart";
 import "../../widgets/section_card.dart";
+import "../../widgets/section_card_lightweight.dart";
 import "../../widgets/screen_popup.dart";
 import "../../widgets/home/entry_actions.dart";
 
@@ -12,12 +13,102 @@ import "../../vault/password_database.dart";
 
 enum _EntryPopupAction { edit, delete, clone }
 
-class AllEntriesTab extends StatelessWidget {
-  const AllEntriesTab({super.key, required this.authController});
+class AllEntriesTab extends StatefulWidget {
+  const AllEntriesTab({
+    super.key,
+    required this.authController,
+    this.startInSearchMode = false,
+    this.screenTitle = "All entries",
+    this.entryIds,
+    this.emptyMessage = "No entries found.",
+  });
 
   final AuthController authController;
+  final bool startInSearchMode;
+  final String screenTitle;
+  final List<String>? entryIds;
+  final String emptyMessage;
 
-  
+  @override
+  State<AllEntriesTab> createState() => _AllEntriesTabState();
+}
+
+class _AllEntriesTabState extends State<AllEntriesTab> {
+  late bool _isSearching;
+
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+
+  AuthController get authController => widget.authController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _isSearching = widget.startInSearchMode;
+
+    if (_isSearching) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _searchFocusNode.requestFocus();
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _openSearch() {
+    setState(() {
+      _isSearching = true;
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _searchFocusNode.requestFocus();
+      }
+    });
+  }
+
+  void _closeSearch() {
+    setState(() {
+      _isSearching = false;
+      _searchController.clear();
+    });
+
+    _searchFocusNode.unfocus();
+  }
+
+  bool _entryMatchesSearch(PasswordEntry entry, String query) {
+    final terms = query
+        .toLowerCase()
+        .split(RegExp(r"\s+"))
+        .where((term) => term.isNotEmpty);
+
+    final searchableText = [
+      entry.title,
+      entry.username,
+      entry.url,
+      entry.notes,
+    ].join(" ").toLowerCase();
+
+    return terms.every(searchableText.contains);
+  }
+
+  List<PasswordEntry> _filterEntries(List<PasswordEntry> entries) {
+    final query = _searchController.text.trim();
+
+    if (query.isEmpty) {
+      return entries;
+    }
+
+    return entries.where((entry) => _entryMatchesSearch(entry, query)).toList();
+  }
 
   Future<void> _showEntryPopup(
     BuildContext context,
@@ -84,9 +175,10 @@ class AllEntriesTab extends StatelessWidget {
     );
 
     if (action == _EntryPopupAction.edit) {
-      final savedEntry = await EntryActions(authController: authController)
-          .openEntryForm(context, entry: entry);
-      
+      final savedEntry = await EntryActions(
+        authController: authController,
+      ).openEntryForm(context, entry: entry);
+
       if (savedEntry != null && context.mounted) {
         await _showEntryPopup(context, savedEntry);
       }
@@ -106,13 +198,43 @@ class AllEntriesTab extends StatelessWidget {
     }
 
     if (action == _EntryPopupAction.clone) {
-      final savedEntry = await EntryActions(authController: authController)
-          .openEntryForm(context, entry: entry, clone: true);
-      
+      final savedEntry = await EntryActions(
+        authController: authController,
+      ).openEntryForm(context, entry: entry, clone: true);
+
       if (savedEntry != null && context.mounted) {
         await _showEntryPopup(context, savedEntry);
       }
     }
+  }
+
+  Widget _buildSearchField() {
+    return TextField(
+      controller: _searchController,
+      focusNode: _searchFocusNode,
+      textInputAction: TextInputAction.search,
+      onChanged: (_) {
+        setState(() {});
+      },
+
+      decoration: InputDecoration(
+        hintText: "Search entries",
+        prefixIcon: const Icon(Icons.search_rounded),
+        suffixIcon: _searchController.text.trim().isEmpty
+            ? null
+            : IconButton(
+                tooltip: "Clear search",
+                onPressed: () {
+                  setState(() {
+                    _searchController.clear();
+                  });
+
+                  _searchFocusNode.requestFocus();
+                },
+                icon: const Icon(Icons.close_rounded),
+              ),
+      ),
+    );
   }
 
   @override
@@ -121,12 +243,23 @@ class AllEntriesTab extends StatelessWidget {
       animation: authController,
       builder: (context, _) {
         final database = authController.database;
-        final entries = database?.entries ?? const <PasswordEntry>[];
+
+        final allEntries = database?.entries ?? const <PasswordEntry>[];
+        final entryIdFilter = widget.entryIds?.toSet();
+
+        final entries = entryIdFilter == null
+            ? allEntries
+            : allEntries
+                  .where((entry) => entryIdFilter.contains(entry.id))
+                  .toList();
+
+        final visibleEntries = _filterEntries(entries);
+        final isFiltering = _searchController.text.trim().isNotEmpty;
         final entryActions = EntryActions(authController: authController);
         return Scaffold(
           body: SafeArea(
             child: ScreenFrame(
-              title: "All entries",
+              title: widget.screenTitle,
               enableReturnButton: true,
               returnButtonAction: () {
                 Navigator.of(context).pop();
@@ -140,64 +273,95 @@ class AllEntriesTab extends StatelessWidget {
                   icon: const Icon(Icons.add_rounded),
                 ),
                 IconButton(
-                  tooltip: "Search for entry",
-                  onPressed: () {
-                    // We will implement search here soon.
-                  },
-                  icon: const Icon(Icons.search),
+                  tooltip: _isSearching ? "Close search" : "Search for entry",
+                  onPressed: _isSearching ? _closeSearch : _openSearch,
+                  icon: _isSearching
+                      ? const Icon(Icons.close_rounded)
+                      : const Icon(Icons.search_rounded),
                 ),
               ],
               children: [
+                if (_isSearching) ...[
+                  _buildSearchField(),
+                  const SizedBox(height: 12),
+                ],
                 if (entries.isEmpty)
-                  const Card(
+                  Card(
                     child: Padding(
                       padding: EdgeInsets.all(6.0),
                       child: Text(
-                        "No entries found.",
+                        widget.emptyMessage,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  )
+                else if (visibleEntries.isEmpty)
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(6.0),
+                      child: Text(
+                        isFiltering
+                            ? "No entries match your search."
+                            : "No entries found.",
                         textAlign: TextAlign.center,
                       ),
                     ),
                   )
                 else
-                  ...entries.map(
-                    (entry) => SectionCard(
-                      title: entry.title,
-                      subtitle: entry.username,
-                      icon: Icons.key_rounded,
-                      additionalActionIconButton: IconButton(
-                        tooltip: entry.isFavorite
-                          ? "Remove from favorites"
-                          : "Add to favorites",
-                        onPressed: () {
-                          entryActions.toggleFavorite(context, entry: entry);
-                        },
-                        icon: Icon(
-                          entry.isFavorite
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
-                        ),
-                      ),
-                      contextMenuItems: [
-                        SectionCardMenuItem(
-                          label: "Clone",
-                          icon: Icons.copy_rounded,
-                          onSelected: () {
-                            entryActions.openEntryForm(context, entry: entry, clone: true);
-                          }
-                        ),
-                        SectionCardMenuItem(
-                          label: "Delete",
-                          icon: Icons.delete_rounded,
-                          isDestructive: true,
-                          onSelected: () {
-                            entryActions.deleteEntry(context, entry: entry);
-                          }
-                        ),
-                      ],
-                      action: () {
-                        _showEntryPopup(context, entry);
-                      },
-                    ),
+                  SectionCard(
+                    children: [
+                      ...visibleEntries.asMap().entries.map((e) {
+                        final i = e.key;
+                        final entry = e.value;
+                        final isLast = i == visibleEntries.length - 1;
+
+                        return SectionCardLightweight(
+                          title: entry.title,
+                          subtitle: entry.username,
+                          icon: Icons.key_rounded,
+                          border: isLast
+                              ? null
+                              : Border(bottom: BorderSide(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.14))),
+                          action: () {
+                            _showEntryPopup(context, entry);
+                          },
+                          additionalActionIconButton: IconButton(
+                            tooltip: entry.isFavorite
+                                ? "Remove from favorites"
+                                : "Add to favorites",
+                            onPressed: () {
+                              entryActions.toggleFavorite(
+                                context,
+                                entry: entry,
+                              );
+                            },
+                            icon: Icon(
+                              entry.isFavorite
+                                  ? Icons.star_rounded
+                                  : Icons.star_border_rounded,
+                            ),
+                          ),
+                          contextMenuItems: [
+                            SectionCardMenuItem(
+                              label: "Edit",
+                              icon: Icons.edit_rounded,
+                              isDestructive: false,
+                              onSelected: () {
+                                entryActions.openEntryForm(context, entry: entry);
+                              },
+                            ),
+                            SectionCardMenuItem(
+                              label: "Delete",
+                              icon: Icons.delete_rounded,
+                              isDestructive: true,
+                              onSelected: () {
+                                entryActions.deleteEntry(context, entry: entry);
+                              },
+                            ),
+                          ],
+                        );
+                      }),
+                    ],
                   ),
               ],
             ),
@@ -255,13 +419,8 @@ class _EntryDetail extends StatelessWidget {
   }
 }
 
-
-
 class _EntrySecretDetail extends StatefulWidget {
-  const _EntrySecretDetail({
-    required this.label,
-    required this.value,
-  });
+  const _EntrySecretDetail({required this.label, required this.value});
 
   final String label;
   final String value;
@@ -270,18 +429,17 @@ class _EntrySecretDetail extends StatefulWidget {
   State<_EntrySecretDetail> createState() => _EntrySecretDetailState();
 }
 
-
 class _EntrySecretDetailState extends State<_EntrySecretDetail> {
   bool _obscureText = true;
 
   @override
   Widget build(BuildContext context) {
     final hasValue = widget.value.trim().isNotEmpty;
-    final displayValue = hasValue 
+    final displayValue = hasValue
         ? _obscureText
-            ? "•" * widget.value.length
-            : widget.value
-      : "Not set";
+              ? "•" * widget.value.length
+              : widget.value
+        : "Not set";
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -292,8 +450,8 @@ class _EntrySecretDetailState extends State<_EntrySecretDetail> {
             children: [
               Expanded(child: SelectableText(displayValue)),
               IconButton(
-                tooltip: _obscureText 
-                    ? "Show ${widget.label}" 
+                tooltip: _obscureText
+                    ? "Show ${widget.label}"
                     : "Hide ${widget.label}",
 
                 onPressed: () {
@@ -303,18 +461,20 @@ class _EntrySecretDetailState extends State<_EntrySecretDetail> {
                 },
 
                 icon: Icon(
-                  _obscureText 
-                      ? Icons.visibility_rounded 
-                      : Icons.visibility_off_rounded, 
-                  size: 18
-                )
+                  _obscureText
+                      ? Icons.visibility_rounded
+                      : Icons.visibility_off_rounded,
+                  size: 18,
+                ),
               ),
 
               IconButton(
                 tooltip: "Copy ${widget.label}",
                 onPressed: hasValue
                     ? () async {
-                        await Clipboard.setData(ClipboardData(text: widget.value));
+                        await Clipboard.setData(
+                          ClipboardData(text: widget.value),
+                        );
 
                         if (!context.mounted) {
                           return;
@@ -326,12 +486,12 @@ class _EntrySecretDetailState extends State<_EntrySecretDetail> {
                       }
                     : null,
                 icon: const Icon(Icons.copy_rounded, size: 18),
-              )
-            ]
+              ),
+            ],
           ),
           const Divider(height: 1, thickness: 1),
-        ]
-      )
+        ],
+      ),
     );
   }
 }

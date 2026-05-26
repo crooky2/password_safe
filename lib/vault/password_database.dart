@@ -10,6 +10,7 @@ class PasswordEntry {
     this.notes = "",
     this.url = "",
     this.isFavorite = false,
+    this.iconKey = "",
   });
 
   final String id;
@@ -19,6 +20,7 @@ class PasswordEntry {
   final String notes;
   final String url;
   final bool isFavorite;
+  final String iconKey;
 
 
   Map<String, Object> toJson() {
@@ -30,6 +32,7 @@ class PasswordEntry {
       "notes": notes,
       "url": url,
       "isFavorite": isFavorite,
+      "iconKey": iconKey,
     };
   }
 
@@ -42,6 +45,7 @@ class PasswordEntry {
       notes: json["notes"] as String? ?? "",
       url: json["url"] as String? ?? "",
       isFavorite: json["isFavorite"] as bool? ?? false,
+      iconKey: json["iconKey"] as String? ?? "",
     );
   }
 
@@ -53,6 +57,7 @@ class PasswordEntry {
     String? notes,
     String? url,
     bool? isFavorite,
+    String? iconKey,
   }) {
     return PasswordEntry(
       id: id ?? this.id,
@@ -62,6 +67,50 @@ class PasswordEntry {
       notes: notes ?? this.notes,
       url: url ?? this.url,
       isFavorite: isFavorite ?? this.isFavorite,
+      iconKey: iconKey ?? this.iconKey,
+    );
+  }
+}
+
+
+class PasswordFolder {
+  const PasswordFolder({
+    required this.id,
+    required this.name,
+    this.entryIds = const [],
+  });
+
+  final String id;
+  final String name;
+  final List<String> entryIds;
+
+  Map<String, Object> toJson() {
+    return {
+      "id": id,
+      "name": name,
+      "entryIds": entryIds,
+    };
+  }
+
+  factory PasswordFolder.fromJson(Map<String, Object?> json) {
+    final entryIdsJson = json["entryIds"] as List<Object?>? ?? const [];
+    
+    return PasswordFolder(
+      id: json["id"] as String,
+      name: json["name"] as String,
+      entryIds: entryIdsJson.cast<String>(),
+    );
+  }
+
+  PasswordFolder copyWith({
+    String? id,
+    String? name,
+    List<String>? entryIds,
+  }) {
+    return PasswordFolder(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      entryIds: entryIds ?? this.entryIds,
     );
   }
 }
@@ -72,15 +121,18 @@ class PasswordDatabase {
   const PasswordDatabase({
     required this.version,
     required this.entries,
+    this.folders = const [],
   });
 
   final int version;
   final List<PasswordEntry> entries;
+  final List<PasswordFolder> folders;
 
   factory PasswordDatabase.empty() {
     return const PasswordDatabase(
       version: 1,
       entries: [],
+      folders: [],
     );
   }
 
@@ -88,17 +140,21 @@ class PasswordDatabase {
     return {
       "version": version,
       "entries": entries.map((entry) => entry.toJson()).toList(),
+      "folders": folders.map((f) => f.toJson()).toList(),
     };
   }
 
   factory PasswordDatabase.fromJson(Map<String, Object?> json) {
     final entriesJson = json["entries"] as List<Object?>;
-    
+    final foldersJson = json["folders"] as List<Object?>? ?? const [];
+
     return PasswordDatabase(
       version: json["version"] as int,
       entries: entriesJson.map(
         (entryJson) => PasswordEntry.fromJson(entryJson as Map<String, Object?>)
       ).toList(),
+      folders: foldersJson.map((folderJson) =>
+        PasswordFolder.fromJson(folderJson as Map<String, Object?>)).toList(),
     );
   }
 
@@ -114,11 +170,13 @@ class PasswordDatabase {
 
   PasswordDatabase copyWith({
     int? version,
-    List<PasswordEntry>? entries
+    List<PasswordEntry>? entries,
+    List<PasswordFolder>? folders,
   }) {
     return PasswordDatabase(
       version: version ?? this.version,
       entries: entries ?? this.entries,
+      folders: folders ?? this.folders,
     );
   }
 
@@ -143,6 +201,30 @@ class PasswordDatabase {
   PasswordDatabase removeEntry(String id) {
     return copyWith(
       entries: entries.where((entry) => entry.id != id).toList(),
+    );
+  }
+
+  PasswordDatabase addFolder(PasswordFolder folder) {
+    return copyWith(
+      folders: [...folders, folder],
+    );
+  }
+
+  PasswordDatabase updateFolder(PasswordFolder updatedFolder) {
+    return copyWith(
+      folders: folders.map((folder){
+        if (folder.id == updatedFolder.id) {
+          return updatedFolder;
+        }
+
+        return folder;
+      }).toList(),
+    );
+  }
+
+  PasswordDatabase removeFolder(String id) {
+    return copyWith(
+      folders: folders.where((folder) => folder.id != id).toList(),
     );
   }
 }

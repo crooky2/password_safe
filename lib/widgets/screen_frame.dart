@@ -118,7 +118,9 @@ class ScreenFrame extends StatelessWidget {
                                             color: colorScheme.onPrimary
                                                 .withValues(alpha: 0.88),
                                           ),
-                                          onPressed: returnButtonAction,
+                                          onPressed: returnButtonAction ?? () {
+                                            Navigator.of(context).pop();
+                                          },
                                         ),
                                       ),
                                     ),

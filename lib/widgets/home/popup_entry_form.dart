@@ -73,6 +73,8 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
       password: password,
       url: url,
       notes: notes,
+      isFavorite: _isEditing ? widget.entry!.isFavorite : false,
+      iconKey: widget.entry?.iconKey ?? "",
     );
 
     Navigator.of(context).pop(entry);

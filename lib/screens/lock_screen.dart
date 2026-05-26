@@ -26,6 +26,7 @@ class _LockScreenState extends State<LockScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isCheckingQuickUnlock = true;
+  bool _quickUnlockAvailable = false;
   bool _usePinUnlock = false;
 
   @override
@@ -68,6 +69,7 @@ class _LockScreenState extends State<LockScreen> {
     }
 
     setState(() {
+      _quickUnlockAvailable = enabled;
       _usePinUnlock = enabled;
       _isCheckingQuickUnlock = false;
     });
@@ -141,6 +143,16 @@ class _LockScreenState extends State<LockScreen> {
               });
             },
             child: const Text("Use master password"),
+          )
+        else if (_quickUnlockAvailable)
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _usePinUnlock = true;
+                _passwordController.clear();
+              });
+            },
+            child: const Text("Use quick unlock"),
           ),
       ],
     );
