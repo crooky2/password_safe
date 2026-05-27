@@ -6,17 +6,17 @@ import "../../widgets/settings/settings_dropdown.dart";
 import "../../widgets/settings/popup_pin_setup.dart";
 import "../../widgets/settings/popup_master_password.dart";
 
-
 import "../../auth/auth_controller.dart";
 
 import "../../cloud/cloud_controller.dart";
-
+import "../../l10n/app_localizations.dart";
+import "../../l10n/localized_messages.dart";
 
 enum QuickUnlockMode { disabled, pin }
 
 class SecurityTab extends StatefulWidget {
   const SecurityTab({
-    super.key, 
+    super.key,
     required this.authController,
     required this.cloudController,
   });
@@ -45,6 +45,8 @@ class _SecurityTabState extends State<SecurityTab> {
   }
 
   Future<void> _changeQuickUnlockMode(QuickUnlockMode mode) async {
+    final l10n = AppLocalizations.of(context)!;
+
     if (mode == _quickUnlockMode) {
       return;
     }
@@ -65,7 +67,7 @@ class _SecurityTabState extends State<SecurityTab> {
     final pin = await showGeneralDialog<String>(
       context: context,
       barrierDismissible: true,
-      barrierLabel: "Close PIN setup",
+      barrierLabel: l10n.closePinSetup,
       barrierColor: Colors.transparent,
       pageBuilder: (context, animation, secondaryAnimation) {
         return const PinSetupPopup();
@@ -88,15 +90,17 @@ class _SecurityTabState extends State<SecurityTab> {
       _quickUnlockMode = success
           ? QuickUnlockMode.pin
           : QuickUnlockMode.disabled;
-      _message = success ? null : "Failed to enable quick unlock.";
+      _message = success ? null : l10n.failedToEnableQuickUnlock;
     });
   }
 
   Future<void> _changeMasterPassword() async {
+    final l10n = AppLocalizations.of(context)!;
+
     final change = await showGeneralDialog<MasterPasswordChange>(
       context: context,
       barrierDismissible: true,
-      barrierLabel: "Close master password change",
+      barrierLabel: l10n.closeMasterPasswordChange,
       barrierColor: Colors.transparent,
       pageBuilder: (context, animation, secondaryAnimation) {
         return const MasterPasswordPopup();
@@ -119,20 +123,21 @@ class _SecurityTabState extends State<SecurityTab> {
     setState(() {
       _quickUnlockMode = QuickUnlockMode.disabled;
       _message = success
-          ? "Master password changed successfully. Quick unlock has been disabled."
-          : "Failed to change master password. Current password may be incorrect or vault file may be damaged.";
+          ? l10n.masterPasswordChangedQuickUnlockDisabled
+          : l10n.failedToChangeMasterPassword;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: ScreenFrame(
-          title: "Security",
+          title: l10n.security,
           enableReturnButton: true,
           children: [
             if (_message != null) ...[
@@ -143,20 +148,20 @@ class _SecurityTabState extends State<SecurityTab> {
               ),
             ],
             SectionCard(
-              title: "Quick unlock",
-              subtitle: "Use quick unlock for faster access. This does not replace your master password, is only stored on this device, and your vault remains encrypted with the master password.",
+              title: l10n.quickUnlock,
+              subtitle: l10n.quickUnlockDescription,
               icon: Icons.pin_rounded,
               children: [
                 SettingsDropdown<QuickUnlockMode>(
-                  title: "Type",
+                  title: l10n.type,
                   value: _quickUnlockMode,
-                  options: const [
+                  options: [
                     SettingsDropdownOption(
-                      label: "Disabled",
+                      label: l10n.disabled,
                       value: QuickUnlockMode.disabled,
                     ),
                     SettingsDropdownOption(
-                      label: "PIN",
+                      label: l10n.pin,
                       value: QuickUnlockMode.pin,
                     ),
                   ],
@@ -166,14 +171,14 @@ class _SecurityTabState extends State<SecurityTab> {
             ),
 
             SectionCard(
-              title: "Master password",
-              subtitle: "The master password is used to encrypt and decrypt your vault data.",
+              title: l10n.masterPassword,
+              subtitle: l10n.masterPasswordDescription,
               icon: Icons.lock_reset_rounded,
               children: [
                 FilledButton.icon(
                   onPressed: _changeMasterPassword,
                   icon: const Icon(Icons.lock_reset_rounded),
-                  label: const Text("Change password"),
+                  label: Text(l10n.changePassword),
                 ),
               ],
             ),
@@ -182,52 +187,64 @@ class _SecurityTabState extends State<SecurityTab> {
               animation: widget.cloudController,
               builder: (context, _) {
                 final cloud = widget.cloudController;
+                final cloudMessage = cloud.message;
 
                 return SectionCard(
-                  title: "Cloud sync",
-                  subtitle: "Store an encrypted vault copy in the cloud. You can still access your vault without internet connection, and your data is never shared unencrypted.",
+                  title: l10n.cloudSync,
+                  subtitle: l10n.cloudSyncDescription,
                   icon: Icons.cloud_sync_rounded,
                   children: [
                     SettingsDropdown<CloudSyncMode>(
-                      title: "Provider",
+                      title: l10n.provider,
                       value: cloud.mode,
-                      options: const [
+                      options: [
                         SettingsDropdownOption(
-                          label: "Disabled",
+                          label: l10n.disabled,
                           value: CloudSyncMode.disabled,
                         ),
                         SettingsDropdownOption(
-                          label: "OneDrive",
+                          label: l10n.oneDrive,
                           value: CloudSyncMode.oneDrive,
                         ),
                       ],
                       onChanged: cloud.setMode,
                     ),
-                    if (cloud.mode == CloudSyncMode.oneDrive)... [
+                    if (cloud.mode == CloudSyncMode.oneDrive) ...[
                       const SizedBox(height: 12),
                       FilledButton.icon(
                         onPressed: cloud.isBusy ? null : cloud.syncNow,
-                        icon: cloud.isBusy 
+                        icon: cloud.isBusy
                             ? const SizedBox(
-                              width: 12, height: 12,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
+                                width: 12,
+                                height: 12,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
                             : const Icon(Icons.sync_rounded),
-                        label: Text(cloud.isBusy ? "Syncing..." : "Sync now"),
-                      )
+                        label: Text(cloud.isBusy ? l10n.syncing : l10n.syncNow),
+                      ),
+                    ],
+
+                    if (cloudMessage != null) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        l10n.cloudFeedback(cloudMessage),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     ],
 
                     if (cloud.syncHeld) ...[
                       const SizedBox(height: 12),
                       Text(
-                        "Cloud sync is paused. Use Sync now after choosing which vault should win.",
+                        l10n.cloudSyncPausedResolve,
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],
-                  ]
+                  ],
                 );
-              }
-            )
+              },
+            ),
           ],
         ),
       ),

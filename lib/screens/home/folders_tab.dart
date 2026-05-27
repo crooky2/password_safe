@@ -11,6 +11,8 @@ import "../../widgets/section_card_lightweight.dart";
 import "../../widgets/screen_popup.dart";
 
 import "all_entries_tab.dart";
+import "../../l10n/app_localizations.dart";
+import "../../l10n/localized_messages.dart";
 
 class FoldersTab extends StatelessWidget {
   const FoldersTab({super.key, required this.authController});
@@ -18,6 +20,7 @@ class FoldersTab extends StatelessWidget {
   final AuthController authController;
 
   Future<void> _createFolder(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final nameController = TextEditingController();
     final selectedEntryIds = <String>{};
     final entries = authController.database?.entries ?? const <PasswordEntry>[];
@@ -25,13 +28,13 @@ class FoldersTab extends StatelessWidget {
     final result = await showGeneralDialog<_FolderFormResult>(
       context: context,
       barrierDismissible: true,
-      barrierLabel: "Close folder form",
+      barrierLabel: l10n.closeFolderForm,
       barrierColor: Colors.transparent,
       pageBuilder: (context, animation, secondaryAnimation) {
         return StatefulBuilder(
           builder: (context, setPopupState) {
             return ScreenPopup(
-              title: "New folder",
+              title: l10n.newFolder,
               onClose: () {
                 Navigator.of(context).pop();
               },
@@ -39,14 +42,17 @@ class FoldersTab extends StatelessWidget {
                 TextField(
                   controller: nameController,
                   autofocus: true,
-                  decoration: const InputDecoration(labelText: "Folder name"),
+                  decoration: InputDecoration(labelText: l10n.folderName),
                 ),
                 const SizedBox(height: 16),
 
-                Text("Entries", style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  l10n.entries,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 const SizedBox(height: 8),
                 if (entries.isEmpty)
-                  const Text("No entries available to add to folder.")
+                  Text(l10n.noEntriesAvailableToAddToFolder)
                 else
                   for (final entry in entries)
                     CheckboxListTile(
@@ -78,7 +84,7 @@ class FoldersTab extends StatelessWidget {
                     );
                   },
                   icon: const Icon(Icons.create_new_folder_rounded),
-                  label: const Text("Create"),
+                  label: Text(l10n.create),
                 ),
               ],
             );
@@ -112,13 +118,14 @@ class FoldersTab extends StatelessWidget {
       return;
     }
 
-    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           success
-              ? "Folder created."
-              : authController.errorMessage ?? "Failed to create folder.",
+              ? l10n.folderCreated
+              : authController.errorMessage == null
+              ? l10n.failedToCreateFolder
+              : l10n.authFeedback(authController.errorMessage!),
         ),
       ),
     );
@@ -130,6 +137,7 @@ class FoldersTab extends StatelessWidget {
     return AnimatedBuilder(
       animation: authController,
       builder: (context, _) {
+        final l10n = AppLocalizations.of(context)!;
         final database = authController.database;
         final entries = database?.entries ?? const <PasswordEntry>[];
         final customFolders = database?.folders ?? const <PasswordFolder>[];
@@ -138,11 +146,11 @@ class FoldersTab extends StatelessWidget {
         return Scaffold(
           body: SafeArea(
             child: ScreenFrame(
-              title: "Folders",
+              title: l10n.folders,
               enableReturnButton: true,
               headerActions: [
                 IconButton(
-                  tooltip: "Create new folder",
+                  tooltip: l10n.createNewFolder,
                   onPressed: () {
                     _createFolder(context);
                   },
@@ -151,16 +159,16 @@ class FoldersTab extends StatelessWidget {
               ],
               children: [
                 SectionCard(
-                  title: "Custom",
+                  title: l10n.customFolders,
                   icon: Icons.folder_rounded,
                   children: [
                     if (customFolders.isEmpty)
-                      const Text("No custom folders yet.")
+                      Text(l10n.noCustomFoldersYet)
                     else
                       for (final folder in customFolders)
                         SectionCardLightweight(
                           title: folder.name,
-                          subtitle: "${folder.entryIds.length} entries",
+                          subtitle: l10n.entryCount(folder.entryIds.length),
                           icon: Icons.folder_rounded,
                           action: () {
                             Navigator.of(context).push(
@@ -169,7 +177,7 @@ class FoldersTab extends StatelessWidget {
                                   authController: authController,
                                   screenTitle: folder.name,
                                   entryIds: folder.entryIds,
-                                  emptyMessage: "This folder is empty.",
+                                  emptyMessage: l10n.thisFolderIsEmpty,
                                 ),
                               ),
                             );
@@ -178,17 +186,19 @@ class FoldersTab extends StatelessWidget {
                   ],
                 ),
                 SectionCard(
-                  title: "Detected",
+                  title: l10n.detectedFolders,
                   icon: Icons.auto_awesome_rounded,
                   children: [
                     if (detectedFolders.isEmpty)
-                      const Text("No detected folders yet.")
+                      Text(l10n.noDetectedFoldersYet)
                     else
                       for (final folder in detectedFolders)
                         SectionCardLightweight(
                           title: folder.name,
-                          subtitle:
-                              "${folder.entries.length} entries - ${folder.source}",
+                          subtitle: l10n.folderSourceInfo(
+                            folder.entries.length,
+                            l10n.detectedFolderSourceLabel(folder.source),
+                          ),
                           icon: Icons.auto_awesome_rounded,
                           action: () {
                             Navigator.of(context).push(
@@ -199,7 +209,7 @@ class FoldersTab extends StatelessWidget {
                                   entryIds: folder.entries
                                       .map((entry) => entry.id)
                                       .toList(),
-                                  emptyMessage: "No entries in this folder.",
+                                  emptyMessage: l10n.noEntriesInThisFolder,
                                 ),
                               ),
                             );

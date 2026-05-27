@@ -10,6 +10,8 @@ import "../../storage/vault_file_store.dart";
 
 import "../../cloud/microsoft_auth_service.dart";
 import "../../cloud/onedrive_vault_store.dart";
+import "../../l10n/app_localizations.dart";
+import "../../l10n/localized_messages.dart";
 
 class DebugTab extends StatefulWidget {
   const DebugTab({super.key, required this.authController});
@@ -29,12 +31,13 @@ class _DebugTabState extends State<DebugTab> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: ScreenFrame(
-          title: "Debug",
+          title: l10n.debug,
           enableReturnButton: true,
           returnButtonAction: () {
             Navigator.of(context).pop();
@@ -46,17 +49,17 @@ class _DebugTabState extends State<DebugTab> {
 
                 if (database == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("No vault loaded.")),
+                    SnackBar(content: Text(l10n.debugNoVaultLoaded)),
                   );
                   return;
                 }
 
                 final newEntry = PasswordEntry(
                   id: DateTime.now().microsecondsSinceEpoch.toString(),
-                  title: "test entry",
-                  username: "testuser",
-                  password: "testpassword",
-                  notes: "test entry notes",
+                  title: l10n.debugTestEntryTitle,
+                  username: l10n.debugTestEntryUsername,
+                  password: l10n.debugTestEntryPassword,
+                  notes: l10n.debugTestEntryNotes,
                 );
 
                 final updatedDatabase = database.addEntry(newEntry);
@@ -73,14 +76,19 @@ class _DebugTabState extends State<DebugTab> {
                   SnackBar(
                     content: Text(
                       success
-                          ? 'Saved entries: ${updatedDatabase.entries.length}'
-                          : widget.authController.errorMessage ??
-                                'Save failed.',
+                          ? l10n.debugSavedEntries(
+                              updatedDatabase.entries.length,
+                            )
+                          : widget.authController.errorMessage == null
+                          ? l10n.debugSaveFailed
+                          : l10n.authFeedback(
+                              widget.authController.errorMessage!,
+                            ),
                     ),
                   ),
                 );
               },
-              child: const Text("Add test entry"),
+              child: Text(l10n.debugAddTestEntry),
             ),
             FilledButton(
               onPressed: () async {
@@ -94,7 +102,8 @@ class _DebugTabState extends State<DebugTab> {
                   }
 
                   if (info == null) {
-                    final localVaultText = await VaultFileStore().loadTextIfExists();
+                    final localVaultText = await VaultFileStore()
+                        .loadTextIfExists();
 
                     if (!context.mounted) {
                       return;
@@ -102,9 +111,9 @@ class _DebugTabState extends State<DebugTab> {
 
                     if (localVaultText == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text(
-                            "No local vault and no OneDrive vault found.",
+                            l10n.debugNoLocalVaultAndNoOneDriveVault,
                           ),
                         ),
                       );
@@ -122,7 +131,7 @@ class _DebugTabState extends State<DebugTab> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          "Uploaded vault to OneDrive: ${uploadedInfo.eTag}",
+                          l10n.debugUploadedVaultToOneDrive(uploadedInfo.eTag),
                         ),
                       ),
                     );
@@ -134,9 +143,7 @@ class _DebugTabState extends State<DebugTab> {
                   }
 
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Microsoft sign-in canceled."),
-                    ),
+                    SnackBar(content: Text(l10n.cloudMessageSignInCanceled)),
                   );
                 } catch (error) {
                   if (!context.mounted) {
@@ -145,12 +152,14 @@ class _DebugTabState extends State<DebugTab> {
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text("Error during OneDrive sync: $error"),
+                      content: Text(
+                        l10n.debugErrorDuringOneDriveSync(error.toString()),
+                      ),
                     ),
                   );
                 }
               },
-              child: const Text("Test OneDrive sync"),
+              child: Text(l10n.debugTestOneDriveSync),
             ),
             FilledButton(
               onPressed: () async {
@@ -160,8 +169,8 @@ class _DebugTabState extends State<DebugTab> {
                 }
                 await _microsoftAuth.connect();
               },
-              child: const Text("Test Microsoft sign-out and re-sign-in"),
-            )
+              child: Text(l10n.debugTestMicrosoftSignOutAndReSignIn),
+            ),
           ],
         ),
       ),

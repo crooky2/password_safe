@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import "theme_controller.dart";
+import "l10n/app_localizations.dart";
 
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
@@ -11,11 +12,11 @@ import "cloud/cloud_controller.dart";
 
 class AppShell extends StatefulWidget {
   const AppShell({
-      super.key,
-      required this.authController,
-      required this.cloudController,
-      required this.themeController,
-    });
+    super.key,
+    required this.authController,
+    required this.cloudController,
+    required this.themeController,
+  });
 
   final AuthController authController;
   final CloudController cloudController;
@@ -41,18 +42,20 @@ class _AppShellState extends State<AppShell> {
     ];
   }
 
-  static const _destinations = <NavigationDestination>[
-    NavigationDestination(
-      icon: Icon(Icons.home_outlined),
-      selectedIcon: Icon(Icons.home_rounded),
-      label: '',
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.settings_outlined),
-      selectedIcon: Icon(Icons.settings_rounded),
-      label: '',
-    ),
-  ];
+  List<NavigationDestination> _destinations(AppLocalizations l10n) {
+    return [
+      NavigationDestination(
+        icon: const Icon(Icons.home_outlined),
+        selectedIcon: const Icon(Icons.home_rounded),
+        label: l10n.dashboard,
+      ),
+      NavigationDestination(
+        icon: const Icon(Icons.settings_outlined),
+        selectedIcon: const Icon(Icons.settings_rounded),
+        label: l10n.settings,
+      ),
+    ];
+  }
 
   void _selectTab(int index) {
     setState(() {
@@ -62,10 +65,7 @@ class _AppShellState extends State<AppShell> {
   }
 
   Widget _buildAnimatedPage(Widget page) {
-    return KeyedSubtree(
-      key: ValueKey(_selectedIndex),
-      child: page,
-    );
+    return KeyedSubtree(key: ValueKey(_selectedIndex), child: page);
   }
 
   Widget _pageTransition(Widget child, Animation<double> animation) {
@@ -83,15 +83,14 @@ class _AppShellState extends State<AppShell> {
 
     return FadeTransition(
       opacity: animation,
-      child: SlideTransition(
-        position: offsetAnimation,
-        child: child,
-      ),
+      child: SlideTransition(position: offsetAnimation, child: child),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       body: SafeArea(
         child: ClipRect(
@@ -108,7 +107,7 @@ class _AppShellState extends State<AppShell> {
         height: _navigationBarHeight,
         selectedIndex: _selectedIndex,
         onDestinationSelected: _selectTab,
-        destinations: _destinations,
+        destinations: _destinations(l10n),
       ),
     );
   }

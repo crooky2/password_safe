@@ -74,7 +74,9 @@ class SectionCardLightweight extends StatelessWidget {
                     action!();
                   }
                 : null,
-            onLongPress: hasContextMenu ? () => ContextMenuCoordinator.open(controller) : null,
+            onLongPress: hasContextMenu
+                ? () => ContextMenuCoordinator.open(controller)
+                : null,
           ),
         );
       },

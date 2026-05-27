@@ -1,6 +1,18 @@
 {
     "@@locale": "en",
     "appTitle": "Password Safe",
+
+    "generatePassword": "Generate password",
+    "passwordGenerator": "Password generator",
+    "closePasswordGenerator": "Close password generator",
+    "passwordGeneratorNormalCharacters": "Normal characters",
+    "passwordGeneratorSpecialCharacters": "Special characters",
+    "passwordGeneratorNumbers": "Numbers",
+    "passwordGeneratorLength": "Length",
+    "passwordGeneratorNoCharactersSelected": "Select at least one character type.",
+    "usePassword": "Use password",
+
+
     "dashboard": "Dashboard",
     "settings": "Settings",
     "security": "Security",
@@ -8,6 +20,7 @@
     "masterPassword": "Master password",
     "cloudSync": "Cloud sync",
     "appearance": "Appearance",
+    "debug": "Debug",
     "theme": "Theme",
     "language": "Language",
     "system": "System",
@@ -17,7 +30,264 @@
     "english": "English",
     "german": "German",
 
-    
+    "addEntry": "Add entry",
+    "searchForEntry": "Search for entry",
+    "allEntries": "All entries",
+    "entryCount": "{count, plural, =0{0 entries} =1{1 entry} other{{count} entries}}",
+    "@entryCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "folders": "Folders",
+    "homeScreenFoldersInfo": "{customCount, plural, =1{1 created} other{{customCount} created}}, {detectedCount, plural, =1{1 detected} other{{detectedCount} detected}}",
+    "@homeScreenFoldersInfo": {
+        "placeholders": {
+            "customCount": {
+                "type": "int"
+            },
+            "detectedCount": {
+                "type": "int"
+            }
+        }
+    },
+    "favorites": "Favorites",
+    "unfavorite": "Unfavorite",
+    "edit": "Edit",
+    "clone": "Clone",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "create": "Create",
+    "saveChanges": "Save changes",
+    "discard": "Discard",
+    "show": "Show",
+    "hide": "Hide",
+    "disabled": "Disabled",
+    "type": "Type",
+    "provider": "Provider",
+    "oneDrive": "OneDrive",
+
+    "titleLabel": "Title",
+    "username": "Username",
+    "password": "Password",
+    "pin": "PIN",
+    "url": "URL",
+    "notes": "Notes",
+    "notSet": "Not set",
+    "copyLabel": "Copy {label}",
+    "@copyLabel": {
+        "placeholders": {
+            "label": {}
+        }
+    },
+    "labelCopied": "{label} copied.",
+    "@labelCopied": {
+        "placeholders": {
+            "label": {}
+        }
+    },
+    "showLabel": "Show {label}",
+    "@showLabel": {
+        "placeholders": {
+            "label": {}
+        }
+    },
+    "hideLabel": "Hide {label}",
+    "@hideLabel": {
+        "placeholders": {
+            "label": {}
+        }
+    },
+
+    "closeEntryDetails": "Close entry details",
+    "closeEntryForm": "Close entry form",
+    "clearSearch": "Clear search",
+    "closeSearch": "Close search",
+    "searchEntries": "Search entries",
+    "noEntriesFound": "No entries found.",
+    "noEntriesMatchSearch": "No entries match your search.",
+    "removeFromFavorites": "Remove from favorites",
+    "addToFavorites": "Add to favorites",
+
+    "appLocked": "App locked",
+    "enterPinToUnlock": "Enter your PIN to unlock.",
+    "enterPasswordToUnlock": "Enter your password to unlock.",
+    "enterYourPin": "Enter your PIN",
+    "enterYourPassword": "Enter your password",
+    "unlock": "Unlock",
+    "useMasterPassword": "Use master password",
+    "useQuickUnlock": "Use quick unlock",
+    "lockScreenTooManyPinAttemptsMasterAvailable": "Too many PIN attempts. Master password unlock is available in {countdown}.",
+    "@lockScreenTooManyPinAttemptsMasterAvailable": {
+        "placeholders": {
+            "countdown": {}
+        }
+    },
+    "lockScreenWrongPinTryAgainUseMasterPassword": "Wrong PIN. Try again in {countdown} or use master password.",
+    "@lockScreenWrongPinTryAgainUseMasterPassword": {
+        "placeholders": {
+            "countdown": {}
+        }
+    },
+    "lockScreenQuickUnlockDisabledFor": "Quick unlock is disabled for {countdown}.",
+    "@lockScreenQuickUnlockDisabledFor": {
+        "placeholders": {
+            "countdown": {}
+        }
+    },
+
+    "setupVault": "Setup vault",
+    "useAtLeast12Characters": "Use at least 12 characters.",
+    "passwordsDoNotMatch": "Passwords do not match.",
+    "atLeast12Characters": "At least 12 characters",
+    "confirmPassword": "Confirm password",
+    "createVault": "Create vault",
+
+    "lockApp": "Lock app",
+    "resetAppData": "Reset app data",
+    "resetAppDataMessage": "Reset app data.",
+
+    "quickUnlockDescription": "Use quick unlock for faster access. This does not replace your master password, is only stored on this device, and your vault remains encrypted with the master password.",
+    "failedToEnableQuickUnlock": "Failed to enable quick unlock.",
+    "masterPasswordChangedQuickUnlockDisabled": "Master password changed successfully. Quick unlock has been disabled.",
+    "failedToChangeMasterPassword": "Failed to change master password. Current password may be incorrect or vault file may be damaged.",
+    "masterPasswordDescription": "The master password is used to encrypt and decrypt your vault data.",
+    "changePassword": "Change password",
+    "cloudSyncDescription": "Store an encrypted vault copy in the cloud. You can still access your vault without internet connection, and your data is never shared unencrypted.",
+    "syncing": "Syncing...",
+    "syncNow": "Sync now",
+    "cloudSyncPausedResolve": "Cloud sync is paused. Use Sync now after choosing which vault should win.",
+    "closePinSetup": "Close PIN setup",
+    "closeMasterPasswordChange": "Close master password change",
+
+    "setPin": "Set PIN",
+    "confirmPin": "Confirm PIN",
+    "useAtLeast4Characters": "Use at least 4 characters.",
+    "pinsDoNotMatch": "PINs do not match.",
+    "enablePin": "Enable PIN",
+
+    "changeMasterPassword": "Change master password",
+    "quickUnlockDisabledAfterPasswordChange": "Quick unlock will be disabled after this change.",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "enterCurrentPassword": "Enter current password.",
+
+    "cloudSyncConflict": "Cloud sync conflict",
+    "closeCloudSyncConflict": "Close cloud sync conflict",
+    "cloudConflictSubtitle": "The vault file on this device differs from the one in the cloud.",
+    "useThisDevicesVersion": "Use this device's version",
+    "useCloudVersion": "Use cloud version",
+    "keepBothVersions": "Keep both versions",
+
+    "titleRequired": "Title is required.",
+    "editEntry": "Edit entry",
+    "cloneEntry": "Clone entry",
+    "newEntry": "New entry",
+    "createEntry": "Create entry",
+    "entrySaved": "Entry saved.",
+    "entryDeleted": "Entry deleted.",
+    "entryMarkedAsFavorite": "Entry marked as favorite.",
+    "entryRemovedFromFavorites": "Entry removed from favorites.",
+    "failedToSaveEntry": "Failed to save entry.",
+    "failedToDeleteEntry": "Failed to delete entry.",
+    "failedToUpdateEntry": "Failed to update entry.",
+    "deleteEntryDialogTitle": "Delete entry?",
+    "deleteEntryDialogContent": "Delete \"{title}\" for \"{username}\"?\n\nThis action cannot be undone.",
+    "@deleteEntryDialogContent": {
+        "placeholders": {
+            "title": {},
+            "username": {}
+        }
+    },
+
+    "closeFolderForm": "Close folder form",
+    "newFolder": "New folder",
+    "folderName": "Folder name",
+    "entries": "Entries",
+    "noEntriesAvailableToAddToFolder": "No entries available to add to folder.",
+    "folderCreated": "Folder created.",
+    "failedToCreateFolder": "Failed to create folder.",
+    "createNewFolder": "Create new folder",
+    "customFolders": "Created",
+    "noCustomFoldersYet": "No created folders yet.",
+    "detectedFolders": "Detected",
+    "noDetectedFoldersYet": "No detected folders yet.",
+    "thisFolderIsEmpty": "This folder is empty.",
+    "noEntriesInThisFolder": "No entries in this folder.",
+    "folderSourceInfo": "{count, plural, =0{0 entries} =1{1 entry} other{{count} entries}} - {source}",
+    "@folderSourceInfo": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            },
+            "source": {}
+        }
+    },
+    "detectedFolderSourceTitle": "Title",
+    "detectedFolderSourceUsernameDomain": "Same username domain",
+    "detectedFolderSourceUrlHost": "Same website",
+
+    "durationMinutesAndSeconds": "{minutes, plural, =1{1 minute} other{{minutes} minutes}} and {seconds, plural, =1{1 second} other{{seconds} seconds}}",
+    "@durationMinutesAndSeconds": {
+        "placeholders": {
+            "minutes": {
+                "type": "int"
+            },
+            "seconds": {
+                "type": "int"
+            }
+        }
+    },
+    "durationMinutes": "{minutes, plural, =1{1 minute} other{{minutes} minutes}}",
+    "@durationMinutes": {
+        "placeholders": {
+            "minutes": {
+                "type": "int"
+            }
+        }
+    },
+    "durationSeconds": "{seconds, plural, =1{1 second} other{{seconds} seconds}}",
+    "@durationSeconds": {
+        "placeholders": {
+            "seconds": {
+                "type": "int"
+            }
+        }
+    },
+
+    "authCouldNotCreateVault": "Could not create vault.",
+    "authTooManyPinAttemptsTryAgain": "Too many PIN attempts. Try again in {duration}.",
+    "@authTooManyPinAttemptsTryAgain": {
+        "placeholders": {
+            "duration": {}
+        }
+    },
+    "authWrongPassword": "Wrong password.",
+    "authVaultIsLocked": "Vault is locked.",
+    "authCouldNotSaveDatabase": "Could not save database.",
+    "authUseAtLeast12CharactersForPassword": "Use at least 12 characters for the password.",
+    "authCurrentPasswordIncorrectOrVaultDamaged": "Current password is incorrect or vault file is damaged.",
+    "authUseAtLeast4DigitsForPin": "Use at least 4 digits for the PIN.",
+    "authPinMustContainOnlyNumbers": "PIN must contain only numbers.",
+    "authCouldNotEnableQuickUnlock": "Could not enable quick unlock.",
+    "authTooManyPinAttemptsWaitThenUseMasterPassword": "Too many PIN attempts. Wait {duration}, then use your master password.",
+    "@authTooManyPinAttemptsWaitThenUseMasterPassword": {
+        "placeholders": {
+            "duration": {}
+        }
+    },
+    "authQuickUnlockDisabledUseMasterPassword": "Quick unlock is disabled. Use your master password.",
+    "authWrongPinTryAgain": "Wrong PIN. Try again in {duration}.",
+    "@authWrongPinTryAgain": {
+        "placeholders": {
+            "duration": {}
+        }
+    },
+    "authWrongPin": "Wrong PIN.",
+
     "cloudMessageSyncDisabled": "Cloud sync disabled.",
     "cloudMessageSyncPaused": "Cloud sync is paused.",
     "cloudMessageOneDriveConnectedNoVault": "OneDrive connected, but no vault file was found.",
@@ -31,5 +301,36 @@
     "cloudMessageUploadedLocalConflict": "Uploaded this device's vault to OneDrive.",
     "cloudMessageDownloadedCloudConflict": "Downloaded OneDrive vault to this device.",
     "cloudMessageKeptBothPaused": "Saved OneDrive vault as a separate file on this device. Sync is paused.",
-    "cloudMessageSaveConflictFailed": "Could not save the cloud conflict copy."
+    "cloudMessageSaveConflictFailed": "Could not save the cloud conflict copy.",
+
+    "debugNoVaultLoaded": "No vault loaded.",
+    "debugTestEntryTitle": "test entry",
+    "debugTestEntryUsername": "testuser",
+    "debugTestEntryPassword": "testpassword",
+    "debugTestEntryNotes": "test entry notes",
+    "debugSavedEntries": "Saved entries: {count}",
+    "@debugSavedEntries": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "debugSaveFailed": "Save failed.",
+    "debugAddTestEntry": "Add test entry",
+    "debugNoLocalVaultAndNoOneDriveVault": "No local vault and no OneDrive vault found.",
+    "debugUploadedVaultToOneDrive": "Uploaded vault to OneDrive: {eTag}",
+    "@debugUploadedVaultToOneDrive": {
+        "placeholders": {
+            "eTag": {}
+        }
+    },
+    "debugErrorDuringOneDriveSync": "Error during OneDrive sync: {error}",
+    "@debugErrorDuringOneDriveSync": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+    "debugTestOneDriveSync": "Test OneDrive sync",
+    "debugTestMicrosoftSignOutAndReSignIn": "Test Microsoft sign-out and re-sign-in"
 }

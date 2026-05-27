@@ -55,7 +55,9 @@ class MicrosoftAuthService {
     Map<String, String>? headers,
     Object? body,
   }) {
-    return _runAuthRequest(() => _helper.put(url, headers: headers, body: body));
+    return _runAuthRequest(
+      () => _helper.put(url, headers: headers, body: body),
+    );
   }
 
   Future<void> signOut() {

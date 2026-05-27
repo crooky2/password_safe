@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app_shell.dart';
 import "theme_controller.dart";
+import "l10n/app_localizations.dart";
 
 import 'screens/lock_screen.dart';
 import "screens/setup_screen.dart";
@@ -13,10 +14,7 @@ import "cloud/cloud_controller.dart";
 import "widgets/settings/popup_cloud_sync_conflict.dart";
 
 class RootGate extends StatefulWidget {
-  const RootGate({
-    super.key,
-    required this.themeController,
-  });
+  const RootGate({super.key, required this.themeController});
 
   final ThemeController themeController;
 
@@ -25,7 +23,7 @@ class RootGate extends StatefulWidget {
 }
 
 class _RootGateState extends State<RootGate> {
-  AuthController _authController = AuthController();
+  final AuthController _authController = AuthController();
   final CloudController _cloudController = CloudController();
 
   bool _isShowingCloudConflict = false;
@@ -35,7 +33,7 @@ class _RootGateState extends State<RootGate> {
     super.initState();
 
     _cloudController.addListener(_handleCloudControllerChanged);
-    
+
     _authController.initialize();
     _cloudController.initialize();
   }
@@ -54,16 +52,19 @@ class _RootGateState extends State<RootGate> {
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted || _isShowingCloudConflict || !_cloudController.hasPendingConflict) {
+      if (!mounted ||
+          _isShowingCloudConflict ||
+          !_cloudController.hasPendingConflict) {
         return;
       }
 
       _isShowingCloudConflict = true;
+      final l10n = AppLocalizations.of(context)!;
 
       final choice = await showGeneralDialog<CloudConflictChoice>(
         context: context,
         barrierDismissible: false,
-        barrierLabel: "Cloud sync conflict",
+        barrierLabel: l10n.closeCloudSyncConflict,
         pageBuilder: (context, animation, secondaryAnimation) {
           return const CloudSyncConflictPopup();
         },
@@ -74,7 +75,7 @@ class _RootGateState extends State<RootGate> {
         return;
       }
 
-      switch(choice) {
+      switch (choice) {
         case CloudConflictChoice.useLocal:
           await _cloudController.useLocalVaultForConflict();
           break;
@@ -98,7 +99,7 @@ class _RootGateState extends State<RootGate> {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _authController,
-      
+
       builder: (context, _) {
         return switch (_authController.state) {
           AuthState.checking || AuthState.busy => Scaffold(
@@ -110,8 +111,8 @@ class _RootGateState extends State<RootGate> {
               child: SetupScreen(
                 onCreateVault: _authController.createVault,
                 errorMessage: _authController.errorMessage,
-              )
-            )
+              ),
+            ),
           ),
 
           AuthState.locked => Scaffold(
@@ -122,7 +123,8 @@ class _RootGateState extends State<RootGate> {
                 isQuickUnlockEnabled: _authController.isQuickUnlockEnabled,
                 refreshUnlockBlock: _authController.refreshUnlockBlock,
                 unlockBlockedUntil: _authController.unlockBlockedUntil,
-                unlockBlockedRequiresMasterPassword: _authController.unlockBlockedRequiresMasterPassword,
+                unlockBlockedRequiresMasterPassword:
+                    _authController.unlockBlockedRequiresMasterPassword,
                 errorMessage: _authController.errorMessage,
               ),
             ),

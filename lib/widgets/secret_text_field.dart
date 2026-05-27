@@ -1,6 +1,8 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
+import "../l10n/app_localizations.dart";
+
 class SecretTextField extends StatefulWidget {
   const SecretTextField({
     super.key,
@@ -13,6 +15,7 @@ class SecretTextField extends StatefulWidget {
     this.borderRadius = 12,
     this.enableBorder = false,
     this.enabled = true,
+    this.extraSuffixIcon,
   });
 
   final TextEditingController controller;
@@ -24,6 +27,7 @@ class SecretTextField extends StatefulWidget {
   final double borderRadius;
   final bool enableBorder;
   final bool enabled;
+  final Widget? extraSuffixIcon;
 
   @override
   State<SecretTextField> createState() => _SecretTextFieldState();
@@ -34,6 +38,8 @@ class _SecretTextFieldState extends State<SecretTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return TextField(
       controller: widget.controller,
       obscureText: _obscureText,
@@ -49,20 +55,26 @@ class _SecretTextFieldState extends State<SecretTextField> {
                 borderRadius: BorderRadius.circular(widget.borderRadius),
               )
             : null,
-        suffixIcon: IconButton(
-          tooltip: _obscureText ? "Show" : "Hide",
-          onPressed: widget.enabled
-              ? () {
-                  setState(() {
-                    _obscureText = !_obscureText;
-                  });
-                }
-              : null,
-          icon: Icon(
-            _obscureText
-                ? Icons.visibility_rounded
-                : Icons.visibility_off_rounded,
-          ),
+        suffixIcon: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (widget.extraSuffixIcon != null) widget.extraSuffixIcon!,
+            IconButton(
+              tooltip: _obscureText ? l10n.show : l10n.hide,
+              onPressed: widget.enabled
+                  ? () {
+                      setState(() {
+                        _obscureText = !_obscureText;
+                      });
+                    }
+                  : null,
+              icon: Icon(
+                _obscureText
+                    ? Icons.visibility_rounded
+                    : Icons.visibility_off_rounded,
+              ),
+            ),
+          ],
         ),
       ),
     );

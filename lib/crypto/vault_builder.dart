@@ -4,14 +4,11 @@ import "master_key_deriver.dart";
 import "vault_cipher.dart";
 import "vault_models.dart";
 
-
 import "../vault/password_database.dart";
 import "../vault/unlocked_vault.dart";
 
 class VaultBuilder {
-  const VaultBuilder({
-    this.keyDeriver = const MasterKeyDeriver(),
-  });
+  const VaultBuilder({this.keyDeriver = const MasterKeyDeriver()});
 
   final MasterKeyDeriver keyDeriver;
 
@@ -48,20 +45,13 @@ class VaultBuilder {
         wrappedVaultKey: wrappedVaultKey,
         encryptedDatabase: encryptedDatabase,
       ),
-      unlockedVault: UnlockedVault(
-        vaultKey: vaultKey,
-        database: database,
-      ),
+      unlockedVault: UnlockedVault(vaultKey: vaultKey, database: database),
     );
   }
 }
 
-
 class CreatedVault {
-  const CreatedVault({
-    required this.vaultFile,
-    required this.unlockedVault,
-  });
+  const CreatedVault({required this.vaultFile, required this.unlockedVault});
 
   final VaultFile vaultFile;
   final UnlockedVault unlockedVault;

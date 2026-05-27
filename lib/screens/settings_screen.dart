@@ -15,6 +15,7 @@ import "../cloud/cloud_controller.dart";
 import "settings/security_tab.dart";
 import "settings/debug_tab.dart";
 import "settings/appearance_tab.dart";
+import "../l10n/app_localizations.dart";
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({
@@ -30,14 +31,16 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return ScreenFrame(
-      title: 'Settings',
+      title: l10n.settings,
       icon: Icons.settings_rounded,
       headerActions: [
         FilledButton.icon(
           onPressed: authController.lock,
           icon: const Icon(Icons.lock_rounded),
-          label: const Text("Lock app"),
+          label: Text(l10n.lockApp),
           style: FilledButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.tertiary,
             foregroundColor: Theme.of(context).colorScheme.onTertiary,
@@ -46,7 +49,7 @@ class SettingsScreen extends StatelessWidget {
       ],
       children: [
         SectionCard(
-          title: "Appearance",
+          title: l10n.appearance,
           icon: Icons.palette_rounded,
           action: () {
             Navigator.of(context).push(
@@ -58,19 +61,22 @@ class SettingsScreen extends StatelessWidget {
         ),
 
         SectionCard(
-          title: "Security",
+          title: l10n.security,
           icon: Icons.security_rounded,
           action: () {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) => SecurityTab(authController: authController, cloudController: cloudController),
+                builder: (_) => SecurityTab(
+                  authController: authController,
+                  cloudController: cloudController,
+                ),
               ),
             );
           },
         ),
 
         SectionCard(
-          title: "Debug",
+          title: l10n.debug,
           icon: Icons.bug_report_rounded,
           action: () {
             Navigator.of(context).push(
@@ -87,15 +93,19 @@ class SettingsScreen extends StatelessWidget {
             await authController.disableQuickUnlock();
             await MicrosoftAuthService().signOut();
 
+            if (!context.mounted) {
+              return;
+            }
+
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text("Reset app data.")));
+            ).showSnackBar(SnackBar(content: Text(l10n.resetAppDataMessage)));
           },
           style: FilledButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.error,
             foregroundColor: Theme.of(context).colorScheme.onError,
           ),
-          child: const Text("Reset App Data"),
+          child: Text(l10n.resetAppData),
         ),
       ],
     );

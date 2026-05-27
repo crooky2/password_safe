@@ -165,26 +165,24 @@ class LocalUnlockService {
   }
 
   Future<void> _throwIfQuickUnlockBlocked() async {
-  final now = DateTime.now();
-  final throttleState = await readThrottleState();
+    final now = DateTime.now();
+    final throttleState = await readThrottleState();
 
-  if (throttleState.requiresMasterPassword) {
-    if (throttleState.isLocked(now)) {
-      throw QuickUnlockLockedException(
-        throttleState.remainingLockTime(now),
-        requiresMasterPassword: true,
-      );
+    if (throttleState.requiresMasterPassword) {
+      if (throttleState.isLocked(now)) {
+        throw QuickUnlockLockedException(
+          throttleState.remainingLockTime(now),
+          requiresMasterPassword: true,
+        );
+      }
+
+      throw const QuickUnlockMasterPasswordRequiredException();
     }
 
-    throw const QuickUnlockMasterPasswordRequiredException();
+    if (throttleState.isLocked(now)) {
+      throw QuickUnlockLockedException(throttleState.remainingLockTime(now));
+    }
   }
-
-  if (throttleState.isLocked(now)) {
-    throw QuickUnlockLockedException(
-      throttleState.remainingLockTime(now),
-    );
-  }
-}
 
   Future<QuickUnlockRejectedException> _recordFailedAttempt() async {
     final now = DateTime.now();

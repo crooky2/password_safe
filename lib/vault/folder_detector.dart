@@ -12,14 +12,6 @@ class DetectedFolder {
   final String name;
   final DetectedFolderSource source;
   final List<PasswordEntry> entries;
-
-  String get sourceLabel {
-    return switch (source) {
-      DetectedFolderSource.title => "Title",
-      DetectedFolderSource.usernameDomain => "Same username domain",
-      DetectedFolderSource.urlHost => "Same website",
-    };
-  }
 }
 
 List<DetectedFolder> detectFolders(List<PasswordEntry> entries) {
@@ -41,7 +33,7 @@ List<DetectedFolder> detectFolders(List<PasswordEntry> entries) {
 
   for (final entry in entries) {
     final titleKey = _normalize(entry.title);
-    if (titleKey.length >= 1) {
+    if (titleKey.isNotEmpty) {
       addGroup(
         key: "title:$titleKey",
         name: _prettyName(entry.title),

@@ -13,13 +13,12 @@ class EncryptedBlob {
 
   Map<String, Object> toJson() {
     return {
-      "algorithm":algorithm,
+      "algorithm": algorithm,
       "nonce": nonceBase64,
       "ciphertext": ciphertextBase64,
       "mac": macBase64,
     };
   }
-
 
   factory EncryptedBlob.fromJson(Map<String, Object?> json) {
     return EncryptedBlob(
@@ -30,9 +29,6 @@ class EncryptedBlob {
     );
   }
 }
-
-
-
 
 class KdfParams {
   const KdfParams({
@@ -70,10 +66,6 @@ class KdfParams {
   }
 }
 
-
-
-
-
 class VaultFile {
   const VaultFile({
     required this.version,
@@ -103,7 +95,9 @@ class VaultFile {
       wrappedVaultKey: EncryptedBlob.fromJson(
         json["wrappedVaultKey"] as Map<String, Object?>,
       ),
-      encryptedDatabase: EncryptedBlob.fromJson(json["encryptedDatabase"] as Map<String, Object?>),
+      encryptedDatabase: EncryptedBlob.fromJson(
+        json["encryptedDatabase"] as Map<String, Object?>,
+      ),
     );
   }
 

@@ -26,15 +26,11 @@ enum CloudMessage {
 }
 
 class CloudSyncConflict {
-  const CloudSyncConflict({
-    required this.localText,
-    required this.remoteText,
-  });
+  const CloudSyncConflict({required this.localText, required this.remoteText});
 
   final String localText;
   final String remoteText;
 }
-
 
 class CloudController extends ChangeNotifier {
   CloudController({
@@ -147,7 +143,7 @@ class CloudController extends ChangeNotifier {
     _setBusy(true);
 
     try {
-      switch(_mode) {
+      switch (_mode) {
         case CloudSyncMode.oneDrive:
           await microsoftAuthService.connect();
           await oneDriveVaultStore.uploadText(conflict.localText);
@@ -176,7 +172,7 @@ class CloudController extends ChangeNotifier {
     _setBusy(true);
 
     try {
-      switch(_mode) {
+      switch (_mode) {
         case CloudSyncMode.oneDrive:
           await vaultFileStore.saveText(conflict.remoteText);
           _message = CloudMessage.downloadedCloudConflict;
@@ -186,7 +182,7 @@ class CloudController extends ChangeNotifier {
           _message = CloudMessage.syncDisabled;
           break;
       }
-    } on MicrosoftSignInCanceledException  {
+    } on MicrosoftSignInCanceledException {
       _message = CloudMessage.signInCanceled;
     } catch (_) {
       _message = CloudMessage.syncFailed;
@@ -199,7 +195,7 @@ class CloudController extends ChangeNotifier {
 
   Future<void> keepBothVaultsForConflict() async {
     final conflict = _pendingConflict;
-    if(conflict == null || _isBusy) {
+    if (conflict == null || _isBusy) {
       return;
     }
 
@@ -245,7 +241,7 @@ class CloudController extends ChangeNotifier {
   Future<void> _disable() async {
     _setBusy(true);
 
-    switch(_mode) {
+    switch (_mode) {
       case CloudSyncMode.oneDrive:
         await microsoftAuthService.signOut();
         break;
@@ -287,7 +283,6 @@ class CloudController extends ChangeNotifier {
       return CloudMessage.alreadyInSync;
     }
 
-
     _pendingConflict = CloudSyncConflict(
       localText: localText!,
       remoteText: remoteText!,
@@ -295,7 +290,6 @@ class CloudController extends ChangeNotifier {
 
     return CloudMessage.vaultsDiffer;
   }
-
 
   void _setBusy(bool value) {
     _isBusy = value;

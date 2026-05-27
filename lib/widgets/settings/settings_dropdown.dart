@@ -1,15 +1,11 @@
 import "package:flutter/material.dart";
 
 class SettingsDropdownOption<T> {
-  const SettingsDropdownOption({
-    required this.value,
-    required this.label,
-  });
+  const SettingsDropdownOption({required this.value, required this.label});
 
   final T value;
   final String label;
 }
-
 
 class SettingsDropdown<T> extends StatelessWidget {
   const SettingsDropdown({
@@ -38,14 +34,24 @@ class SettingsDropdown<T> extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+              Text(
+                title,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
 
               if (subtitle != null && subtitle!.trim().isNotEmpty) ...[
                 const SizedBox(height: 4),
-                Text(subtitle!, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-              ]
-            ]
-          )
+                Text(
+                  subtitle!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
 
         const SizedBox(width: 16),
@@ -58,14 +64,15 @@ class SettingsDropdown<T> extends StatelessWidget {
 
             onChanged(newValue);
           },
-          items: [ for (final option in options)
-            DropdownMenuItem<T>(
-              value: option.value,
-              child: Text(option.label),
-            )
+          items: [
+            for (final option in options)
+              DropdownMenuItem<T>(
+                value: option.value,
+                child: Text(option.label),
+              ),
           ],
-        )
-      ]
+        ),
+      ],
     );
   }
 }

@@ -13,6 +13,7 @@ import "../widgets/home/entry_actions.dart";
 
 import "../vault/password_database.dart";
 import "../vault/folder_detector.dart";
+import "../l10n/app_localizations.dart";
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key, required this.authController});
@@ -24,6 +25,7 @@ class HomeScreen extends StatelessWidget {
     return AnimatedBuilder(
       animation: authController,
       builder: (context, _) {
+        final l10n = AppLocalizations.of(context)!;
         final entryActions = EntryActions(authController: authController);
         final entries =
             authController.database?.entries ?? const <PasswordEntry>[];
@@ -35,17 +37,17 @@ class HomeScreen extends StatelessWidget {
 
         return ScreenFrame(
           icon: Icons.dashboard_rounded,
-          title: "Dashboard",
+          title: l10n.dashboard,
           headerActions: [
             IconButton(
-              tooltip: "Add entry",
+              tooltip: l10n.addEntry,
               onPressed: () {
                 entryActions.openEntryForm(context);
               },
               icon: const Icon(Icons.add_rounded),
             ),
             IconButton(
-              tooltip: "Search for entry",
+              tooltip: l10n.searchForEntry,
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -61,8 +63,8 @@ class HomeScreen extends StatelessWidget {
           ],
           children: [
             SectionCard(
-              title: 'All entries',
-              subtitle: "${entries.length} entries",
+              title: l10n.allEntries,
+              subtitle: l10n.entryCount(entries.length),
               icon: Icons.list_rounded,
               action: () {
                 Navigator.of(context).push(
@@ -75,9 +77,11 @@ class HomeScreen extends StatelessWidget {
             ),
 
             SectionCard(
-              title: 'Folders',
-              subtitle:
-                  "$customFolderCount custom, $detectedFolderCount detected",
+              title: l10n.folders,
+              subtitle: l10n.homeScreenFoldersInfo(
+                customFolderCount,
+                detectedFolderCount,
+              ),
               icon: Icons.folder_rounded,
               action: () {
                 Navigator.of(context).push(
@@ -88,7 +92,7 @@ class HomeScreen extends StatelessWidget {
               },
             ),
             SectionCard(
-              title: "Favorites",
+              title: l10n.favorites,
               icon: Icons.star_rounded,
               children: [
                 for (final entry in favoriteEntries)
@@ -100,7 +104,13 @@ class HomeScreen extends StatelessWidget {
                     icon: Icons.key_rounded,
                     border: entry.id == favoriteEntries.last.id
                         ? null
-                        : Border(bottom: BorderSide(color: Theme.of(context,).colorScheme.onSurface.withValues(alpha: 0.14))),
+                        : Border(
+                            bottom: BorderSide(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.14),
+                            ),
+                          ),
                     action: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
@@ -111,19 +121,18 @@ class HomeScreen extends StatelessWidget {
                     },
                     contextMenuItems: [
                       SectionCardMenuItem(
-                        label: "Unfavorite",
+                        label: l10n.unfavorite,
                         icon: Icons.star_outline_rounded,
                         isDestructive: true,
                         onSelected: () {
                           entryActions.toggleFavorite(context, entry: entry);
-                          
                         },
                       ),
                       SectionCardMenuItem(
-                        label: "Edit",
+                        label: l10n.edit,
                         icon: Icons.edit_rounded,
                         onSelected: () {
-                          entryActions.openEntryForm( context, entry: entry);
+                          entryActions.openEntryForm(context, entry: entry);
                         },
                       ),
                     ],

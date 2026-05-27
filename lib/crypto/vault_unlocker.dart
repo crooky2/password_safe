@@ -8,11 +8,8 @@ import "vault_models.dart";
 import "../vault/password_database.dart";
 import "../vault/unlocked_vault.dart";
 
-
 class VaultUnlocker {
-  const VaultUnlocker({
-    this.keyDeriver = const MasterKeyDeriver(),
-  });
+  const VaultUnlocker({this.keyDeriver = const MasterKeyDeriver()});
 
   final MasterKeyDeriver keyDeriver;
 
@@ -53,7 +50,7 @@ class VaultUnlocker {
 
     final databaseBytes = await cipher.decrypt(
       blob: vaultFile.encryptedDatabase,
-      key: vaultKey
+      key: vaultKey,
     );
 
     final databaseText = bytesToText(databaseBytes);

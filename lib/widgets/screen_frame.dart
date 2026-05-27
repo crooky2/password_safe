@@ -73,9 +73,7 @@ class ScreenFrame extends StatelessWidget {
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [
-                                    colorScheme.primary.withValues(
-                                      alpha: 0.5,
-                                    ),
+                                    colorScheme.primary.withValues(alpha: 0.5),
                                     colorScheme.primary.withValues(alpha: 0.8),
                                   ],
                                   begin: Alignment.topLeft,
@@ -118,9 +116,11 @@ class ScreenFrame extends StatelessWidget {
                                             color: colorScheme.onPrimary
                                                 .withValues(alpha: 0.88),
                                           ),
-                                          onPressed: returnButtonAction ?? () {
-                                            Navigator.of(context).pop();
-                                          },
+                                          onPressed:
+                                              returnButtonAction ??
+                                              () {
+                                                Navigator.of(context).pop();
+                                              },
                                         ),
                                       ),
                                     ),

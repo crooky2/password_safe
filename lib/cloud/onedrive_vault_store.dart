@@ -15,14 +15,14 @@ class OneDriveVaultInfo {
 }
 
 class OneDriveVaultStore {
-  const OneDriveVaultStore({
-    required this.authService,
-  });
+  const OneDriveVaultStore({required this.authService});
 
   final MicrosoftAuthService authService;
 
-  static const _vaultMetadataUrl = "https://graph.microsoft.com/v1.0/me/drive/special/approot:/vault.json";
-  static const _vaultContentUrl = "https://graph.microsoft.com/v1.0/me/drive/special/approot:/vault.json:/content";
+  static const _vaultMetadataUrl =
+      "https://graph.microsoft.com/v1.0/me/drive/special/approot:/vault.json";
+  static const _vaultContentUrl =
+      "https://graph.microsoft.com/v1.0/me/drive/special/approot:/vault.json:/content";
 
   Future<OneDriveVaultInfo?> getInfo() async {
     final response = await authService.get(_vaultMetadataUrl);
@@ -32,7 +32,9 @@ class OneDriveVaultStore {
     }
 
     if (response.statusCode != 200) {
-      throw StateError("Could not load OneDrive vault metadata: ${response.statusCode}");
+      throw StateError(
+        "Could not load OneDrive vault metadata: ${response.statusCode}",
+      );
     }
 
     final json = jsonDecode(response.body) as Map<String, Object?>;
@@ -40,7 +42,9 @@ class OneDriveVaultStore {
     return OneDriveVaultInfo(
       id: json["id"] as String,
       eTag: json["eTag"] as String,
-      lastModifiedDateTime: DateTime.parse(json["lastModifiedDateTime"] as String),
+      lastModifiedDateTime: DateTime.parse(
+        json["lastModifiedDateTime"] as String,
+      ),
     );
   }
 
@@ -52,7 +56,9 @@ class OneDriveVaultStore {
     }
 
     if (response.statusCode != 200) {
-      throw StateError("Could not download OneDrive vault content: ${response.statusCode}");
+      throw StateError(
+        "Could not download OneDrive vault content: ${response.statusCode}",
+      );
     }
 
     return response.body;
@@ -66,7 +72,9 @@ class OneDriveVaultStore {
     );
 
     if (response.statusCode != 200 && response.statusCode != 201) {
-      throw StateError("Could not upload OneDrive vault content: ${response.statusCode}");
+      throw StateError(
+        "Could not upload OneDrive vault content: ${response.statusCode}",
+      );
     }
 
     final json = jsonDecode(response.body) as Map<String, Object?>;
@@ -74,7 +82,9 @@ class OneDriveVaultStore {
     return OneDriveVaultInfo(
       id: json["id"] as String,
       eTag: json["eTag"] as String,
-      lastModifiedDateTime: DateTime.parse(json["lastModifiedDateTime"] as String),
+      lastModifiedDateTime: DateTime.parse(
+        json["lastModifiedDateTime"] as String,
+      ),
     );
   }
 }

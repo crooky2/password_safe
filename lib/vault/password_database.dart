@@ -1,6 +1,5 @@
 import "dart:convert";
 
-
 class PasswordEntry {
   const PasswordEntry({
     required this.id,
@@ -21,7 +20,6 @@ class PasswordEntry {
   final String url;
   final bool isFavorite;
   final String iconKey;
-
 
   Map<String, Object> toJson() {
     return {
@@ -72,7 +70,6 @@ class PasswordEntry {
   }
 }
 
-
 class PasswordFolder {
   const PasswordFolder({
     required this.id,
@@ -85,16 +82,12 @@ class PasswordFolder {
   final List<String> entryIds;
 
   Map<String, Object> toJson() {
-    return {
-      "id": id,
-      "name": name,
-      "entryIds": entryIds,
-    };
+    return {"id": id, "name": name, "entryIds": entryIds};
   }
 
   factory PasswordFolder.fromJson(Map<String, Object?> json) {
     final entryIdsJson = json["entryIds"] as List<Object?>? ?? const [];
-    
+
     return PasswordFolder(
       id: json["id"] as String,
       name: json["name"] as String,
@@ -102,11 +95,7 @@ class PasswordFolder {
     );
   }
 
-  PasswordFolder copyWith({
-    String? id,
-    String? name,
-    List<String>? entryIds,
-  }) {
+  PasswordFolder copyWith({String? id, String? name, List<String>? entryIds}) {
     return PasswordFolder(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -114,8 +103,6 @@ class PasswordFolder {
     );
   }
 }
-
-
 
 class PasswordDatabase {
   const PasswordDatabase({
@@ -129,11 +116,7 @@ class PasswordDatabase {
   final List<PasswordFolder> folders;
 
   factory PasswordDatabase.empty() {
-    return const PasswordDatabase(
-      version: 1,
-      entries: [],
-      folders: [],
-    );
+    return const PasswordDatabase(version: 1, entries: [], folders: []);
   }
 
   Map<String, Object> toJson() {
@@ -150,11 +133,18 @@ class PasswordDatabase {
 
     return PasswordDatabase(
       version: json["version"] as int,
-      entries: entriesJson.map(
-        (entryJson) => PasswordEntry.fromJson(entryJson as Map<String, Object?>)
-      ).toList(),
-      folders: foldersJson.map((folderJson) =>
-        PasswordFolder.fromJson(folderJson as Map<String, Object?>)).toList(),
+      entries: entriesJson
+          .map(
+            (entryJson) =>
+                PasswordEntry.fromJson(entryJson as Map<String, Object?>),
+          )
+          .toList(),
+      folders: foldersJson
+          .map(
+            (folderJson) =>
+                PasswordFolder.fromJson(folderJson as Map<String, Object?>),
+          )
+          .toList(),
     );
   }
 
@@ -181,9 +171,7 @@ class PasswordDatabase {
   }
 
   PasswordDatabase addEntry(PasswordEntry entry) {
-    return copyWith(
-      entries: [...entries, entry],
-    );
+    return copyWith(entries: [...entries, entry]);
   }
 
   PasswordDatabase updateEntry(PasswordEntry updatedEntry) {
@@ -199,20 +187,16 @@ class PasswordDatabase {
   }
 
   PasswordDatabase removeEntry(String id) {
-    return copyWith(
-      entries: entries.where((entry) => entry.id != id).toList(),
-    );
+    return copyWith(entries: entries.where((entry) => entry.id != id).toList());
   }
 
   PasswordDatabase addFolder(PasswordFolder folder) {
-    return copyWith(
-      folders: [...folders, folder],
-    );
+    return copyWith(folders: [...folders, folder]);
   }
 
   PasswordDatabase updateFolder(PasswordFolder updatedFolder) {
     return copyWith(
-      folders: folders.map((folder){
+      folders: folders.map((folder) {
         if (folder.id == updatedFolder.id) {
           return updatedFolder;
         }

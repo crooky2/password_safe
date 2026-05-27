@@ -1,6 +1,6 @@
 import "package:shared_preferences/shared_preferences.dart";
 
-enum CloudSyncMode {disabled, oneDrive}
+enum CloudSyncMode { disabled, oneDrive }
 
 class CloudSyncSettings {
   const CloudSyncSettings();
@@ -19,12 +19,9 @@ class CloudSyncSettings {
   Future<void> saveMode(CloudSyncMode mode) async {
     final preferences = await SharedPreferences.getInstance();
 
-    await preferences.setString(
-      _modeKey,
-      switch (mode) {
-        CloudSyncMode.oneDrive => "oneDrive",
-        CloudSyncMode.disabled => "disabled",
-      }
-    );
+    await preferences.setString(_modeKey, switch (mode) {
+      CloudSyncMode.oneDrive => "oneDrive",
+      CloudSyncMode.disabled => "disabled",
+    });
   }
 }

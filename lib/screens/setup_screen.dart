@@ -2,6 +2,9 @@ import "package:flutter/material.dart";
 
 import "../widgets/screen_frame.dart";
 import "../widgets/secret_text_field.dart";
+import "../auth/auth_controller.dart";
+import "../l10n/app_localizations.dart";
+import "../l10n/localized_messages.dart";
 
 class SetupScreen extends StatefulWidget {
   const SetupScreen({
@@ -11,7 +14,7 @@ class SetupScreen extends StatefulWidget {
   });
 
   final Future<bool> Function(String password) onCreateVault;
-  final String? errorMessage;
+  final AuthFeedbackMessage? errorMessage;
 
   @override
   State<SetupScreen> createState() => _SetupVaultScreenState();
@@ -31,6 +34,7 @@ class _SetupVaultScreenState extends State<SetupScreen> {
   }
 
   Future<void> _submit() async {
+    final l10n = AppLocalizations.of(context)!;
     final password = _passwordController.text;
     final confirm = _confirmController.text;
 
@@ -40,14 +44,14 @@ class _SetupVaultScreenState extends State<SetupScreen> {
 
     if (password.length < 12) {
       setState(() {
-        _localError = 'Use at least 12 characters.';
+        _localError = l10n.useAtLeast12Characters;
       });
       return;
     }
 
     if (password != confirm) {
       setState(() {
-        _localError = 'Passwords do not match.';
+        _localError = l10n.passwordsDoNotMatch;
       });
       return;
     }
@@ -66,18 +70,23 @@ class _SetupVaultScreenState extends State<SetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final errorMessage = _localError ?? widget.errorMessage;
+    final l10n = AppLocalizations.of(context)!;
+    final errorMessage =
+        _localError ??
+        (widget.errorMessage == null
+            ? null
+            : l10n.authFeedback(widget.errorMessage!));
 
     return ScreenFrame(
-      title: "Setup Vault",
+      title: l10n.setupVault,
       icon: Icons.security_rounded,
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: SecretTextField(
             controller: _passwordController,
-            labelText: "Master password",
-            hintText: "At least 12 characters",
+            labelText: l10n.masterPassword,
+            hintText: l10n.atLeast12Characters,
           ),
         ),
 
@@ -85,7 +94,7 @@ class _SetupVaultScreenState extends State<SetupScreen> {
           padding: const EdgeInsets.only(bottom: 12),
           child: SecretTextField(
             controller: _confirmController,
-            labelText: "Confirm password",
+            labelText: l10n.confirmPassword,
             onSubmitted: (_) => _submit(),
           ),
         ),
@@ -102,8 +111,8 @@ class _SetupVaultScreenState extends State<SetupScreen> {
         FilledButton.icon(
           onPressed: _submit,
           icon: const Icon(Icons.lock_rounded),
-          label: const Text("Create Vault"),
-        )
+          label: Text(l10n.createVault),
+        ),
       ],
     );
   }

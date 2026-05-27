@@ -1,7 +1,8 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
-import "../screen_popup.dart ";
+import "../../l10n/app_localizations.dart";
+import "../screen_popup.dart";
 import "../secret_text_field.dart";
 
 class PinSetupPopup extends StatefulWidget {
@@ -30,19 +31,20 @@ class _PinSetupPopupState extends State<PinSetupPopup> {
   }
 
   void _submit() {
+    final l10n = AppLocalizations.of(context)!;
     final pin = _pinController.text;
     final confirm = _confirmController.text;
 
     if (pin.length < 4) {
       setState(() {
-        _errorMessage = "Use at least 4 characters.";
+        _errorMessage = l10n.useAtLeast4Characters;
       });
       return;
     }
 
     if (pin != confirm) {
       setState(() {
-        _errorMessage = "PINs do not match.";
+        _errorMessage = l10n.pinsDoNotMatch;
       });
       return;
     }
@@ -52,8 +54,10 @@ class _PinSetupPopupState extends State<PinSetupPopup> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return ScreenPopup(
-      title: "Set PIN",
+      title: l10n.setPin,
       onClose: () {
         Navigator.of(context).pop();
       },
@@ -61,7 +65,7 @@ class _PinSetupPopupState extends State<PinSetupPopup> {
       children: [
         SecretTextField(
           controller: _pinController,
-          labelText: "PIN",
+          labelText: l10n.pin,
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           enableBorder: false,
@@ -69,7 +73,7 @@ class _PinSetupPopupState extends State<PinSetupPopup> {
         const SizedBox(height: 12),
         SecretTextField(
           controller: _confirmController,
-          labelText: "Confirm PIN",
+          labelText: l10n.confirmPin,
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           enableBorder: false,
@@ -86,11 +90,11 @@ class _PinSetupPopupState extends State<PinSetupPopup> {
 
         const SizedBox(height: 16),
         FilledButton.icon(
-          onPressed: _submit, 
+          onPressed: _submit,
           icon: const Icon(Icons.lock_rounded),
-          label: const Text("Enable PIN")
-        )
-      ]
+          label: Text(l10n.enablePin),
+        ),
+      ],
     );
   }
 }

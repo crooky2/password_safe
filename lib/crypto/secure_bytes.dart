@@ -13,7 +13,7 @@ Uint8List generateRandomBytes(int length) {
       length,
       (_) => _secureRandom.nextInt(256),
       growable: false,
-    )
+    ),
   );
 }
 

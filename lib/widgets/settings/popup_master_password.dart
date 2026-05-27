@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
 
+import "../../l10n/app_localizations.dart";
 import "../screen_popup.dart";
 import "../secret_text_field.dart";
-
 
 class MasterPasswordChange {
   const MasterPasswordChange({
@@ -13,7 +13,6 @@ class MasterPasswordChange {
   final String currentPassword;
   final String newPassword;
 }
-
 
 class MasterPasswordPopup extends StatefulWidget {
   const MasterPasswordPopup({super.key});
@@ -38,27 +37,28 @@ class _MasterPasswordPopupState extends State<MasterPasswordPopup> {
   }
 
   void _submit() {
+    final l10n = AppLocalizations.of(context)!;
     final currentPassword = _currentController.text;
     final newPassword = _newController.text;
     final confirmPassword = _confirmController.text;
 
-    if(currentPassword.isEmpty) {
+    if (currentPassword.isEmpty) {
       setState(() {
-        _errorMessage = "Enter current password.";
+        _errorMessage = l10n.enterCurrentPassword;
       });
       return;
     }
 
     if (newPassword.length < 12) {
       setState(() {
-        _errorMessage = "Use at least 12 characters.";
+        _errorMessage = l10n.useAtLeast12Characters;
       });
       return;
     }
 
     if (newPassword != confirmPassword) {
       setState(() {
-        _errorMessage = "Passwords do not match.";
+        _errorMessage = l10n.passwordsDoNotMatch;
       });
       return;
     }
@@ -73,28 +73,30 @@ class _MasterPasswordPopupState extends State<MasterPasswordPopup> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return ScreenPopup(
-      title: "Change master password",
-      subtitle: "Quick unlock will be disabled after this change.",
+      title: l10n.changeMasterPassword,
+      subtitle: l10n.quickUnlockDisabledAfterPasswordChange,
       onClose: () {
         Navigator.of(context).pop();
       },
       children: [
         SecretTextField(
           controller: _currentController,
-          labelText: "Current password",
+          labelText: l10n.currentPassword,
         ),
         SecretTextField(
           controller: _newController,
-          labelText: "New password",
+          labelText: l10n.newPassword,
         ),
         SecretTextField(
           controller: _confirmController,
-          labelText: "Confirm new password",
+          labelText: l10n.confirmNewPassword,
           onSubmitted: (_) => _submit(),
         ),
 
-        if(_errorMessage != null) ...[
+        if (_errorMessage != null) ...[
           const SizedBox(height: 12),
           Text(
             _errorMessage!,
@@ -105,9 +107,9 @@ class _MasterPasswordPopupState extends State<MasterPasswordPopup> {
         FilledButton.icon(
           onPressed: _submit,
           icon: const Icon(Icons.lock_reset_rounded),
-          label: const Text("Change password"),
+          label: Text(l10n.changePassword),
         ),
-      ]
+      ],
     );
   }
 }

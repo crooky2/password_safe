@@ -5,6 +5,9 @@ import "dart:async";
 
 import '../widgets/screen_frame.dart';
 import "../widgets/secret_text_field.dart";
+import "../auth/auth_controller.dart";
+import "../l10n/app_localizations.dart";
+import "../l10n/localized_messages.dart";
 
 class LockScreen extends StatefulWidget {
   const LockScreen({
@@ -24,7 +27,7 @@ class LockScreen extends StatefulWidget {
   final Future<void> Function() refreshUnlockBlock;
   final DateTime? unlockBlockedUntil;
   final bool unlockBlockedRequiresMasterPassword;
-  final String? errorMessage;
+  final AuthFeedbackMessage? errorMessage;
 
   @override
   State<LockScreen> createState() => _LockScreenState();
@@ -174,27 +177,40 @@ class _LockScreenState extends State<LockScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final unlockLabel = _usePinUnlock ? "PIN" : "Password";
-    final unlockHint = _usePinUnlock ? "Enter your PIN" : "Enter your password";
+    final l10n = AppLocalizations.of(context)!;
+    final unlockLabel = _usePinUnlock ? l10n.pin : l10n.password;
+    final unlockHint = _usePinUnlock
+        ? l10n.enterYourPin
+        : l10n.enterYourPassword;
 
     final remaining = _remainingUnlockBlock;
     final isBlocked = _isCurrentUnlockModeBlocked;
 
     final countdownMessage = remaining > Duration.zero
         ? widget.unlockBlockedRequiresMasterPassword
-              ? "Too many PIN attempts. Master password unlock is available in ${_formatCountdown(remaining)}."
+              ? l10n.lockScreenTooManyPinAttemptsMasterAvailable(
+                  _formatCountdown(remaining),
+                )
               : _usePinUnlock
-              ? "Wrong PIN. Try again in ${_formatCountdown(remaining)} or use master password."
-              : "Quick unlock is disabled down for ${_formatCountdown(remaining)}."
+              ? l10n.lockScreenWrongPinTryAgainUseMasterPassword(
+                  _formatCountdown(remaining),
+                )
+              : l10n.lockScreenQuickUnlockDisabledFor(
+                  _formatCountdown(remaining),
+                )
         : null;
 
-    final visibleErrorMessage = countdownMessage ?? widget.errorMessage;
+    final visibleErrorMessage =
+        countdownMessage ??
+        (widget.errorMessage == null
+            ? null
+            : l10n.authFeedback(widget.errorMessage!));
 
     return ScreenFrame(
-      title: 'App Locked',
+      title: l10n.appLocked,
       subtitle: _usePinUnlock
-          ? "Enter your PIN to unlock."
-          : "Enter your password to unlock.",
+          ? l10n.enterPinToUnlock
+          : l10n.enterPasswordToUnlock,
       icon: Icons.lock_rounded,
       children: [
         Padding(
@@ -234,7 +250,7 @@ class _LockScreenState extends State<LockScreen> {
         FilledButton.icon(
           onPressed: isBlocked ? null : _submit,
           icon: const Icon(Icons.lock_open_rounded),
-          label: const Text('Unlock'),
+          label: Text(l10n.unlock),
         ),
 
         if (_usePinUnlock)
@@ -245,7 +261,7 @@ class _LockScreenState extends State<LockScreen> {
                 _passwordController.clear();
               });
             },
-            child: const Text("Use master password"),
+            child: Text(l10n.useMasterPassword),
           )
         else if (_quickUnlockAvailable)
           TextButton(
@@ -255,7 +271,7 @@ class _LockScreenState extends State<LockScreen> {
                 _passwordController.clear();
               });
             },
-            child: const Text("Use quick unlock"),
+            child: Text(l10n.useQuickUnlock),
           ),
       ],
     );

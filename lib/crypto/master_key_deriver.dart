@@ -5,7 +5,6 @@ import "package:cryptography/cryptography.dart";
 import "secure_bytes.dart";
 import "vault_models.dart";
 
-
 class MasterKeyDeriver {
   const MasterKeyDeriver();
 

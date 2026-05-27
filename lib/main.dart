@@ -82,7 +82,7 @@ class _PasswordSafeAppState extends State<PasswordSafeApp> {
             GlobalWidgetsLocalizations.delegate,
           ],
           supportedLocales: AppLocalizations.supportedLocales,
-          
+
           themeMode: widget.themeController.themeMode,
           theme: buildTheme(Brightness.light),
           darkTheme: buildTheme(Brightness.dark),

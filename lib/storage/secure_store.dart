@@ -1,6 +1,9 @@
+// ignore_for_file: prefer_initializing_formals
+
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 
 class SecureStore {
+  // Keep the named parameter so tests and callers can inject storage clearly.
   const SecureStore({
     FlutterSecureStorage storage = const FlutterSecureStorage(),
   }) : _storage = storage;

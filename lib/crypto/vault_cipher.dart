@@ -7,7 +7,6 @@ import "package:cryptography/cryptography.dart";
 import "secure_bytes.dart";
 import "vault_models.dart";
 
-
 class VaultCipher {
   VaultCipher();
 
@@ -22,12 +21,20 @@ class VaultCipher {
     required List<int> key,
   }) async {
     if (key.length != _keyLength) {
-      throw ArgumentError.value(key.length, "key.length", "AES-256-GCM requires a 32-byte key");
-    };
+      throw ArgumentError.value(
+        key.length,
+        "key.length",
+        "AES-256-GCM requires a 32-byte key",
+      );
+    }
 
     final nonce = generateRandomBytes(_nonceLength);
 
-    final secretBox = await _algorithm.encrypt(plaintext, secretKey: SecretKey(key), nonce: nonce);
+    final secretBox = await _algorithm.encrypt(
+      plaintext,
+      secretKey: SecretKey(key),
+      nonce: nonce,
+    );
 
     return EncryptedBlob(
       algorithm: algorithmName,
@@ -46,7 +53,11 @@ class VaultCipher {
     }
 
     if (key.length != _keyLength) {
-      throw ArgumentError.value(key.length, "key.length", "AES-256-GCM requires a 32-byte key");
+      throw ArgumentError.value(
+        key.length,
+        "key.length",
+        "AES-256-GCM requires a 32-byte key",
+      );
     }
 
     final secretBox = SecretBox(
@@ -54,7 +65,6 @@ class VaultCipher {
       nonce: base64ToBytes(blob.nonceBase64),
       mac: Mac(base64ToBytes(blob.macBase64)),
     );
-
 
     final plaintext = await _algorithm.decrypt(
       secretBox,

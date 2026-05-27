@@ -10,6 +10,7 @@ import "../../widgets/screen_popup.dart";
 import "../../widgets/home/entry_actions.dart";
 
 import "../../vault/password_database.dart";
+import "../../l10n/app_localizations.dart";
 
 enum _EntryPopupAction { edit, delete, clone }
 
@@ -18,16 +19,16 @@ class AllEntriesTab extends StatefulWidget {
     super.key,
     required this.authController,
     this.startInSearchMode = false,
-    this.screenTitle = "All entries",
+    this.screenTitle,
     this.entryIds,
-    this.emptyMessage = "No entries found.",
+    this.emptyMessage,
   });
 
   final AuthController authController;
   final bool startInSearchMode;
-  final String screenTitle;
+  final String? screenTitle;
   final List<String>? entryIds;
-  final String emptyMessage;
+  final String? emptyMessage;
 
   @override
   State<AllEntriesTab> createState() => _AllEntriesTabState();
@@ -114,10 +115,12 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
     BuildContext context,
     PasswordEntry entry,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
+
     final action = await showGeneralDialog<_EntryPopupAction>(
       context: context,
       barrierDismissible: true,
-      barrierLabel: "Close entry details",
+      barrierLabel: l10n.closeEntryDetails,
       barrierColor: Colors.transparent,
       pageBuilder: (context, animation, secondaryAnimation) {
         return ScreenPopup(
@@ -134,7 +137,7 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
                       Navigator.of(context).pop(_EntryPopupAction.edit);
                     },
                     icon: const Icon(Icons.edit, size: 18),
-                    label: const Text("Edit"),
+                    label: Text(l10n.edit),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -144,7 +147,7 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
                       Navigator.of(context).pop(_EntryPopupAction.clone);
                     },
                     icon: const Icon(Icons.copy_sharp, size: 18),
-                    label: const Text("Clone"),
+                    label: Text(l10n.clone),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -158,57 +161,63 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
                       foregroundColor: Theme.of(context).colorScheme.onError,
                     ),
                     icon: const Icon(Icons.delete, size: 18),
-                    label: const Text("Delete"),
+                    label: Text(l10n.delete),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
 
-            _EntryDetail(label: "Username", value: entry.username),
-            _EntrySecretDetail(label: "Password", value: entry.password),
-            _EntryDetail(label: "URL", value: entry.url),
-            _EntryDetail(label: "Notes", value: entry.notes),
+            _EntryDetail(label: l10n.username, value: entry.username),
+            _EntrySecretDetail(label: l10n.password, value: entry.password),
+            _EntryDetail(label: l10n.url, value: entry.url),
+            _EntryDetail(label: l10n.notes, value: entry.notes),
           ],
         );
       },
     );
 
-    if (action == _EntryPopupAction.edit) {
-      final savedEntry = await EntryActions(
-        authController: authController,
-      ).openEntryForm(context, entry: entry);
-
-      if (savedEntry != null && context.mounted) {
-        await _showEntryPopup(context, savedEntry);
-      }
+    if (!context.mounted) {
+      return;
     }
 
-    if (action == _EntryPopupAction.delete) {
-      bool success = await EntryActions(
-        authController: authController,
-      ).deleteEntry(context, entry: entry);
+    switch (action) {
+      case _EntryPopupAction.edit:
+        final savedEntry = await EntryActions(
+          authController: authController,
+        ).openEntryForm(context, entry: entry);
 
-      if (!context.mounted) {
+        if (savedEntry != null && context.mounted) {
+          await _showEntryPopup(context, savedEntry);
+        }
         return;
-      }
-      if (!success) {
-        await _showEntryPopup(context, entry);
-      }
-    }
+      case _EntryPopupAction.delete:
+        final success = await EntryActions(
+          authController: authController,
+        ).deleteEntry(context, entry: entry);
 
-    if (action == _EntryPopupAction.clone) {
-      final savedEntry = await EntryActions(
-        authController: authController,
-      ).openEntryForm(context, entry: entry, clone: true);
+        if (!context.mounted) {
+          return;
+        }
+        if (!success) {
+          await _showEntryPopup(context, entry);
+        }
+        return;
+      case _EntryPopupAction.clone:
+        final savedEntry = await EntryActions(
+          authController: authController,
+        ).openEntryForm(context, entry: entry, clone: true);
 
-      if (savedEntry != null && context.mounted) {
-        await _showEntryPopup(context, savedEntry);
-      }
+        if (savedEntry != null && context.mounted) {
+          await _showEntryPopup(context, savedEntry);
+        }
+        return;
+      case null:
+        return;
     }
   }
 
-  Widget _buildSearchField() {
+  Widget _buildSearchField(AppLocalizations l10n) {
     return TextField(
       controller: _searchController,
       focusNode: _searchFocusNode,
@@ -218,12 +227,12 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
       },
 
       decoration: InputDecoration(
-        hintText: "Search entries",
+        hintText: l10n.searchEntries,
         prefixIcon: const Icon(Icons.search_rounded),
         suffixIcon: _searchController.text.trim().isEmpty
             ? null
             : IconButton(
-                tooltip: "Clear search",
+                tooltip: l10n.clearSearch,
                 onPressed: () {
                   setState(() {
                     _searchController.clear();
@@ -242,6 +251,7 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
     return AnimatedBuilder(
       animation: authController,
       builder: (context, _) {
+        final l10n = AppLocalizations.of(context)!;
         final database = authController.database;
 
         final allEntries = database?.entries ?? const <PasswordEntry>[];
@@ -259,21 +269,23 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
         return Scaffold(
           body: SafeArea(
             child: ScreenFrame(
-              title: widget.screenTitle,
+              title: widget.screenTitle ?? l10n.allEntries,
               enableReturnButton: true,
               returnButtonAction: () {
                 Navigator.of(context).pop();
               },
               headerActions: [
                 IconButton(
-                  tooltip: "Add entry",
+                  tooltip: l10n.addEntry,
                   onPressed: () {
                     entryActions.openEntryForm(context);
                   },
                   icon: const Icon(Icons.add_rounded),
                 ),
                 IconButton(
-                  tooltip: _isSearching ? "Close search" : "Search for entry",
+                  tooltip: _isSearching
+                      ? l10n.closeSearch
+                      : l10n.searchForEntry,
                   onPressed: _isSearching ? _closeSearch : _openSearch,
                   icon: _isSearching
                       ? const Icon(Icons.close_rounded)
@@ -282,7 +294,7 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
               ],
               children: [
                 if (_isSearching) ...[
-                  _buildSearchField(),
+                  _buildSearchField(l10n),
                   const SizedBox(height: 12),
                 ],
                 if (entries.isEmpty)
@@ -290,7 +302,7 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
                     child: Padding(
                       padding: EdgeInsets.all(6.0),
                       child: Text(
-                        widget.emptyMessage,
+                        widget.emptyMessage ?? l10n.noEntriesFound,
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -301,8 +313,8 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
                       padding: const EdgeInsets.all(6.0),
                       child: Text(
                         isFiltering
-                            ? "No entries match your search."
-                            : "No entries found.",
+                            ? l10n.noEntriesMatchSearch
+                            : l10n.noEntriesFound,
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -321,14 +333,21 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
                           icon: Icons.key_rounded,
                           border: isLast
                               ? null
-                              : Border(bottom: BorderSide(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.14))),
+                              : Border(
+                                  bottom: BorderSide(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.14),
+                                  ),
+                                ),
                           action: () {
                             _showEntryPopup(context, entry);
                           },
                           additionalActionIconButton: IconButton(
                             tooltip: entry.isFavorite
-                                ? "Remove from favorites"
-                                : "Add to favorites",
+                                ? l10n.removeFromFavorites
+                                : l10n.addToFavorites,
                             onPressed: () {
                               entryActions.toggleFavorite(
                                 context,
@@ -343,15 +362,18 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
                           ),
                           contextMenuItems: [
                             SectionCardMenuItem(
-                              label: "Edit",
+                              label: l10n.edit,
                               icon: Icons.edit_rounded,
                               isDestructive: false,
                               onSelected: () {
-                                entryActions.openEntryForm(context, entry: entry);
+                                entryActions.openEntryForm(
+                                  context,
+                                  entry: entry,
+                                );
                               },
                             ),
                             SectionCardMenuItem(
-                              label: "Delete",
+                              label: l10n.delete,
                               icon: Icons.delete_rounded,
                               isDestructive: true,
                               onSelected: () {
@@ -380,7 +402,8 @@ class _EntryDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayValue = value.trim().isEmpty ? "Not set" : value;
+    final l10n = AppLocalizations.of(context)!;
+    final displayValue = value.trim().isEmpty ? l10n.notSet : value;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -394,7 +417,7 @@ class _EntryDetail extends StatelessWidget {
             children: [
               Expanded(child: SelectableText(displayValue)),
               IconButton(
-                tooltip: "Copy $label",
+                tooltip: l10n.copyLabel(label),
                 onPressed: value.trim().isEmpty
                     ? null
                     : () async {
@@ -405,7 +428,7 @@ class _EntryDetail extends StatelessWidget {
                         }
 
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("$label copied.")),
+                          SnackBar(content: Text(l10n.labelCopied(label))),
                         );
                       },
                 icon: const Icon(Icons.copy_rounded, size: 18),
@@ -434,12 +457,13 @@ class _EntrySecretDetailState extends State<_EntrySecretDetail> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final hasValue = widget.value.trim().isNotEmpty;
     final displayValue = hasValue
         ? _obscureText
               ? "•" * widget.value.length
               : widget.value
-        : "Not set";
+        : l10n.notSet;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -451,8 +475,8 @@ class _EntrySecretDetailState extends State<_EntrySecretDetail> {
               Expanded(child: SelectableText(displayValue)),
               IconButton(
                 tooltip: _obscureText
-                    ? "Show ${widget.label}"
-                    : "Hide ${widget.label}",
+                    ? l10n.showLabel(widget.label)
+                    : l10n.hideLabel(widget.label),
 
                 onPressed: () {
                   setState(() {
@@ -469,7 +493,7 @@ class _EntrySecretDetailState extends State<_EntrySecretDetail> {
               ),
 
               IconButton(
-                tooltip: "Copy ${widget.label}",
+                tooltip: l10n.copyLabel(widget.label),
                 onPressed: hasValue
                     ? () async {
                         await Clipboard.setData(
@@ -481,7 +505,9 @@ class _EntrySecretDetailState extends State<_EntrySecretDetail> {
                         }
 
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("${widget.label} copied.")),
+                          SnackBar(
+                            content: Text(l10n.labelCopied(widget.label)),
+                          ),
                         );
                       }
                     : null,

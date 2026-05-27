@@ -3,13 +3,13 @@ import "package:flutter/material.dart";
 import "../../auth/auth_controller.dart";
 
 import "../../vault/password_database.dart";
+import "../../l10n/app_localizations.dart";
+import "../../l10n/localized_messages.dart";
 
 import "popup_entry_form.dart";
 
 class EntryActions {
-  const EntryActions({
-    required this.authController,
-  });
+  const EntryActions({required this.authController});
 
   final AuthController authController;
 
@@ -18,10 +18,12 @@ class EntryActions {
     PasswordEntry? entry,
     bool clone = false,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
+
     final savedEntry = await showGeneralDialog<PasswordEntry>(
       context: context,
       barrierDismissible: true,
-      barrierLabel: "Close entry form",
+      barrierLabel: l10n.closeEntryForm,
       barrierColor: Colors.transparent,
       pageBuilder: (context, animation, secondaryAnimation) {
         return EntryFormPopup(entry: entry, clone: clone);
@@ -34,15 +36,14 @@ class EntryActions {
 
     final database = authController.database;
 
-
     if (database == null) {
-      if(!context.mounted) {
+      if (!context.mounted) {
         return null;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Vault is locked.")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.authVaultIsLocked)));
       return null;
     }
 
@@ -59,34 +60,43 @@ class EntryActions {
     if (!success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authController.errorMessage ?? "Failed to save entry."),
+          content: Text(
+            authController.errorMessage == null
+                ? l10n.failedToSaveEntry
+                : l10n.authFeedback(authController.errorMessage!),
+          ),
         ),
       );
       return null;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Entry saved.")),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.entrySaved)));
 
     return savedEntry;
   }
 
-  Future<bool> deleteEntry(BuildContext context, {
+  Future<bool> deleteEntry(
+    BuildContext context, {
     required PasswordEntry entry,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text ("Delete entry?"),
-          content: Text('Delete "${entry.title}" for "${entry.username}"? \n\n This action cannot be undone.'),
+          title: Text(l10n.deleteEntryDialogTitle),
+          content: Text(
+            l10n.deleteEntryDialogContent(entry.title, entry.username),
+          ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
-              child: const Text("Cancel"),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -95,11 +105,11 @@ class EntryActions {
               style: TextButton.styleFrom(
                 foregroundColor: Theme.of(context).colorScheme.error,
               ),
-              child: const Text("Delete"),
+              child: Text(l10n.delete),
             ),
-          ]
+          ],
         );
-      }
+      },
     );
     if (confirmed != true) {
       return false;
@@ -108,13 +118,13 @@ class EntryActions {
     final database = authController.database;
 
     if (database == null) {
-      if(!context.mounted) {
+      if (!context.mounted) {
         return false;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Vault is locked.")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.authVaultIsLocked)));
       return false;
     }
 
@@ -128,30 +138,34 @@ class EntryActions {
     if (!success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authController.errorMessage ?? "Failed to delete entry."),
+          content: Text(
+            authController.errorMessage == null
+                ? l10n.failedToDeleteEntry
+                : l10n.authFeedback(authController.errorMessage!),
+          ),
         ),
       );
       return false;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Entry deleted.")),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.entryDeleted)));
     return true;
   }
 
-  Future<bool> toggleFavorite(BuildContext context, {
+  Future<bool> toggleFavorite(
+    BuildContext context, {
     required PasswordEntry entry,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
     final database = authController.database;
 
     if (database == null) {
       return false;
     }
 
-    final updatedEntry = entry.copyWith(
-      isFavorite: !entry.isFavorite,
-    );
+    final updatedEntry = entry.copyWith(isFavorite: !entry.isFavorite);
 
     final updatedDatabase = database.updateEntry(updatedEntry);
     final success = await authController.saveDatabase(updatedDatabase);
@@ -165,9 +179,11 @@ class EntryActions {
         content: Text(
           success
               ? (updatedEntry.isFavorite
-                  ? "Entry marked as favorite."
-                  : "Entry removed from favorites.")
-              : authController.errorMessage ?? "Failed to update entry.",
+                    ? l10n.entryMarkedAsFavorite
+                    : l10n.entryRemovedFromFavorites)
+              : authController.errorMessage == null
+              ? l10n.failedToUpdateEntry
+              : l10n.authFeedback(authController.errorMessage!),
         ),
       ),
     );

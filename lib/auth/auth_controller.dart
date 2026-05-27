@@ -19,6 +19,30 @@ import "local_unlock_models.dart";
 
 enum AuthState { checking, needsSetup, locked, unlocked, busy }
 
+enum AuthMessage {
+  couldNotCreateVault,
+  tooManyPinAttemptsTryAgain,
+  wrongPassword,
+  vaultIsLocked,
+  couldNotSaveDatabase,
+  useAtLeast12CharactersForPassword,
+  currentPasswordIncorrectOrVaultDamaged,
+  useAtLeast4DigitsForPin,
+  pinMustContainOnlyNumbers,
+  couldNotEnableQuickUnlock,
+  tooManyPinAttemptsWaitThenUseMasterPassword,
+  quickUnlockDisabledUseMasterPassword,
+  wrongPinTryAgain,
+  wrongPin,
+}
+
+class AuthFeedbackMessage {
+  const AuthFeedbackMessage(this.message, {this.duration});
+
+  final AuthMessage message;
+  final Duration? duration;
+}
+
 class AuthController extends ChangeNotifier {
   AuthController({
     this.store = const VaultFileStore(),
@@ -38,14 +62,14 @@ class AuthController extends ChangeNotifier {
 
   AuthState _state = AuthState.checking;
   UnlockedVault? _unlockedVault;
-  String? _errorMessage;
+  AuthFeedbackMessage? _errorMessage;
   DateTime? _unlockBlockedUntil;
   bool _unlockBlockedRequiresMasterPassword = false;
 
   AuthState get state => _state;
   UnlockedVault? get unlockedVault => _unlockedVault;
   PasswordDatabase? get database => _unlockedVault?.database;
-  String? get errorMessage => _errorMessage;
+  AuthFeedbackMessage? get errorMessage => _errorMessage;
   DateTime? get unlockBlockedUntil => _unlockBlockedUntil;
   bool get unlockBlockedRequiresMasterPassword =>
       _unlockBlockedRequiresMasterPassword;
@@ -60,6 +84,10 @@ class AuthController extends ChangeNotifier {
     _setState(AuthState.busy);
   }
 
+  void _setErrorMessage(AuthMessage message, {Duration? duration}) {
+    _errorMessage = AuthFeedbackMessage(message, duration: duration);
+  }
+
   void lock() {
     _unlockedVault?.clearSecrets();
     _unlockedVault = null;
@@ -67,19 +95,6 @@ class AuthController extends ChangeNotifier {
     _setState(AuthState.locked);
 
     exit(0);
-  }
-
-  String _formatDuration(Duration duration) {
-    final minutes = duration.inMinutes;
-    final seconds = duration.inSeconds.remainder(60);
-
-    if (minutes > 0 && seconds > 0) {
-      return "$minutes minute(s) and $seconds second(s)";
-    }
-    if (minutes > 0) {
-      return "$minutes minute(s)";
-    }
-    return "$seconds second(s)";
   }
 
   void _setUnlockBlock(
@@ -136,7 +151,7 @@ class AuthController extends ChangeNotifier {
 
       return true;
     } catch (_) {
-      _errorMessage = "Could not create vault.";
+      _setErrorMessage(AuthMessage.couldNotCreateVault);
       _setState(AuthState.needsSetup);
 
       return false;
@@ -169,15 +184,17 @@ class AuthController extends ChangeNotifier {
 
       _unlockedVault?.clearSecrets();
       _unlockedVault = null;
-      _errorMessage =
-          "Too many PIN attempts. Try again in ${_formatDuration(error.remainingLockTime)}.";
+      _setErrorMessage(
+        AuthMessage.tooManyPinAttemptsTryAgain,
+        duration: error.remainingLockTime,
+      );
       _setState(AuthState.locked);
 
       return false;
     } catch (_) {
       _unlockedVault?.clearSecrets();
       _unlockedVault = null;
-      _errorMessage = "Wrong password.";
+      _setErrorMessage(AuthMessage.wrongPassword);
       _setState(AuthState.locked);
 
       return false;
@@ -188,7 +205,7 @@ class AuthController extends ChangeNotifier {
     final unlockedVault = _unlockedVault;
 
     if (unlockedVault == null) {
-      _errorMessage = "Vault is locked.";
+      _setErrorMessage(AuthMessage.vaultIsLocked);
       notifyListeners();
       return false;
     }
@@ -213,7 +230,7 @@ class AuthController extends ChangeNotifier {
 
       return true;
     } catch (_) {
-      _errorMessage = "Could not save Database.";
+      _setErrorMessage(AuthMessage.couldNotSaveDatabase);
       notifyListeners();
 
       return false;
@@ -227,13 +244,13 @@ class AuthController extends ChangeNotifier {
     final unlockedVault = _unlockedVault;
 
     if (unlockedVault == null) {
-      _errorMessage = "Vault is locked.";
+      _setErrorMessage(AuthMessage.vaultIsLocked);
       notifyListeners();
       return false;
     }
 
     if (newPassword.length < 12) {
-      _errorMessage = "Use at least 12 characters for the password.";
+      _setErrorMessage(AuthMessage.useAtLeast12CharactersForPassword);
       notifyListeners();
       return false;
     }
@@ -270,7 +287,7 @@ class AuthController extends ChangeNotifier {
 
       return true;
     } catch (_) {
-      _errorMessage = "Current password is incorrect or vault file is damaged.";
+      _setErrorMessage(AuthMessage.currentPasswordIncorrectOrVaultDamaged);
       notifyListeners();
       return false;
     }
@@ -284,19 +301,19 @@ class AuthController extends ChangeNotifier {
     final unlockedVault = _unlockedVault;
 
     if (unlockedVault == null) {
-      _errorMessage = "Vault is locked.";
+      _setErrorMessage(AuthMessage.vaultIsLocked);
       notifyListeners();
       return false;
     }
 
     if (pin.length < 4) {
-      _errorMessage = "Use at least 4 digits for the PIN.";
+      _setErrorMessage(AuthMessage.useAtLeast4DigitsForPin);
       notifyListeners();
       return false;
     }
 
     if (!RegExp(r'^\d+$').hasMatch(pin)) {
-      _errorMessage = 'PIN must contain only numbers.';
+      _setErrorMessage(AuthMessage.pinMustContainOnlyNumbers);
       notifyListeners();
       return false;
     }
@@ -312,7 +329,7 @@ class AuthController extends ChangeNotifier {
 
       return true;
     } catch (_) {
-      _errorMessage = "Could not enable quick unlock.";
+      _setErrorMessage(AuthMessage.couldNotEnableQuickUnlock);
       notifyListeners();
 
       return false;
@@ -336,24 +353,26 @@ class AuthController extends ChangeNotifier {
         vaultFile: vaultFile,
         vaultKey: vaultKey,
       );
-      
+
       _clearUnlockBlock();
 
       _errorMessage = null;
       _setState(AuthState.unlocked);
-
-      
 
       return true;
     } on QuickUnlockLockedException catch (error) {
       _unlockedVault?.clearSecrets();
       _unlockedVault = null;
       if (error.requiresMasterPassword) {
-        _errorMessage =
-            "Too many PIN attempts. Wait ${_formatDuration(error.remainingLockTime)}, then use your master password.";
+        _setErrorMessage(
+          AuthMessage.tooManyPinAttemptsWaitThenUseMasterPassword,
+          duration: error.remainingLockTime,
+        );
       } else {
-        _errorMessage =
-            "Too many PIN attempts. Try again in ${_formatDuration(error.remainingLockTime)}.";
+        _setErrorMessage(
+          AuthMessage.tooManyPinAttemptsTryAgain,
+          duration: error.remainingLockTime,
+        );
       }
 
       _setState(AuthState.locked);
@@ -367,7 +386,7 @@ class AuthController extends ChangeNotifier {
     } on QuickUnlockMasterPasswordRequiredException {
       _unlockedVault?.clearSecrets();
       _unlockedVault = null;
-      _errorMessage = "Quick unlock is disabled. Use your master password.";
+      _setErrorMessage(AuthMessage.quickUnlockDisabledUseMasterPassword);
 
       _setState(AuthState.locked);
 
@@ -380,13 +399,17 @@ class AuthController extends ChangeNotifier {
       _unlockedVault = null;
 
       if (error.requiresMasterPassword) {
-        _errorMessage =
-            "Too many PIN attempts. Wait ${_formatDuration(error.cooldown!)}, then use your master password.";
+        _setErrorMessage(
+          AuthMessage.tooManyPinAttemptsWaitThenUseMasterPassword,
+          duration: error.cooldown!,
+        );
       } else if (error.cooldown != null) {
-        _errorMessage =
-            "Wrong PIN. Try again in ${_formatDuration(error.cooldown!)}.";
+        _setErrorMessage(
+          AuthMessage.wrongPinTryAgain,
+          duration: error.cooldown!,
+        );
       } else {
-        _errorMessage = "Wrong PIN.";
+        _setErrorMessage(AuthMessage.wrongPin);
       }
 
       _setState(AuthState.locked);
@@ -404,7 +427,7 @@ class AuthController extends ChangeNotifier {
     } catch (_) {
       _unlockedVault?.clearSecrets();
       _unlockedVault = null;
-      _errorMessage = "Wrong PIN.";
+      _setErrorMessage(AuthMessage.wrongPin);
       _setState(AuthState.locked);
 
       return false;

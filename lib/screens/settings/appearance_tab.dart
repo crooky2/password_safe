@@ -57,24 +57,24 @@ class _AppearanceTabState extends State<AppearanceTab> {
                   },
                 ),
                 SettingsDropdown<AppLanguage>(
-                    title: l10n.language,
-                    value: widget.themeController.language,
-                    options: [
-                      SettingsDropdownOption(
-                        label: l10n.systemLanguage,
-                        value: AppLanguage.system,
-                      ),
-                      SettingsDropdownOption(
-                        label: l10n.english,
-                        value: AppLanguage.english,
-                      ),
-                      SettingsDropdownOption(
-                        label: l10n.german,
-                        value: AppLanguage.german,
-                      ),
-                    ],
-                    onChanged: widget.themeController.setLanguage,
-                  ),
+                  title: l10n.language,
+                  value: widget.themeController.language,
+                  options: [
+                    SettingsDropdownOption(
+                      label: l10n.systemLanguage,
+                      value: AppLanguage.system,
+                    ),
+                    SettingsDropdownOption(
+                      label: l10n.english,
+                      value: AppLanguage.english,
+                    ),
+                    SettingsDropdownOption(
+                      label: l10n.german,
+                      value: AppLanguage.german,
+                    ),
+                  ],
+                  onChanged: widget.themeController.setLanguage,
+                ),
               ],
             ),
           ],

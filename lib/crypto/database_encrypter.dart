@@ -4,7 +4,6 @@ import "vault_models.dart";
 
 import "../vault/password_database.dart";
 
-
 class DatabaseEncrypter {
   const DatabaseEncrypter();
 

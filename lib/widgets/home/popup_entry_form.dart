@@ -1,9 +1,12 @@
 import "package:flutter/material.dart";
 
 import "../../vault/password_database.dart";
+import "../../l10n/app_localizations.dart";
 
 import "../screen_popup.dart";
 import "../secret_text_field.dart";
+
+import "popup_password_generator.dart";
 
 class EntryFormPopup extends StatefulWidget {
   const EntryFormPopup({super.key, this.entry, this.clone = false});
@@ -23,6 +26,7 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
   late final TextEditingController _notesController;
 
   String? _errorMessage;
+  bool _hidePopup = false;
 
   bool get _isEditing => widget.entry != null && !widget.clone;
 
@@ -51,6 +55,7 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
   }
 
   void _save() {
+    final l10n = AppLocalizations.of(context)!;
     final title = _titleController.text.trim();
     final username = _usernameController.text.trim();
     final password = _passwordController.text;
@@ -59,7 +64,7 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
 
     if (title.isEmpty) {
       setState(() {
-        _errorMessage = "Title is required.";
+        _errorMessage = l10n.titleRequired;
       });
       return;
     }
@@ -80,13 +85,48 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
     Navigator.of(context).pop(entry);
   }
 
+  Future<void> _openPasswordGenerator() async {
+    final l10n = AppLocalizations.of(context)!;
+
+    setState((){
+      _hidePopup = true;
+    });
+
+    final password = await showGeneralDialog<String>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: l10n.closePasswordGenerator,
+      barrierColor: Colors.transparent,
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return const PasswordGeneratorPopup();
+      },
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _hidePopup = false;
+
+      if (password != null) {
+        _passwordController.text = password;
+      } 
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final title = _isEditing
-        ? "Edit entry"
+        ? l10n.editEntry
         : widget.clone
-        ? "Clone entry"
-        : "New entry";
+        ? l10n.cloneEntry
+        : l10n.newEntry;
+
+    if (_hidePopup) {
+      return const SizedBox.shrink();
+    }
 
     return ScreenPopup(
       title: title,
@@ -96,31 +136,36 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
       children: [
         TextField(
           controller: _titleController,
-          decoration: const InputDecoration(labelText: 'Title'),
+          decoration: InputDecoration(labelText: l10n.titleLabel),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _usernameController,
-          decoration: const InputDecoration(labelText: 'Username'),
+          decoration: InputDecoration(labelText: l10n.username),
         ),
         const SizedBox(height: 12),
         SecretTextField(
           controller: _passwordController,
-          labelText: "Password",
+          labelText: l10n.password,
           enableBorder: false,
+          extraSuffixIcon: IconButton(
+            tooltip: l10n.generatePassword,
+            onPressed: _openPasswordGenerator,
+            icon: const Icon(Icons.refresh_rounded),
+          )
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _urlController,
-          decoration: const InputDecoration(labelText: 'URL'),
+          decoration: InputDecoration(labelText: l10n.url),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _notesController,
           maxLines: 4,
-          decoration: const InputDecoration(
-            labelText: 'Notes',
-            border: OutlineInputBorder(),  
+          decoration: InputDecoration(
+            labelText: l10n.notes,
+            border: OutlineInputBorder(),
           ),
         ),
 
@@ -136,7 +181,7 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
         FilledButton.icon(
           onPressed: _save,
           icon: const Icon(Icons.save_rounded),
-          label: Text(_isEditing ? 'Save changes' : 'Create entry'),
+          label: Text(_isEditing ? l10n.saveChanges : l10n.createEntry),
         ),
         FilledButton.icon(
           onPressed: () {
@@ -147,7 +192,7 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
             foregroundColor: Theme.of(context).colorScheme.onError,
           ),
           icon: const Icon(Icons.delete),
-          label: Text("Discard"),
+          label: Text(l10n.discard),
         ),
       ],
     );

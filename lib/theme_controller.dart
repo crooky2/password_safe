@@ -84,7 +84,6 @@ class ThemeController extends ChangeNotifier {
     _saveLanguage(language);
   }
 
-
   Future<void> _saveThemeMode(ThemeMode themeMode) async {
     final preferences = await _loadPreferences();
 
