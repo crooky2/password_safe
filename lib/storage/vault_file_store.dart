@@ -5,7 +5,6 @@ import "package:path_provider/path_provider.dart";
 
 import "../crypto/vault_models.dart";
 
-
 class VaultFileStore {
   const VaultFileStore();
 
@@ -31,7 +30,7 @@ class VaultFileStore {
 
   Future<VaultFile> load() async {
     final file = await _getVaultFile();
-    
+
     final jsonText = await file.readAsString();
     final jsonMap = jsonDecode(jsonText) as Map<String, Object?>;
 
@@ -48,6 +47,38 @@ class VaultFileStore {
 
   Future<String> getDebugPath() async {
     final file = await _getVaultFile();
+    return file.path;
+  }
+
+  Future<String?> loadTextIfExists() async {
+    final file = await _getVaultFile();
+
+    if (!await file.exists()) {
+      return null;
+    }
+
+    return file.readAsString();
+  }
+
+  Future<void> saveText(String jsonText) async {
+    final file = await _getVaultFile();
+    await file.writeAsString(jsonText);
+  }
+
+  Future<String> saveConflictText(
+    String jsonText, {
+    required String source,
+  }) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final timestamp = DateTime.now().toUtc().toIso8601String().replaceAll(
+      RegExp(r"[:.]"),
+      "-",
+    );
+
+    final file = File(
+      "${directory.path}/vault.$source.conflict.$timestamp.json",
+    );
+    await file.writeAsString(jsonText);
     return file.path;
   }
 }

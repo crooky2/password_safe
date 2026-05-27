@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import "package:flutter_localizations/flutter_localizations.dart";
+
+import "l10n/app_localizations.dart";
 
 import 'root_gate.dart';
 import "theme_controller.dart";
@@ -42,9 +45,7 @@ class _PasswordSafeAppState extends State<PasswordSafeApp> {
         error: brightness == Brightness.dark
             ? const Color.fromARGB(255, 129, 25, 18)
             : const Color.fromARGB(255, 214, 50, 38),
-        onError: brightness == Brightness.dark
-            ? Colors.white
-            : Colors.black,
+        onError: brightness == Brightness.dark ? Colors.white : Colors.black,
         errorContainer: brightness == Brightness.dark
             ? const Color.fromARGB(255, 147, 0, 10)
             : const Color.fromARGB(255, 255, 218, 214),
@@ -57,8 +58,8 @@ class _PasswordSafeAppState extends State<PasswordSafeApp> {
         useMaterial3: true,
         colorScheme: colorScheme,
         scaffoldBackgroundColor: brightness == Brightness.dark
-            ? const Color(0xFF101416)
-            : const Color(0xFFF4F6F8),
+            ? const Color.fromARGB(255, 16, 20, 22)
+            : const Color.fromARGB(255, 244, 246, 248),
         appBarTheme: const AppBarTheme(
           centerTitle: false,
           scrolledUnderElevation: 0,
@@ -71,10 +72,21 @@ class _PasswordSafeAppState extends State<PasswordSafeApp> {
       builder: (context, _) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'Password Safe',
+
+          locale: widget.themeController.locale,
+          onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          
           themeMode: widget.themeController.themeMode,
           theme: buildTheme(Brightness.light),
           darkTheme: buildTheme(Brightness.dark),
+
           home: RootGate(themeController: widget.themeController),
         );
       },

@@ -8,6 +8,10 @@ import "screens/setup_screen.dart";
 
 import "auth/auth_controller.dart";
 
+import "cloud/cloud_controller.dart";
+
+import "widgets/settings/popup_cloud_sync_conflict.dart";
+
 class RootGate extends StatefulWidget {
   const RootGate({
     super.key,
@@ -22,17 +26,72 @@ class RootGate extends StatefulWidget {
 
 class _RootGateState extends State<RootGate> {
   AuthController _authController = AuthController();
+  final CloudController _cloudController = CloudController();
+
+  bool _isShowingCloudConflict = false;
 
   @override
   void initState() {
     super.initState();
+
+    _cloudController.addListener(_handleCloudControllerChanged);
+    
     _authController.initialize();
+    _cloudController.initialize();
   }
 
   @override
   void dispose() {
+    _cloudController.removeListener(_handleCloudControllerChanged);
     _authController.dispose();
+    _cloudController.dispose();
     super.dispose();
+  }
+
+  void _handleCloudControllerChanged() {
+    if (_isShowingCloudConflict || !_cloudController.hasPendingConflict) {
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || _isShowingCloudConflict || !_cloudController.hasPendingConflict) {
+        return;
+      }
+
+      _isShowingCloudConflict = true;
+
+      final choice = await showGeneralDialog<CloudConflictChoice>(
+        context: context,
+        barrierDismissible: false,
+        barrierLabel: "Cloud sync conflict",
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return const CloudSyncConflictPopup();
+        },
+      );
+
+      if (!mounted) {
+        _isShowingCloudConflict = false;
+        return;
+      }
+
+      switch(choice) {
+        case CloudConflictChoice.useLocal:
+          await _cloudController.useLocalVaultForConflict();
+          break;
+        case CloudConflictChoice.useCloud:
+          await _cloudController.useCloudVaultForConflict();
+          _authController.lock();
+          break;
+        case CloudConflictChoice.keepBoth:
+          // Treat dismissing the dialog as choosing the local version, to avoid data loss.
+          await _cloudController.keepBothVaultsForConflict();
+          break;
+        case null:
+          break;
+      }
+
+      _isShowingCloudConflict = false;
+    });
   }
 
   @override
@@ -71,6 +130,7 @@ class _RootGateState extends State<RootGate> {
 
           AuthState.unlocked => AppShell(
             authController: _authController,
+            cloudController: _cloudController,
             themeController: widget.themeController,
           ),
         };

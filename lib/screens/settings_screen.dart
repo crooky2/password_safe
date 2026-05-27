@@ -9,18 +9,23 @@ import "../auth/auth_controller.dart";
 
 import "../storage/vault_file_store.dart";
 
+import "../cloud/microsoft_auth_service.dart";
+import "../cloud/cloud_controller.dart";
+
 import "settings/security_tab.dart";
 import "settings/debug_tab.dart";
-import "settings/appearance.dart";
+import "settings/appearance_tab.dart";
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({
-    super.key, 
+    super.key,
     required this.authController,
+    required this.cloudController,
     required this.themeController,
   });
 
   final AuthController authController;
+  final CloudController cloudController;
   final ThemeController themeController;
 
   @override
@@ -46,9 +51,7 @@ class SettingsScreen extends StatelessWidget {
           action: () {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) => AppearanceTab(
-                  themeController: themeController,
-                ),
+                builder: (_) => AppearanceTab(themeController: themeController),
               ),
             );
           },
@@ -60,7 +63,7 @@ class SettingsScreen extends StatelessWidget {
           action: () {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) => SecurityTab(authController: authController),
+                builder: (_) => SecurityTab(authController: authController, cloudController: cloudController),
               ),
             );
           },
@@ -78,10 +81,11 @@ class SettingsScreen extends StatelessWidget {
           },
         ),
 
-
         FilledButton(
           onPressed: () async {
             await VaultFileStore().delete();
+            await authController.disableQuickUnlock();
+            await MicrosoftAuthService().signOut();
 
             ScaffoldMessenger.of(
               context,

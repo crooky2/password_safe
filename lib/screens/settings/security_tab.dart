@@ -6,14 +6,23 @@ import "../../widgets/settings/settings_dropdown.dart";
 import "../../widgets/settings/popup_pin_setup.dart";
 import "../../widgets/settings/popup_master_password.dart";
 
+
 import "../../auth/auth_controller.dart";
+
+import "../../cloud/cloud_controller.dart";
+
 
 enum QuickUnlockMode { disabled, pin }
 
 class SecurityTab extends StatefulWidget {
-  const SecurityTab({super.key, required this.authController});
+  const SecurityTab({
+    super.key, 
+    required this.authController,
+    required this.cloudController,
+  });
 
   final AuthController authController;
+  final CloudController cloudController;
 
   @override
   State<SecurityTab> createState() => _SecurityTabState();
@@ -125,9 +134,6 @@ class _SecurityTabState extends State<SecurityTab> {
         child: ScreenFrame(
           title: "Security",
           enableReturnButton: true,
-          returnButtonAction: () {
-            Navigator.of(context).pop();
-          },
           children: [
             if (_message != null) ...[
               const SizedBox(height: 12),
@@ -136,10 +142,9 @@ class _SecurityTabState extends State<SecurityTab> {
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             ],
-
             SectionCard(
               title: "Quick unlock",
-              subtitle: "Use quick unlock for faster access.",
+              subtitle: "Use quick unlock for faster access. This does not replace your master password, is only stored on this device, and your vault remains encrypted with the master password.",
               icon: Icons.pin_rounded,
               children: [
                 SettingsDropdown<QuickUnlockMode>(
@@ -162,7 +167,7 @@ class _SecurityTabState extends State<SecurityTab> {
 
             SectionCard(
               title: "Master password",
-              subtitle: "Change your master password.",
+              subtitle: "The master password is used to encrypt and decrypt your vault data.",
               icon: Icons.lock_reset_rounded,
               children: [
                 FilledButton.icon(
@@ -172,6 +177,57 @@ class _SecurityTabState extends State<SecurityTab> {
                 ),
               ],
             ),
+
+            AnimatedBuilder(
+              animation: widget.cloudController,
+              builder: (context, _) {
+                final cloud = widget.cloudController;
+
+                return SectionCard(
+                  title: "Cloud sync",
+                  subtitle: "Store an encrypted vault copy in the cloud. You can still access your vault without internet connection, and your data is never shared unencrypted.",
+                  icon: Icons.cloud_sync_rounded,
+                  children: [
+                    SettingsDropdown<CloudSyncMode>(
+                      title: "Provider",
+                      value: cloud.mode,
+                      options: const [
+                        SettingsDropdownOption(
+                          label: "Disabled",
+                          value: CloudSyncMode.disabled,
+                        ),
+                        SettingsDropdownOption(
+                          label: "OneDrive",
+                          value: CloudSyncMode.oneDrive,
+                        ),
+                      ],
+                      onChanged: cloud.setMode,
+                    ),
+                    if (cloud.mode == CloudSyncMode.oneDrive)... [
+                      const SizedBox(height: 12),
+                      FilledButton.icon(
+                        onPressed: cloud.isBusy ? null : cloud.syncNow,
+                        icon: cloud.isBusy 
+                            ? const SizedBox(
+                              width: 12, height: 12,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : const Icon(Icons.sync_rounded),
+                        label: Text(cloud.isBusy ? "Syncing..." : "Sync now"),
+                      )
+                    ],
+
+                    if (cloud.syncHeld) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        "Cloud sync is paused. Use Sync now after choosing which vault should win.",
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ]
+                );
+              }
+            )
           ],
         ),
       ),

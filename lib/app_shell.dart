@@ -7,14 +7,18 @@ import 'screens/settings_screen.dart';
 
 import "auth/auth_controller.dart";
 
+import "cloud/cloud_controller.dart";
+
 class AppShell extends StatefulWidget {
   const AppShell({
       super.key,
       required this.authController,
+      required this.cloudController,
       required this.themeController,
     });
 
   final AuthController authController;
+  final CloudController cloudController;
   final ThemeController themeController;
 
   @override
@@ -31,6 +35,7 @@ class _AppShellState extends State<AppShell> {
       HomeScreen(authController: widget.authController),
       SettingsScreen(
         authController: widget.authController,
+        cloudController: widget.cloudController,
         themeController: widget.themeController,
       ),
     ];

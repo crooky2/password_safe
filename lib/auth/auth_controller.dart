@@ -1,5 +1,6 @@
 // import "dart:typed_data";
 
+import "dart:io";
 import "package:flutter/foundation.dart";
 
 import "../crypto/vault_builder.dart";
@@ -64,6 +65,8 @@ class AuthController extends ChangeNotifier {
     _unlockedVault = null;
     _errorMessage = null;
     _setState(AuthState.locked);
+
+    exit(0);
   }
 
   String _formatDuration(Duration duration) {
