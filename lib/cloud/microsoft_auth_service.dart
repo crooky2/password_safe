@@ -3,7 +3,7 @@ import "package:oauth2_client/microsoft_oauth2_client.dart";
 import "package:oauth2_client/oauth2_helper.dart";
 import "package:oauth2_client/oauth2_exception.dart";
 
-import "microsoft_graph_config.dart";
+import "cloudconfig/microsoft_graph_config.dart";
 
 class MicrosoftSignInCanceledException implements Exception {
   const MicrosoftSignInCanceledException();

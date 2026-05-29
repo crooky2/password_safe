@@ -1,7 +1,7 @@
 import "dart:io";
 
 import "package:flutter_test/flutter_test.dart";
-import "package:password_safe/cloud/microsoft_graph_config.dart";
+import "package:password_safe/cloud/cloudconfig/microsoft_graph_config.dart";
 
 void main() {
   group("MicrosoftGraphConfig", () {

@@ -57,3 +57,6 @@ android/app/release/
 # Secrets
 .env
 .env.*
+
+#cloud config
+lib/cloud/cloudconfig/
