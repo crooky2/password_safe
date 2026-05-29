@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import "package:flutter/services.dart";
 
 import "../../auth/auth_controller.dart";
 
@@ -11,6 +10,8 @@ import "../../widgets/home/entry_actions.dart";
 
 import "../../vault/password_database.dart";
 import "../../l10n/app_localizations.dart";
+
+import "../../security/timed_clipboard.dart";
 
 enum _EntryPopupAction { edit, delete, clone }
 
@@ -421,7 +422,8 @@ class _EntryDetail extends StatelessWidget {
                 onPressed: value.trim().isEmpty
                     ? null
                     : () async {
-                        await Clipboard.setData(ClipboardData(text: value));
+                        await TimedClipboard.copyText(value);
+                      
 
                         if (!context.mounted) {
                           return;
@@ -496,9 +498,7 @@ class _EntrySecretDetailState extends State<_EntrySecretDetail> {
                 tooltip: l10n.copyLabel(widget.label),
                 onPressed: hasValue
                     ? () async {
-                        await Clipboard.setData(
-                          ClipboardData(text: widget.value),
-                        );
+                        await TimedClipboard.copyText(widget.value);
 
                         if (!context.mounted) {
                           return;

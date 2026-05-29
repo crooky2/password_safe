@@ -225,4 +225,38 @@ class LocalUnlockService {
   }) {
     return keyDeriver.deriveKey(password: "$pin:$deviceSecret", params: params);
   }
+
+  Future<void> enableFingerprintUnlock({required List<int> vaultKey}) {
+    return secureStore.writeFingerprintVaultKey(bytesToBase64(vaultKey));
+  }
+
+  Future<bool> isFingerprintUnlockEnabled() {
+    return secureStore.hasFingerprintUnlock();
+  }
+
+  Future<void> restoreFingerprintUnlockIfNeeded({
+    required List<int> vaultKey,
+  }) async {
+    final hasPreference = await secureStore.hasFingerprintUnlockPreference();
+
+    if (!hasPreference || await secureStore.hasFingerprintVaultKey()) {
+      return;
+    }
+
+    await enableFingerprintUnlock(vaultKey: vaultKey);
+  }
+
+  Future<Uint8List> unlockWithFingerprint() async {
+    final vaultKeyText = await secureStore.readFingerprintVaultKey();
+
+    if (vaultKeyText == null) {
+      throw StateError("No fingerprint unlock key found");
+    }
+
+    return base64ToBytes(vaultKeyText);
+  }
+
+  Future<void> disableFingerprintUnlock() {
+    return secureStore.deleteFingerprintUnlock();
+  }
 }

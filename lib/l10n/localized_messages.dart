@@ -48,6 +48,9 @@ extension LocalizedMessages on AppLocalizations {
         duration ?? durationLabel(Duration.zero),
       ),
       AuthMessage.wrongPin => authWrongPin,
+      AuthMessage.localAuthenticationUnavailable =>
+        authLocalAuthenticationUnavailable,
+      AuthMessage.localAuthenticationFailed => authLocalAuthenticationFailed,
     };
   }
 
@@ -69,6 +72,7 @@ extension LocalizedMessages on AppLocalizations {
         cloudMessageDownloadedCloudConflict,
       CloudMessage.keptBothPaused => cloudMessageKeptBothPaused,
       CloudMessage.saveConflictFailed => cloudMessageSaveConflictFailed,
+      CloudMessage.remoteRollbackDetected => cloudMessageRemoteRollbackDetected,
     };
   }
 

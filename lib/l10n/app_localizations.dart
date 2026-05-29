@@ -158,6 +158,36 @@ abstract class AppLocalizations {
   /// **'Use password'**
   String get usePassword;
 
+  /// No description provided for @fingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fingerprint'**
+  String get fingerprint;
+
+  /// No description provided for @useFingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use fingerprint'**
+  String get useFingerprint;
+
+  /// No description provided for @enterFingerprintToUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your fingerprint to unlock.'**
+  String get enterFingerprintToUnlock;
+
+  /// No description provided for @usePin.
+  ///
+  /// In en, this message translates to:
+  /// **'Use PIN'**
+  String get usePin;
+
+  /// No description provided for @enabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get enabled;
+
   /// No description provided for @dashboard.
   ///
   /// In en, this message translates to:
@@ -1088,6 +1118,24 @@ abstract class AppLocalizations {
   /// **'Wrong PIN.'**
   String get authWrongPin;
 
+  /// No description provided for @confirmDeviceAuthForQuickUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your device unlock to use quick unlock.'**
+  String get confirmDeviceAuthForQuickUnlock;
+
+  /// No description provided for @authLocalAuthenticationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Device authentication is not available.'**
+  String get authLocalAuthenticationUnavailable;
+
+  /// No description provided for @authLocalAuthenticationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Device authentication failed or was cancelled.'**
+  String get authLocalAuthenticationFailed;
+
   /// No description provided for @cloudMessageSyncDisabled.
   ///
   /// In en, this message translates to:
@@ -1171,6 +1219,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not save the cloud conflict copy.'**
   String get cloudMessageSaveConflictFailed;
+
+  /// No description provided for @cloudMessageRemoteRollbackDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud vault changed unexpectedly. Sync has been paused to protect your local vault.'**
+  String get cloudMessageRemoteRollbackDetected;
 
   /// No description provided for @debugNoVaultLoaded.
   ///

@@ -9,24 +9,33 @@ import "../auth/auth_controller.dart";
 import "../l10n/app_localizations.dart";
 import "../l10n/localized_messages.dart";
 
+enum UnlockMode { masterPassword, pin, fingerprint }
+
 class LockScreen extends StatefulWidget {
   const LockScreen({
     super.key,
     required this.onUnlock,
     required this.onUnlockWithPin,
-    required this.isQuickUnlockEnabled,
+    required this.onUnlockWithFingerprint,
+    required this.isPinUnlockEnabled,
+    required this.isFingerprintUnlockEnabled,
     required this.refreshUnlockBlock,
     this.unlockBlockedUntil,
     this.unlockBlockedRequiresMasterPassword = false,
+    this.autoPromptFingerprint = false,
     this.errorMessage,
   });
 
   final Future<bool> Function(String) onUnlock;
   final Future<bool> Function(String) onUnlockWithPin;
-  final Future<bool> Function() isQuickUnlockEnabled;
+  final Future<bool> Function({required String promptTitle})
+  onUnlockWithFingerprint;
+  final Future<bool> Function() isPinUnlockEnabled;
+  final Future<bool> Function() isFingerprintUnlockEnabled;
   final Future<void> Function() refreshUnlockBlock;
   final DateTime? unlockBlockedUntil;
   final bool unlockBlockedRequiresMasterPassword;
+  final bool autoPromptFingerprint;
   final AuthFeedbackMessage? errorMessage;
 
   @override
@@ -37,8 +46,12 @@ class _LockScreenState extends State<LockScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isCheckingQuickUnlock = true;
-  bool _quickUnlockAvailable = false;
-  bool _usePinUnlock = false;
+  bool _pinUnlockAvailable = false;
+  bool _fingerprintUnlockAvailable = false;
+  bool _didAutoPromptFingerprint = false;
+  bool _isSubmitting = false;
+  bool _isFingerprintPromptQueued = false;
+  UnlockMode _unlockMode = UnlockMode.masterPassword;
   Timer? _countdownTimer;
   DateTime _now = DateTime.now();
 
@@ -60,29 +73,56 @@ class _LockScreenState extends State<LockScreen> {
   void didUpdateWidget(covariant LockScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.unlockBlockedRequiresMasterPassword && _usePinUnlock) {
-      _usePinUnlock = false;
-      _quickUnlockAvailable = false;
+    if (widget.unlockBlockedRequiresMasterPassword &&
+        _unlockMode != UnlockMode.masterPassword) {
+      _unlockMode = UnlockMode.masterPassword;
       _passwordController.clear();
     }
 
     _syncCountdownTimer();
+
+    if (!oldWidget.autoPromptFingerprint &&
+        widget.autoPromptFingerprint &&
+        _fingerprintUnlockAvailable &&
+        _unlockMode == UnlockMode.fingerprint) {
+      _promptFingerprintAfterFrame();
+    }
   }
 
   Future<void> _submit() async {
-    if (_isCurrentUnlockModeBlocked) {
+    if (_isSubmitting || _isCurrentUnlockModeBlocked) {
       return;
     }
 
-    final password = _passwordController.text;
+    setState(() {
+      _isSubmitting = true;
+    });
 
-    if (password.trim().isEmpty) {
-      return;
+    final l10n = AppLocalizations.of(context)!;
+
+    var success = false;
+
+    try {
+      success = switch (_unlockMode) {
+        UnlockMode.fingerprint => await widget.onUnlockWithFingerprint(
+          promptTitle: l10n.confirmDeviceAuthForQuickUnlock,
+        ),
+        UnlockMode.pin =>
+          _passwordController.text.trim().isEmpty
+              ? false
+              : await widget.onUnlockWithPin(_passwordController.text),
+        UnlockMode.masterPassword =>
+          _passwordController.text.trim().isEmpty
+              ? false
+              : await widget.onUnlock(_passwordController.text),
+      };
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
-
-    final success = _usePinUnlock
-        ? await widget.onUnlockWithPin(password)
-        : await widget.onUnlock(password);
 
     if (!mounted) {
       return;
@@ -95,17 +135,28 @@ class _LockScreenState extends State<LockScreen> {
 
   Future<void> _loadQuickUnlockMode() async {
     await widget.refreshUnlockBlock();
-    final enabled = await widget.isQuickUnlockEnabled();
+
+    final pinEnabled = await widget.isPinUnlockEnabled();
+    final fingerprintEnabled = await widget.isFingerprintUnlockEnabled();
 
     if (!mounted) {
       return;
     }
 
     setState(() {
-      _quickUnlockAvailable = enabled;
-      _usePinUnlock = enabled;
+      _pinUnlockAvailable = pinEnabled;
+      _fingerprintUnlockAvailable = fingerprintEnabled;
+      _unlockMode = fingerprintEnabled
+          ? UnlockMode.fingerprint
+          : pinEnabled
+          ? UnlockMode.pin
+          : UnlockMode.masterPassword;
       _isCheckingQuickUnlock = false;
     });
+
+    if (fingerprintEnabled && widget.autoPromptFingerprint) {
+      _promptFingerprintAfterFrame();
+    }
   }
 
   Duration get _remainingUnlockBlock {
@@ -130,7 +181,7 @@ class _LockScreenState extends State<LockScreen> {
       return true;
     }
 
-    return _usePinUnlock;
+    return _unlockMode == UnlockMode.pin;
   }
 
   String _formatCountdown(Duration duration) {
@@ -178,20 +229,29 @@ class _LockScreenState extends State<LockScreen> {
     }
 
     final l10n = AppLocalizations.of(context)!;
-    final unlockLabel = _usePinUnlock ? l10n.pin : l10n.password;
-    final unlockHint = _usePinUnlock
-        ? l10n.enterYourPin
-        : l10n.enterYourPassword;
+    final unlockLabel = switch (_unlockMode) {
+      UnlockMode.masterPassword => l10n.password,
+      UnlockMode.pin => l10n.pin,
+      UnlockMode.fingerprint => l10n.fingerprint,
+    };
+
+    final unlockHint = switch (_unlockMode) {
+      UnlockMode.masterPassword => l10n.enterYourPassword,
+      UnlockMode.pin => l10n.enterYourPin,
+      UnlockMode.fingerprint => l10n.enterFingerprintToUnlock,
+    };
 
     final remaining = _remainingUnlockBlock;
     final isBlocked = _isCurrentUnlockModeBlocked;
+    final isUnlockButtonDisabled =
+        isBlocked || _isSubmitting || _isFingerprintPromptQueued;
 
     final countdownMessage = remaining > Duration.zero
         ? widget.unlockBlockedRequiresMasterPassword
               ? l10n.lockScreenTooManyPinAttemptsMasterAvailable(
                   _formatCountdown(remaining),
                 )
-              : _usePinUnlock
+              : _unlockMode == UnlockMode.pin
               ? l10n.lockScreenWrongPinTryAgainUseMasterPassword(
                   _formatCountdown(remaining),
                 )
@@ -208,9 +268,11 @@ class _LockScreenState extends State<LockScreen> {
 
     return ScreenFrame(
       title: l10n.appLocked,
-      subtitle: _usePinUnlock
-          ? l10n.enterPinToUnlock
-          : l10n.enterPasswordToUnlock,
+      subtitle: switch (_unlockMode) {
+        UnlockMode.pin => l10n.enterPinToUnlock,
+        UnlockMode.fingerprint => l10n.enterFingerprintToUnlock,
+        UnlockMode.masterPassword => l10n.enterPasswordToUnlock,
+      },
       icon: Icons.lock_rounded,
       children: [
         Padding(
@@ -218,22 +280,21 @@ class _LockScreenState extends State<LockScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SecretTextField(
-                controller: _passwordController,
-                labelText: unlockLabel,
-                hintText: unlockHint,
-                enableBorder: true,
-                enabled: !isBlocked,
-                keyboardType: _usePinUnlock
-                    ? TextInputType.number
-                    : TextInputType.text,
-
-                inputFormatters: _usePinUnlock
-                    ? [FilteringTextInputFormatter.digitsOnly]
-                    : null,
-
-                onSubmitted: isBlocked ? null : (_) => _submit(),
-              ),
+              if (_unlockMode != UnlockMode.fingerprint)
+                SecretTextField(
+                  controller: _passwordController,
+                  labelText: unlockLabel,
+                  hintText: unlockHint,
+                  enableBorder: true,
+                  enabled: !isBlocked,
+                  keyboardType: _unlockMode == UnlockMode.pin
+                      ? TextInputType.number
+                      : TextInputType.text,
+                  inputFormatters: _unlockMode == UnlockMode.pin
+                      ? [FilteringTextInputFormatter.digitsOnly]
+                      : null,
+                  onSubmitted: isBlocked ? null : (_) => _submit(),
+                ),
               if (visibleErrorMessage != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 12),
@@ -248,32 +309,92 @@ class _LockScreenState extends State<LockScreen> {
           ),
         ),
         FilledButton.icon(
-          onPressed: isBlocked ? null : _submit,
+          onPressed: isUnlockButtonDisabled
+              ? null
+              : _unlockMode == UnlockMode.fingerprint
+              ? _requestFingerprintPrompt
+              : _submit,
           icon: const Icon(Icons.lock_open_rounded),
           label: Text(l10n.unlock),
         ),
 
-        if (_usePinUnlock)
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _usePinUnlock = false;
-                _passwordController.clear();
-              });
-            },
-            child: Text(l10n.useMasterPassword),
-          )
-        else if (_quickUnlockAvailable)
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _usePinUnlock = true;
-                _passwordController.clear();
-              });
-            },
-            child: Text(l10n.useQuickUnlock),
-          ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.center,
+          children: [
+            if (_unlockMode != UnlockMode.masterPassword)
+              TextButton(
+                onPressed: () => _setUnlockMode(UnlockMode.masterPassword),
+                child: Text(l10n.useMasterPassword),
+              ),
+            if (_pinUnlockAvailable && _unlockMode != UnlockMode.pin)
+              TextButton(
+                onPressed: widget.unlockBlockedRequiresMasterPassword
+                    ? null
+                    : () => _setUnlockMode(UnlockMode.pin),
+                child: Text(l10n.usePin),
+              ),
+            if (_fingerprintUnlockAvailable &&
+                _unlockMode != UnlockMode.fingerprint)
+              TextButton(
+                onPressed: widget.unlockBlockedRequiresMasterPassword
+                    ? null
+                    : () => _setUnlockMode(UnlockMode.fingerprint),
+                child: Text(l10n.useFingerprint),
+              ),
+          ],
+        ),
       ],
     );
+  }
+
+  void _setUnlockMode(UnlockMode mode) {
+    setState(() {
+      _unlockMode = mode;
+      _passwordController.clear();
+    });
+
+    if (mode == UnlockMode.fingerprint) {
+      _requestFingerprintPrompt();
+    }
+  }
+
+  void _promptFingerprintAfterFrame() {
+    if (_didAutoPromptFingerprint) {
+      return;
+    }
+
+    _didAutoPromptFingerprint = true;
+    _requestFingerprintPrompt();
+  }
+
+  void _requestFingerprintPrompt() {
+    if (_isSubmitting || _isFingerprintPromptQueued) {
+      return;
+    }
+
+    setState(() {
+      _isFingerprintPromptQueued = true;
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isFingerprintPromptQueued = false;
+      });
+
+      if (_unlockMode != UnlockMode.fingerprint ||
+          _isCurrentUnlockModeBlocked) {
+        return;
+      }
+
+      await _submit();
+    });
   }
 }

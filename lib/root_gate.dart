@@ -22,7 +22,7 @@ class RootGate extends StatefulWidget {
   State<RootGate> createState() => _RootGateState();
 }
 
-class _RootGateState extends State<RootGate> {
+class _RootGateState extends State<RootGate> with WidgetsBindingObserver {
   final AuthController _authController = AuthController();
   final CloudController _cloudController = CloudController();
 
@@ -31,6 +31,7 @@ class _RootGateState extends State<RootGate> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     _cloudController.addListener(_handleCloudControllerChanged);
 
@@ -43,7 +44,21 @@ class _RootGateState extends State<RootGate> {
     _cloudController.removeListener(_handleCloudControllerChanged);
     _authController.dispose();
     _cloudController.dispose();
+
+    WidgetsBinding.instance.removeObserver(this);
+
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached) {
+      if (_authController.state == AuthState.unlocked) {
+        _authController.lock();
+      }
+    }
   }
 
   void _handleCloudControllerChanged() {
@@ -120,11 +135,16 @@ class _RootGateState extends State<RootGate> {
               child: LockScreen(
                 onUnlock: _authController.unlock,
                 onUnlockWithPin: _authController.unlockWithPin,
-                isQuickUnlockEnabled: _authController.isQuickUnlockEnabled,
+                onUnlockWithFingerprint: _authController.unlockWithFingerprint,
+                isPinUnlockEnabled: _authController.isPinUnlockEnabled,
+                isFingerprintUnlockEnabled:
+                    _authController.isFingerprintUnlockEnabled,
                 refreshUnlockBlock: _authController.refreshUnlockBlock,
                 unlockBlockedUntil: _authController.unlockBlockedUntil,
                 unlockBlockedRequiresMasterPassword:
                     _authController.unlockBlockedRequiresMasterPassword,
+                autoPromptFingerprint:
+                    _authController.shouldAutoPromptFingerprint,
                 errorMessage: _authController.errorMessage,
               ),
             ),

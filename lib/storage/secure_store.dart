@@ -11,6 +11,9 @@ class SecureStore {
   static const String deviceSecretKey = "device_secret";
   static const String quickUnlockRecordKey = "quick_unlock_record";
   static const String quickUnlockThrottleKey = "quick_unlock_throttle";
+  static const String fingerprintVaultKeyKey = "fingerprint_vault_key";
+  static const String fingerprintUnlockEnabledKey =
+      "fingerprint_unlock_enabled";
 
   final FlutterSecureStorage _storage;
 
@@ -50,5 +53,38 @@ class SecureStore {
 
   Future<void> deleteQuickUnlockThrottle() {
     return _storage.delete(key: quickUnlockThrottleKey);
+  }
+
+  Future<void> writeFingerprintVaultKey(String value) async {
+    await _storage.write(key: fingerprintVaultKeyKey, value: value);
+
+    await _storage.write(key: fingerprintUnlockEnabledKey, value: "true");
+  }
+
+  Future<String?> readFingerprintVaultKey() {
+    return _storage.read(key: fingerprintVaultKeyKey);
+  }
+
+  Future<bool> hasFingerprintUnlockPreference() {
+    return _storage.containsKey(key: fingerprintUnlockEnabledKey);
+  }
+
+  Future<bool> hasFingerprintVaultKey() {
+    return _storage.containsKey(key: fingerprintVaultKeyKey);
+  }
+
+  Future<bool> hasFingerprintUnlock() async {
+    final hasPreference = await hasFingerprintUnlockPreference();
+
+    if (!hasPreference) {
+      return false;
+    }
+
+    return await hasFingerprintVaultKey();
+  }
+
+  Future<void> deleteFingerprintUnlock() async {
+    await _storage.delete(key: fingerprintVaultKeyKey);
+    await _storage.delete(key: fingerprintUnlockEnabledKey);
   }
 }

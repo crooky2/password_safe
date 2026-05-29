@@ -40,6 +40,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usePassword => 'Use password';
 
   @override
+  String get fingerprint => 'Fingerprint';
+
+  @override
+  String get useFingerprint => 'Use fingerprint';
+
+  @override
+  String get enterFingerprintToUnlock => 'Use your fingerprint to unlock.';
+
+  @override
+  String get usePin => 'Use PIN';
+
+  @override
+  String get enabled => 'Enabled';
+
+  @override
   String get dashboard => 'Dashboard';
 
   @override
@@ -602,6 +617,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authWrongPin => 'Wrong PIN.';
 
   @override
+  String get confirmDeviceAuthForQuickUnlock =>
+      'Confirm your device unlock to use quick unlock.';
+
+  @override
+  String get authLocalAuthenticationUnavailable =>
+      'Device authentication is not available.';
+
+  @override
+  String get authLocalAuthenticationFailed =>
+      'Device authentication failed or was cancelled.';
+
+  @override
   String get cloudMessageSyncDisabled => 'Cloud sync disabled.';
 
   @override
@@ -651,6 +678,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get cloudMessageSaveConflictFailed =>
       'Could not save the cloud conflict copy.';
+
+  @override
+  String get cloudMessageRemoteRollbackDetected =>
+      'Cloud vault changed unexpectedly. Sync has been paused to protect your local vault.';
 
   @override
   String get debugNoVaultLoaded => 'No vault loaded.';

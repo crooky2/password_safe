@@ -55,7 +55,18 @@ class FakeMicrosoftAuthService extends MicrosoftAuthService {
       return http.Response("", 404);
     }
 
-    return http.Response(remoteText!, 200);
+    if (url.endsWith(":/content")) {
+      return http.Response(remoteText!, 200);
+    }
+
+    return http.Response(
+      jsonEncode({
+        "id": "vault",
+        "eTag": "etag",
+        "lastModifiedDateTime": "2026-05-27T12:00:00Z",
+      }),
+      200,
+    );
   }
 
   @override
@@ -83,7 +94,9 @@ void main() {
   });
 
   test("enabling OneDrive uploads local vault when cloud is empty", () async {
-    final localStore = FakeVaultFileStore(text: "local-vault");
+    final localVault = fakeVaultText("local");
+
+    final localStore = FakeVaultFileStore(text: localVault);
     final auth = FakeMicrosoftAuthService();
 
     final controller = CloudController(
@@ -95,7 +108,7 @@ void main() {
 
     expect(controller.mode, CloudSyncMode.oneDrive);
     expect(auth.connected, isTrue);
-    expect(auth.remoteText, "local-vault");
+    expect(auth.remoteText, localVault);
     expect(controller.hasPendingConflict, isFalse);
   });
 
@@ -106,16 +119,18 @@ void main() {
     });
 
     final controller = CloudController(
-      vaultFileStore: FakeVaultFileStore(text: "local-vault"),
-      microsoftAuthService: FakeMicrosoftAuthService(remoteText: "cloud-vault"),
+      vaultFileStore: FakeVaultFileStore(text: fakeVaultText("local")),
+      microsoftAuthService: FakeMicrosoftAuthService(
+        remoteText: fakeVaultText("cloud"),
+      ),
     );
 
     await controller.initialize();
 
     expect(controller.mode, CloudSyncMode.oneDrive);
     expect(controller.hasPendingConflict, isTrue);
-    expect(controller.pendingConflict!.localText, "local-vault");
-    expect(controller.pendingConflict!.remoteText, "cloud-vault");
+    expect(controller.pendingConflict!.localText, fakeVaultText("local"));
+    expect(controller.pendingConflict!.remoteText, fakeVaultText("cloud"));
   });
 
   test("keep both saves cloud copy and pauses sync", () async {
@@ -124,11 +139,13 @@ void main() {
       "cloud_sync_held": false,
     });
 
-    final localStore = FakeVaultFileStore(text: "local-vault");
+    final localStore = FakeVaultFileStore(text: fakeVaultText("local"));
 
     final controller = CloudController(
       vaultFileStore: localStore,
-      microsoftAuthService: FakeMicrosoftAuthService(remoteText: "cloud-vault"),
+      microsoftAuthService: FakeMicrosoftAuthService(
+        remoteText: fakeVaultText("cloud"),
+      ),
     );
 
     await controller.initialize();
@@ -136,7 +153,31 @@ void main() {
 
     expect(controller.hasPendingConflict, isFalse);
     expect(controller.syncHeld, isTrue);
-    expect(localStore.text, "local-vault");
-    expect(localStore.conflictText, "cloud-vault");
+    expect(localStore.text, fakeVaultText("local"));
+    expect(localStore.conflictText, fakeVaultText("cloud"));
   });
+}
+
+String fakeVaultText(String label) {
+  return jsonEncode({
+    "version": 1,
+    "kdf": {
+      "algorithm": "argon2id",
+      "memoryKb": 65536,
+      "iterations": 3,
+      "parallelism": 1,
+      "salt": base64Encode(List<int>.filled(16, 1)),
+    },
+    "wrappedVaultKey": fakeBlob("wrapped-$label"),
+    "encryptedDatabase": fakeBlob("database-$label"),
+  });
+}
+
+Map<String, Object> fakeBlob(String label) {
+  return {
+    "algorithm": "aes-256-gcm",
+    "nonce": base64Encode(List<int>.filled(12, 2)),
+    "ciphertext": base64Encode(utf8.encode(label)),
+    "mac": base64Encode(List<int>.filled(16, 3)),
+  };
 }

@@ -40,6 +40,22 @@ class AppLocalizationsDe extends AppLocalizations {
   String get usePassword => 'Passwort übernehmen';
 
   @override
+  String get fingerprint => 'Fingerabdruck';
+
+  @override
+  String get useFingerprint => 'Fingerabdruck verwenden';
+
+  @override
+  String get enterFingerprintToUnlock =>
+      'Verwende deinen Fingerabdruck zum Entsperren.';
+
+  @override
+  String get usePin => 'PIN verwenden';
+
+  @override
+  String get enabled => 'Aktiviert';
+
+  @override
   String get dashboard => 'Übersicht';
 
   @override
@@ -584,6 +600,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get authWrongPin => 'Falsche PIN.';
 
   @override
+  String get confirmDeviceAuthForQuickUnlock =>
+      'Bestätige deine Geräteentsperrung, um Schnellentsperren zu verwenden.';
+
+  @override
+  String get authLocalAuthenticationUnavailable =>
+      'Geräteauthentifizierung ist nicht verfügbar.';
+
+  @override
+  String get authLocalAuthenticationFailed =>
+      'Geräteauthentifizierung fehlgeschlagen oder abgebrochen.';
+
+  @override
   String get cloudMessageSyncDisabled => 'Cloud-Synchronisierung deaktiviert.';
 
   @override
@@ -634,6 +662,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get cloudMessageSaveConflictFailed =>
       'Konnte die Konfliktkopie nicht speichern.';
+
+  @override
+  String get cloudMessageRemoteRollbackDetected =>
+      'Der Cloud-Tresor hat sich unerwartet geändert. Die Synchronisierung wurde zum Schutz deines lokalen Tresors pausiert.';
 
   @override
   String get debugNoVaultLoaded => 'Kein Tresor geladen.';

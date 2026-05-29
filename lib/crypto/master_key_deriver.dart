@@ -4,6 +4,7 @@ import "package:cryptography/cryptography.dart";
 
 import "secure_bytes.dart";
 import "vault_models.dart";
+import "vault_file_validator.dart";
 
 class MasterKeyDeriver {
   const MasterKeyDeriver();
@@ -24,9 +25,7 @@ class MasterKeyDeriver {
     required String password,
     required KdfParams params,
   }) async {
-    if (params.algorithm != "argon2id") {
-      throw UnsupportedError("Unsupported KDF algorithm: ${params.algorithm}");
-    }
+    VaultFileValidator.validateKdf(params);
 
     final algorithm = Argon2id(
       memory: params.memoryKb,

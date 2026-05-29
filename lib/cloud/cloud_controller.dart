@@ -3,8 +3,11 @@ import "package:shared_preferences/shared_preferences.dart";
 
 import "../storage/vault_file_store.dart";
 
+import "../crypto/vault_file_validator.dart";
+
 import "microsoft_auth_service.dart";
 import "onedrive_vault_store.dart";
+import "cloud_sync_checkpoint_store.dart";
 
 enum CloudSyncMode { disabled, oneDrive }
 
@@ -23,18 +26,25 @@ enum CloudMessage {
   downloadedCloudConflict,
   keptBothPaused,
   saveConflictFailed,
+  remoteRollbackDetected,
 }
 
 class CloudSyncConflict {
-  const CloudSyncConflict({required this.localText, required this.remoteText});
+  const CloudSyncConflict({
+    required this.localText,
+    required this.remoteText,
+    required this.remoteETag,
+  });
 
   final String localText;
   final String remoteText;
+  final String remoteETag;
 }
 
 class CloudController extends ChangeNotifier {
   CloudController({
     this.vaultFileStore = const VaultFileStore(),
+    this.checkpointStore = const CloudSyncCheckpointStore(),
     MicrosoftAuthService? microsoftAuthService,
   }) : microsoftAuthService = microsoftAuthService ?? MicrosoftAuthService() {
     oneDriveVaultStore = OneDriveVaultStore(
@@ -47,9 +57,11 @@ class CloudController extends ChangeNotifier {
 
   final VaultFileStore vaultFileStore;
   final MicrosoftAuthService microsoftAuthService;
+  final CloudSyncCheckpointStore checkpointStore;
   late final OneDriveVaultStore oneDriveVaultStore;
 
   CloudSyncMode _mode = CloudSyncMode.disabled;
+  static const _oneDriveProvider = "oneDrive";
   bool _isBusy = false;
   bool _syncHeld = false;
   CloudMessage? _message;
@@ -146,7 +158,8 @@ class CloudController extends ChangeNotifier {
       switch (_mode) {
         case CloudSyncMode.oneDrive:
           await microsoftAuthService.connect();
-          await oneDriveVaultStore.uploadText(conflict.localText);
+          final info = await oneDriveVaultStore.uploadText(conflict.localText);
+          await _rememberOneDriveText(text: conflict.localText, info: info);
           _message = CloudMessage.uploadedLocalConflict;
           break;
         case CloudSyncMode.disabled:
@@ -175,6 +188,13 @@ class CloudController extends ChangeNotifier {
       switch (_mode) {
         case CloudSyncMode.oneDrive:
           await vaultFileStore.saveText(conflict.remoteText);
+          await checkpointStore.write(
+            CloudSyncCheckpoint(
+              provider: _oneDriveProvider,
+              remoteETag: conflict.remoteETag,
+              remoteHash: await checkpointStore.hashText(conflict.remoteText),
+            ),
+          );
           _message = CloudMessage.downloadedCloudConflict;
           break;
         case CloudSyncMode.disabled:
@@ -225,6 +245,7 @@ class CloudController extends ChangeNotifier {
       final preferences = await SharedPreferences.getInstance();
       await preferences.setString(_modeKey, "oneDrive");
       await preferences.setBool(_syncHeldKey, false);
+      _syncHeld = false;
 
       _mode = CloudSyncMode.oneDrive;
       _message = await _syncOneDrive();
@@ -233,7 +254,6 @@ class CloudController extends ChangeNotifier {
     } catch (_) {
       _message = CloudMessage.syncFailed;
     } finally {
-      await _setSyncHeld(false);
       _setBusy(false);
     }
   }
@@ -252,6 +272,7 @@ class CloudController extends ChangeNotifier {
     final preferences = await SharedPreferences.getInstance();
     await preferences.setString(_modeKey, "disabled");
     await preferences.setBool(_syncHeldKey, false);
+    await checkpointStore.clear();
 
     _mode = CloudSyncMode.disabled;
     _pendingConflict = null;
@@ -263,29 +284,55 @@ class CloudController extends ChangeNotifier {
 
   Future<CloudMessage> _syncOneDrive() async {
     final localText = await vaultFileStore.loadTextIfExists();
-    final remoteText = await oneDriveVaultStore.downloadText();
+
+    if (localText != null) {
+      VaultFileValidator.parse(localText);
+    }
+
+    final remoteInfo = await oneDriveVaultStore.getInfo();
+    final remoteText = remoteInfo == null
+        ? null
+        : await oneDriveVaultStore.downloadText();
+
+    if (remoteText != null) {
+      VaultFileValidator.parse(remoteText);
+    }
 
     if (localText == null && remoteText == null) {
       return CloudMessage.oneDriveConnectedNoVault;
     }
 
     if (localText != null && remoteText == null) {
-      await oneDriveVaultStore.uploadText(localText);
-      return CloudMessage.uploadedLocalConflict;
+      final info = await oneDriveVaultStore.uploadText(localText);
+      await _rememberOneDriveText(text: localText, info: info);
+      return CloudMessage.uploadedToOneDrive;
     }
 
     if (localText == null && remoteText != null) {
+      if (await _remoteDiffersFromCheckpoint(remoteText)) {
+        await _setSyncHeld(true);
+        return CloudMessage.remoteRollbackDetected;
+      }
+
       await vaultFileStore.saveText(remoteText);
-      return CloudMessage.downloadedCloudConflict;
+      await _rememberOneDriveText(text: remoteText, info: remoteInfo!);
+      return CloudMessage.downloadedFromOneDrive;
     }
 
     if (localText == remoteText) {
+      if (await _remoteDiffersFromCheckpoint(remoteText!)) {
+        await _setSyncHeld(true);
+        return CloudMessage.remoteRollbackDetected;
+      }
+
+      await _rememberOneDriveText(text: remoteText, info: remoteInfo!);
       return CloudMessage.alreadyInSync;
     }
 
     _pendingConflict = CloudSyncConflict(
       localText: localText!,
       remoteText: remoteText!,
+      remoteETag: remoteInfo!.eTag,
     );
 
     return CloudMessage.vaultsDiffer;
@@ -303,5 +350,31 @@ class CloudController extends ChangeNotifier {
     await preferences.setBool(_syncHeldKey, value);
 
     notifyListeners();
+  }
+
+  Future<void> _rememberOneDriveText({
+    required String text,
+    required OneDriveVaultInfo info,
+  }) async {
+    final hash = await checkpointStore.hashText(text);
+
+    await checkpointStore.write(
+      CloudSyncCheckpoint(
+        provider: _oneDriveProvider,
+        remoteETag: info.eTag,
+        remoteHash: hash,
+      ),
+    );
+  }
+
+  Future<bool> _remoteDiffersFromCheckpoint(String remoteText) async {
+    final checkpoint = await checkpointStore.read();
+
+    if (checkpoint == null || checkpoint.provider != _oneDriveProvider) {
+      return false;
+    }
+
+    final remoteHash = await checkpointStore.hashText(remoteText);
+    return remoteHash != checkpoint.remoteHash;
   }
 }

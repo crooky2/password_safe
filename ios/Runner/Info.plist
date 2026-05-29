@@ -3,6 +3,8 @@
 <plist version="1.0">
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<key>NSFaceIDUsageDescription</key>
+		<string>Use Face ID to protect quick unlock.</string>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
@@ -28,6 +30,17 @@
 	<true/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
+		<key>CFBundleURLTypes</key>
+		<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.christopherbach.passwordsafe.oauth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+			<string>com.christopherbach.passwordsafe</string>
+			</array>
+		</dict>
+		</array>
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
 		<key>UISceneConfigurations</key>

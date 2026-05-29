@@ -12,7 +12,7 @@ import "../../cloud/cloud_controller.dart";
 import "../../l10n/app_localizations.dart";
 import "../../l10n/localized_messages.dart";
 
-enum QuickUnlockMode { disabled, pin }
+enum QuickUnlockSetting { disabled, enabled }
 
 class SecurityTab extends StatefulWidget {
   const SecurityTab({
@@ -31,7 +31,8 @@ class SecurityTab extends StatefulWidget {
 class _SecurityTabState extends State<SecurityTab> {
   String? _message;
 
-  QuickUnlockMode _quickUnlockMode = QuickUnlockMode.disabled;
+  QuickUnlockSetting _pinUnlockSetting = QuickUnlockSetting.disabled;
+  QuickUnlockSetting _fingerprintUnlockSetting = QuickUnlockSetting.disabled;
 
   @override
   void initState() {
@@ -44,14 +45,14 @@ class _SecurityTabState extends State<SecurityTab> {
     super.dispose();
   }
 
-  Future<void> _changeQuickUnlockMode(QuickUnlockMode mode) async {
+  Future<void> _changePinUnlockSetting(QuickUnlockSetting setting) async {
     final l10n = AppLocalizations.of(context)!;
 
-    if (mode == _quickUnlockMode) {
+    if (setting == _pinUnlockSetting) {
       return;
     }
 
-    if (mode == QuickUnlockMode.disabled) {
+    if (setting == QuickUnlockSetting.disabled) {
       await widget.authController.disableQuickUnlock();
 
       if (!mounted) {
@@ -59,7 +60,8 @@ class _SecurityTabState extends State<SecurityTab> {
       }
 
       setState(() {
-        _quickUnlockMode = QuickUnlockMode.disabled;
+        _pinUnlockSetting = QuickUnlockSetting.disabled;
+        _message = null;
       });
       return;
     }
@@ -74,23 +76,60 @@ class _SecurityTabState extends State<SecurityTab> {
       },
     );
 
-    if (!mounted) {
-      return;
-    }
-    if (pin == null) {
+    if (!mounted || pin == null) {
       return;
     }
 
     final success = await widget.authController.enableQuickUnlock(pin);
+
     if (!mounted) {
       return;
     }
 
     setState(() {
-      _quickUnlockMode = success
-          ? QuickUnlockMode.pin
-          : QuickUnlockMode.disabled;
-      _message = success ? null : l10n.failedToEnableQuickUnlock;
+      _pinUnlockSetting = success
+          ? QuickUnlockSetting.enabled
+          : QuickUnlockSetting.disabled;
+      _message = success ? null : _quickUnlockFailureMessage(l10n);
+    });
+  }
+
+  Future<void> _changeFingerprintUnlockSetting(
+    QuickUnlockSetting setting,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (setting == _fingerprintUnlockSetting) {
+      return;
+    }
+
+    if (setting == QuickUnlockSetting.disabled) {
+      await widget.authController.disableFingerprintUnlock();
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _fingerprintUnlockSetting = QuickUnlockSetting.disabled;
+        _message = null;
+      });
+      return;
+    }
+
+    final success = await widget.authController.enableFingerprintUnlock(
+      promptTitle: l10n.confirmDeviceAuthForQuickUnlock,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _fingerprintUnlockSetting = success
+          ? QuickUnlockSetting.enabled
+          : QuickUnlockSetting.disabled;
+      _message = success ? null : _quickUnlockFailureMessage(l10n);
     });
   }
 
@@ -121,7 +160,8 @@ class _SecurityTabState extends State<SecurityTab> {
     }
 
     setState(() {
-      _quickUnlockMode = QuickUnlockMode.disabled;
+      _pinUnlockSetting = QuickUnlockSetting.disabled;
+      _fingerprintUnlockSetting = QuickUnlockSetting.disabled;
       _message = success
           ? l10n.masterPasswordChangedQuickUnlockDisabled
           : l10n.failedToChangeMasterPassword;
@@ -150,22 +190,38 @@ class _SecurityTabState extends State<SecurityTab> {
             SectionCard(
               title: l10n.quickUnlock,
               subtitle: l10n.quickUnlockDescription,
-              icon: Icons.pin_rounded,
+              icon: Icons.lock_open_rounded,
               children: [
-                SettingsDropdown<QuickUnlockMode>(
-                  title: l10n.type,
-                  value: _quickUnlockMode,
+                SettingsDropdown<QuickUnlockSetting>(
+                  title: l10n.pin,
+                  value: _pinUnlockSetting,
                   options: [
                     SettingsDropdownOption(
                       label: l10n.disabled,
-                      value: QuickUnlockMode.disabled,
+                      value: QuickUnlockSetting.disabled,
                     ),
                     SettingsDropdownOption(
-                      label: l10n.pin,
-                      value: QuickUnlockMode.pin,
+                      label: l10n.enabled,
+                      value: QuickUnlockSetting.enabled,
                     ),
                   ],
-                  onChanged: _changeQuickUnlockMode,
+                  onChanged: _changePinUnlockSetting,
+                ),
+                const SizedBox(height: 12),
+                SettingsDropdown<QuickUnlockSetting>(
+                  title: l10n.fingerprint,
+                  value: _fingerprintUnlockSetting,
+                  options: [
+                    SettingsDropdownOption(
+                      label: l10n.disabled,
+                      value: QuickUnlockSetting.disabled,
+                    ),
+                    SettingsDropdownOption(
+                      label: l10n.enabled,
+                      value: QuickUnlockSetting.enabled,
+                    ),
+                  ],
+                  onChanged: _changeFingerprintUnlockSetting,
                 ),
               ],
             ),
@@ -252,16 +308,31 @@ class _SecurityTabState extends State<SecurityTab> {
   }
 
   Future<void> _loadQuickUnlockMode() async {
-    final enabled = await widget.authController.isQuickUnlockEnabled();
+    final pinEnabled = await widget.authController.isPinUnlockEnabled();
+    final fingerprintEnabled = await widget.authController
+        .isFingerprintUnlockEnabled();
 
     if (!mounted) {
       return;
     }
 
     setState(() {
-      _quickUnlockMode = enabled
-          ? QuickUnlockMode.pin
-          : QuickUnlockMode.disabled;
+      _pinUnlockSetting = pinEnabled
+          ? QuickUnlockSetting.enabled
+          : QuickUnlockSetting.disabled;
+      _fingerprintUnlockSetting = fingerprintEnabled
+          ? QuickUnlockSetting.enabled
+          : QuickUnlockSetting.disabled;
     });
+  }
+
+  String _quickUnlockFailureMessage(AppLocalizations l10n) {
+    final feedback = widget.authController.errorMessage;
+
+    if (feedback == null) {
+      return l10n.failedToEnableQuickUnlock;
+    }
+
+    return l10n.authFeedback(feedback);
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:flutter/foundation.dart";
 
 import "../theme_controller.dart";
 
@@ -38,7 +39,7 @@ class SettingsScreen extends StatelessWidget {
       icon: Icons.settings_rounded,
       headerActions: [
         FilledButton.icon(
-          onPressed: authController.lock,
+          onPressed: () => authController.lock(),
           icon: const Icon(Icons.lock_rounded),
           label: Text(l10n.lockApp),
           style: FilledButton.styleFrom(
@@ -75,17 +76,18 @@ class SettingsScreen extends StatelessWidget {
           },
         ),
 
-        SectionCard(
-          title: l10n.debug,
-          icon: Icons.bug_report_rounded,
-          action: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => DebugTab(authController: authController),
-              ),
-            );
-          },
-        ),
+        if (kDebugMode)
+          SectionCard(
+            title: l10n.debug,
+            icon: Icons.bug_report_rounded,
+            action: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => DebugTab(authController: authController),
+                ),
+              );
+            },
+          ),
 
         FilledButton(
           onPressed: () async {

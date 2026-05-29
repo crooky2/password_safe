@@ -1,6 +1,3 @@
-// import "dart:typed_data";
-
-import "dart:io";
 import "package:flutter/foundation.dart";
 
 import "../crypto/vault_builder.dart";
@@ -16,6 +13,7 @@ import "../vault/unlocked_vault.dart";
 
 import "local_unlock_service.dart";
 import "local_unlock_models.dart";
+import "local_auth_gate.dart";
 
 enum AuthState { checking, needsSetup, locked, unlocked, busy }
 
@@ -34,6 +32,8 @@ enum AuthMessage {
   quickUnlockDisabledUseMasterPassword,
   wrongPinTryAgain,
   wrongPin,
+  localAuthenticationUnavailable,
+  localAuthenticationFailed,
 }
 
 class AuthFeedbackMessage {
@@ -51,7 +51,8 @@ class AuthController extends ChangeNotifier {
     this.databaseEncrypter = const DatabaseEncrypter(),
     this.localUnlockService = const LocalUnlockService(),
     this.masterKeyDeriver = const MasterKeyDeriver(),
-  });
+    LocalAuthGate? localAuthGate,
+  }) : localAuthGate = localAuthGate ?? LocalAuthGate();
 
   final VaultFileStore store;
   final VaultBuilder builder;
@@ -59,12 +60,14 @@ class AuthController extends ChangeNotifier {
   final DatabaseEncrypter databaseEncrypter;
   final LocalUnlockService localUnlockService;
   final MasterKeyDeriver masterKeyDeriver;
+  final LocalAuthGate localAuthGate;
 
   AuthState _state = AuthState.checking;
   UnlockedVault? _unlockedVault;
   AuthFeedbackMessage? _errorMessage;
   DateTime? _unlockBlockedUntil;
   bool _unlockBlockedRequiresMasterPassword = false;
+  bool _shouldAutoPromptFingerprint = false;
 
   AuthState get state => _state;
   UnlockedVault? get unlockedVault => _unlockedVault;
@@ -73,6 +76,7 @@ class AuthController extends ChangeNotifier {
   DateTime? get unlockBlockedUntil => _unlockBlockedUntil;
   bool get unlockBlockedRequiresMasterPassword =>
       _unlockBlockedRequiresMasterPassword;
+  bool get shouldAutoPromptFingerprint => _shouldAutoPromptFingerprint;
 
   void _setState(AuthState newState) {
     _state = newState;
@@ -81,6 +85,7 @@ class AuthController extends ChangeNotifier {
 
   void _setBusy() {
     _errorMessage = null;
+    _shouldAutoPromptFingerprint = false;
     _setState(AuthState.busy);
   }
 
@@ -88,13 +93,12 @@ class AuthController extends ChangeNotifier {
     _errorMessage = AuthFeedbackMessage(message, duration: duration);
   }
 
-  void lock() {
+  void lock({bool autoPromptFingerprint = false}) {
     _unlockedVault?.clearSecrets();
     _unlockedVault = null;
     _errorMessage = null;
+    _shouldAutoPromptFingerprint = autoPromptFingerprint;
     _setState(AuthState.locked);
-
-    exit(0);
   }
 
   void _setUnlockBlock(
@@ -110,6 +114,18 @@ class AuthController extends ChangeNotifier {
   void _clearUnlockBlock() {
     _unlockBlockedUntil = null;
     _unlockBlockedRequiresMasterPassword = false;
+  }
+
+  Future<void> _restoreFingerprintUnlockIfNeeded() async {
+    final unlockedVault = _unlockedVault;
+
+    if (unlockedVault == null) {
+      return;
+    }
+
+    await localUnlockService.restoreFingerprintUnlockIfNeeded(
+      vaultKey: unlockedVault.vaultKey,
+    );
   }
 
   Future<void> refreshUnlockBlock() async {
@@ -128,8 +144,10 @@ class AuthController extends ChangeNotifier {
     final vaultExists = await store.exists();
 
     if (vaultExists) {
+      _shouldAutoPromptFingerprint = true;
       _setState(AuthState.locked);
     } else {
+      _shouldAutoPromptFingerprint = false;
       _setState(AuthState.needsSetup);
     }
   }
@@ -147,6 +165,7 @@ class AuthController extends ChangeNotifier {
 
       _unlockedVault = createdVault.unlockedVault;
       _errorMessage = null;
+      _shouldAutoPromptFingerprint = false;
       _setState(AuthState.unlocked);
 
       return true;
@@ -169,10 +188,12 @@ class AuthController extends ChangeNotifier {
         vaultFile: vaultFile,
         masterPassword: masterPassword,
       );
+      await _restoreFingerprintUnlockIfNeeded();
 
       await localUnlockService.clearThrottleState();
       _clearUnlockBlock();
       _errorMessage = null;
+      _shouldAutoPromptFingerprint = false;
       _setState(AuthState.unlocked);
 
       return true;
@@ -281,8 +302,10 @@ class AuthController extends ChangeNotifier {
 
       await store.save(updatedVaultFile);
       await localUnlockService.disable();
+      await localUnlockService.disableFingerprintUnlock();
 
       _errorMessage = null;
+      _shouldAutoPromptFingerprint = false;
       notifyListeners();
 
       return true;
@@ -353,10 +376,12 @@ class AuthController extends ChangeNotifier {
         vaultFile: vaultFile,
         vaultKey: vaultKey,
       );
+      await _restoreFingerprintUnlockIfNeeded();
 
       _clearUnlockBlock();
 
       _errorMessage = null;
+      _shouldAutoPromptFingerprint = false;
       _setState(AuthState.unlocked);
 
       return true;
@@ -430,6 +455,106 @@ class AuthController extends ChangeNotifier {
       _setErrorMessage(AuthMessage.wrongPin);
       _setState(AuthState.locked);
 
+      return false;
+    }
+  }
+
+  Future<bool> isPinUnlockEnabled() {
+    return localUnlockService.isEnabled();
+  }
+
+  Future<bool> isFingerprintUnlockEnabled() {
+    return localUnlockService.isFingerprintUnlockEnabled();
+  }
+
+  Future<bool> enableFingerprintUnlock({required String promptTitle}) async {
+    final unlockedVault = _unlockedVault;
+
+    if (unlockedVault == null) {
+      _setErrorMessage(AuthMessage.vaultIsLocked);
+      notifyListeners();
+      return false;
+    }
+
+    if (!await localAuthGate.canUseFingerprint()) {
+      _setErrorMessage(AuthMessage.localAuthenticationUnavailable);
+      notifyListeners();
+      return false;
+    }
+
+    try {
+      final authenticated = await localAuthGate.authenticateFingerprint(
+        reason: promptTitle,
+      );
+
+      if (!authenticated) {
+        _setErrorMessage(AuthMessage.localAuthenticationFailed);
+        notifyListeners();
+        return false;
+      }
+
+      await localUnlockService.enableFingerprintUnlock(
+        vaultKey: unlockedVault.vaultKey,
+      );
+
+      _errorMessage = null;
+      notifyListeners();
+      return true;
+    } catch (_) {
+      _setErrorMessage(AuthMessage.couldNotEnableQuickUnlock);
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<void> disableFingerprintUnlock() async {
+    await localUnlockService.disableFingerprintUnlock();
+    _errorMessage = null;
+    _shouldAutoPromptFingerprint = false;
+    notifyListeners();
+  }
+
+  Future<bool> unlockWithFingerprint({required String promptTitle}) async {
+    _shouldAutoPromptFingerprint = false;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final authenticated = await localAuthGate.authenticateFingerprint(
+        reason: promptTitle,
+      );
+
+      if (!authenticated) {
+        return false;
+      }
+
+      final vaultKey = await localUnlockService.unlockWithFingerprint();
+      final vaultFile = await store.load();
+
+      _unlockedVault = await unlocker.unlockWithVaultKey(
+        vaultFile: vaultFile,
+        vaultKey: vaultKey,
+      );
+
+      _errorMessage = null;
+      _shouldAutoPromptFingerprint = false;
+      _setState(AuthState.unlocked);
+      return true;
+    } catch (error, stackTrace) {
+      debugPrint("Fingerprint unlock did not complete: $error");
+      debugPrintStack(stackTrace: stackTrace);
+
+      _unlockedVault?.clearSecrets();
+      _unlockedVault = null;
+
+      if (error is StateError) {
+        _setErrorMessage(AuthMessage.quickUnlockDisabledUseMasterPassword);
+        await localUnlockService.disableFingerprintUnlock();
+      } else {
+        _setErrorMessage(AuthMessage.localAuthenticationFailed);
+      }
+
+      _setState(AuthState.locked);
       return false;
     }
   }

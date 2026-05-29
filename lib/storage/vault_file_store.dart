@@ -4,6 +4,7 @@ import "dart:io";
 import "package:path_provider/path_provider.dart";
 
 import "../crypto/vault_models.dart";
+import "../crypto/vault_file_validator.dart";
 
 class VaultFileStore {
   const VaultFileStore();
@@ -21,20 +22,19 @@ class VaultFileStore {
   }
 
   Future<void> save(VaultFile vaultFile) async {
-    final file = await _getVaultFile();
+    VaultFileValidator.validate(vaultFile);
+
     final jsonMap = vaultFile.toJson();
     final jsonText = jsonEncode(jsonMap);
 
-    await file.writeAsString(jsonText);
+    await _saveTextAtomically(jsonText);
   }
 
   Future<VaultFile> load() async {
     final file = await _getVaultFile();
 
-    final jsonText = await file.readAsString();
-    final jsonMap = jsonDecode(jsonText) as Map<String, Object?>;
-
-    return VaultFile.fromJson(jsonMap);
+    final jsonText = await _readTextWithSizeLimit(file);
+    return VaultFileValidator.parse(jsonText);
   }
 
   Future<void> delete() async {
@@ -57,12 +57,12 @@ class VaultFileStore {
       return null;
     }
 
-    return file.readAsString();
+    return _readTextWithSizeLimit(file);
   }
 
   Future<void> saveText(String jsonText) async {
-    final file = await _getVaultFile();
-    await file.writeAsString(jsonText);
+    VaultFileValidator.parse(jsonText);
+    await _saveTextAtomically(jsonText);
   }
 
   Future<String> saveConflictText(
@@ -80,5 +80,39 @@ class VaultFileStore {
     );
     await file.writeAsString(jsonText);
     return file.path;
+  }
+
+  Future<void> _saveTextAtomically(String jsonText) async {
+    VaultFileValidator.ensureTextWithinLimit(jsonText);
+
+    final file = await _getVaultFile();
+    final tempFile = File("${file.path}.tmp");
+    final backupFile = File("${file.path}.previous");
+
+    await tempFile.writeAsString(jsonText, flush: true);
+
+    if (await file.exists()) {
+      await backupFile.writeAsBytes(await file.readAsBytes(), flush: true);
+    }
+
+    try {
+      await tempFile.rename(file.path);
+    } on FileSystemException {
+      if (await file.exists()) {
+        await file.delete();
+      }
+
+      await tempFile.rename(file.path);
+    }
+  }
+
+  Future<String> _readTextWithSizeLimit(File file) async {
+    final size = await file.length();
+
+    if (size > VaultFileValidator.maxVaultFileBytes) {
+      throw const VaultFileValidationException("Vault file is too large.");
+    }
+
+    return file.readAsString();
   }
 }

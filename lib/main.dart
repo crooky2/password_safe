@@ -34,7 +34,7 @@ class _PasswordSafeAppState extends State<PasswordSafeApp> {
   @override
   Widget build(BuildContext context) {
     ThemeData buildTheme(Brightness brightness) {
-      const seedColor = Color(0xFF1F6F78);
+      const seedColor = Color.fromARGB(255, 31, 111, 120);
 
       final baseColorScheme = ColorScheme.fromSeed(
         seedColor: seedColor,

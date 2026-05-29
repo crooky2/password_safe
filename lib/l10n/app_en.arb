@@ -11,8 +11,12 @@
     "passwordGeneratorLength": "Length",
     "passwordGeneratorNoCharactersSelected": "Select at least one character type.",
     "usePassword": "Use password",
+    "fingerprint": "Fingerprint",
+    "useFingerprint": "Use fingerprint",
+    "enterFingerprintToUnlock": "Use your fingerprint to unlock.",
+    "usePin": "Use PIN",
 
-
+    "enabled": "Enabled",
     "dashboard": "Dashboard",
     "settings": "Settings",
     "security": "Security",
@@ -288,6 +292,10 @@
     },
     "authWrongPin": "Wrong PIN.",
 
+    "confirmDeviceAuthForQuickUnlock": "Confirm your device unlock to use quick unlock.",
+    "authLocalAuthenticationUnavailable": "Device authentication is not available.",
+    "authLocalAuthenticationFailed": "Device authentication failed or was cancelled.",
+
     "cloudMessageSyncDisabled": "Cloud sync disabled.",
     "cloudMessageSyncPaused": "Cloud sync is paused.",
     "cloudMessageOneDriveConnectedNoVault": "OneDrive connected, but no vault file was found.",
@@ -302,6 +310,7 @@
     "cloudMessageDownloadedCloudConflict": "Downloaded OneDrive vault to this device.",
     "cloudMessageKeptBothPaused": "Saved OneDrive vault as a separate file on this device. Sync is paused.",
     "cloudMessageSaveConflictFailed": "Could not save the cloud conflict copy.",
+    "cloudMessageRemoteRollbackDetected": "Cloud vault changed unexpectedly. Sync has been paused to protect your local vault.",
 
     "debugNoVaultLoaded": "No vault loaded.",
     "debugTestEntryTitle": "test entry",

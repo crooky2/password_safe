@@ -11,7 +11,12 @@
     "passwordGeneratorLength": "Länge",
     "passwordGeneratorNoCharactersSelected": "Wähle mindestens einen Zeichentyp aus.",
     "usePassword": "Passwort übernehmen",
+    "fingerprint": "Fingerabdruck",
+    "useFingerprint": "Fingerabdruck verwenden",
+    "enterFingerprintToUnlock": "Verwende deinen Fingerabdruck zum Entsperren.",
+    "usePin": "PIN verwenden",
 
+    "enabled": "Aktiviert",
     "dashboard": "Übersicht",
     "settings": "Einstellungen",
     "security": "Sicherheit",
@@ -182,6 +187,10 @@
     "authWrongPinTryAgain": "Falsche PIN. Versuche es in {duration} erneut.",
     "authWrongPin": "Falsche PIN.",
 
+    "confirmDeviceAuthForQuickUnlock": "Bestätige deine Geräteentsperrung, um Schnellentsperren zu verwenden.",
+    "authLocalAuthenticationUnavailable": "Geräteauthentifizierung ist nicht verfügbar.",
+    "authLocalAuthenticationFailed": "Geräteauthentifizierung fehlgeschlagen oder abgebrochen.",
+
     "cloudMessageSyncDisabled": "Cloud-Synchronisierung deaktiviert.",
     "cloudMessageSyncPaused": "Cloud-Synchronisierung pausiert.",
     "cloudMessageOneDriveConnectedNoVault": "OneDrive verbunden, aber keine Tresordatei gefunden.",
@@ -196,6 +205,7 @@
     "cloudMessageDownloadedCloudConflict": "OneDrive-Tresor auf dieses Gerät heruntergeladen.",
     "cloudMessageKeptBothPaused": "OneDrive-Tresor als separate Datei auf diesem Gerät gespeichert. Synchronisierung pausiert.",
     "cloudMessageSaveConflictFailed": "Konnte die Konfliktkopie nicht speichern.",
+    "cloudMessageRemoteRollbackDetected": "Der Cloud-Tresor hat sich unerwartet geändert. Die Synchronisierung wurde zum Schutz deines lokalen Tresors pausiert.",
 
     "debugNoVaultLoaded": "Kein Tresor geladen.",
     "debugTestEntryTitle": "Testeintrag",
