@@ -24,6 +24,7 @@ class MicrosoftAuthService {
     clientId: MicrosoftGraphConfig.clientId,
     scopes: MicrosoftGraphConfig.graphScopes,
     authCodeParams: {"scope": MicrosoftGraphConfig.authorizationScope},
+    webAuthOpts: MicrosoftGraphConfig.webAuthOptions,
   );
 
   Future<void> connect() async {

@@ -1,10 +1,15 @@
 name: password_safe
 description: "An lightweight password manager built with Flutter."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 1.0.0+1
+version: 1.0.1
 
 msix_config:
   display_name: Password Safe
+  identity_name: crooky.PasswordSafeWindows
+  publisher: CN=CA72CBB8-2F17-4B02-9FE8-944D53AAF8B3
+  publisher_display_name: crooky
+  msix_version: 1.0.0.0
+  store: true
   install_certificate: false
 
 environment:
@@ -35,6 +40,7 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^6.0.0
+  inno_bundle: ^0.11.2
 
 flutter:
   uses-material-design: true
@@ -70,3 +76,7 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+inno_bundle:
+  id: 6bfe55d0-5b44-11f1-bfd8-59b53481673e
+  publisher: chris

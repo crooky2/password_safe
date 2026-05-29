@@ -2,6 +2,19 @@
 
 A new Flutter project.
 
+## OneDrive Azure App Registration
+
+The Microsoft app registration must include this exact redirect URI under
+Authentication > Mobile and desktop applications > Custom redirect URI:
+
+```text
+com.christopherbach.passwordsafe://oauth2redirect/microsoft
+```
+
+The same URI is used by Android and Windows. If Azure still has an older value
+such as `passwordsafe://oauth2redirect`, Microsoft login fails with
+`invalid_request` before the app receives the callback.
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
