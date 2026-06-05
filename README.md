@@ -1,30 +1,16 @@
-# password_safe
+## Download
+Download the latest Android APK from the GitHub Releases page:
 
-A new Flutter project.
+[Download Password Safe for Android and Windows](https://github.com/crooky2/password_safe/releases/latest)
 
-## OneDrive Azure App Registration
 
-The Microsoft app registration must include this exact redirect URI under
-Authentication > Mobile and desktop applications > Custom redirect URI:
+## PasswordSafe
+An lightweight Password Manager.
 
-```text
-com.christopherbach.passwordsafe://oauth2redirect/microsoft
-```
 
-The same URI is used by Android and Windows. If Azure still has an older value
-such as `passwordsafe://oauth2redirect`, Microsoft login fails with
-`invalid_request` before the app receives the callback.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Save and organize passwords securely
+- Unlock with a master password or quick PIN
+- Generate strong passwords
+- Search, copy, edit, clone, and favorite entries
+- Group passwords into folders
+- Optional OneDrive cloud sync
