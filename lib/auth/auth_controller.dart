@@ -51,6 +51,7 @@ class AuthController extends ChangeNotifier {
     this.databaseEncrypter = const DatabaseEncrypter(),
     this.localUnlockService = const LocalUnlockService(),
     this.masterKeyDeriver = const MasterKeyDeriver(),
+    this.onDatabaseSaved,
     LocalAuthGate? localAuthGate,
   }) : localAuthGate = localAuthGate ?? LocalAuthGate();
 
@@ -61,6 +62,7 @@ class AuthController extends ChangeNotifier {
   final LocalUnlockService localUnlockService;
   final MasterKeyDeriver masterKeyDeriver;
   final LocalAuthGate localAuthGate;
+  final VoidCallback? onDatabaseSaved;
 
   AuthState _state = AuthState.checking;
   UnlockedVault? _unlockedVault;
@@ -222,7 +224,10 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  Future<bool> saveDatabase(PasswordDatabase database) async {
+  Future<bool> saveDatabase(
+    PasswordDatabase database, {
+    bool notifyDatabaseSaved = true,
+  }) async {
     final unlockedVault = _unlockedVault;
 
     if (unlockedVault == null) {
@@ -249,6 +254,10 @@ class AuthController extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
+      if (notifyDatabaseSaved) {
+        onDatabaseSaved?.call();
+      }
+
       return true;
     } catch (_) {
       _setErrorMessage(AuthMessage.couldNotSaveDatabase);
@@ -257,7 +266,7 @@ class AuthController extends ChangeNotifier {
       return false;
     }
   }
-
+  
   Future<bool> changeMasterPassword({
     required String currentPassword,
     required String newPassword,

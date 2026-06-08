@@ -3,8 +3,6 @@ import "package:flutter/material.dart";
 import "../../l10n/app_localizations.dart";
 import "../screen_popup.dart";
 
-enum CloudConflictChoice { useLocal, useCloud, keepBoth }
-
 class CloudSyncConflictPopup extends StatelessWidget {
   const CloudSyncConflictPopup({super.key});
 
@@ -19,26 +17,11 @@ class CloudSyncConflictPopup extends StatelessWidget {
         Navigator.of(context).pop();
       },
       children: [
-        FilledButton.icon(
+        FilledButton(
           onPressed: () {
-            Navigator.of(context).pop(CloudConflictChoice.useLocal);
+            Navigator.of(context).pop(true);
           },
-          icon: const Icon(Icons.phone_rounded),
-          label: Text(l10n.useThisDevicesVersion),
-        ),
-        FilledButton.icon(
-          onPressed: () {
-            Navigator.of(context).pop(CloudConflictChoice.useCloud);
-          },
-          icon: const Icon(Icons.cloud_rounded),
-          label: Text(l10n.useCloudVersion),
-        ),
-        FilledButton.icon(
-          onPressed: () {
-            Navigator.of(context).pop(CloudConflictChoice.keepBoth);
-          },
-          icon: const Icon(Icons.content_copy_rounded),
-          label: Text(l10n.keepBothVersions),
+          child: Text("Resolve"),
         ),
       ],
     );
