@@ -141,7 +141,10 @@ class FoldersTab extends StatelessWidget {
         final database = authController.database;
         final entries = database?.entries ?? const <PasswordEntry>[];
         final customFolders = database?.folders ?? const <PasswordFolder>[];
-        final detectedFolders = detectFolders(entries);
+        final detectedFolders = detectFolders(
+          entries,
+          untitledName: l10n.untitled,
+        );
 
         return Scaffold(
           body: SafeArea(

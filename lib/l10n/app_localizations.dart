@@ -128,6 +128,12 @@ abstract class AppLocalizations {
   /// **'Normal characters'**
   String get passwordGeneratorNormalCharacters;
 
+  /// No description provided for @passwordGeneratorUppercaseCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'Uppercase characters'**
+  String get passwordGeneratorUppercaseCharacters;
+
   /// No description provided for @passwordGeneratorSpecialCharacters.
   ///
   /// In en, this message translates to:
@@ -410,6 +416,36 @@ abstract class AppLocalizations {
   /// **'OneDrive'**
   String get oneDrive;
 
+  /// No description provided for @yes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get yes;
+
+  /// No description provided for @no.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get no;
+
+  /// No description provided for @favorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite'**
+  String get favorite;
+
+  /// No description provided for @icon.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get icon;
+
+  /// No description provided for @resolve.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve'**
+  String get resolve;
+
   /// No description provided for @titleLabel.
   ///
   /// In en, this message translates to:
@@ -451,6 +487,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not set'**
   String get notSet;
+
+  /// No description provided for @untitled.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled'**
+  String get untitled;
 
   /// No description provided for @copyLabel.
   ///
@@ -800,6 +842,12 @@ abstract class AppLocalizations {
   /// **'Close cloud sync conflict'**
   String get closeCloudSyncConflict;
 
+  /// No description provided for @closeVersionComparison.
+  ///
+  /// In en, this message translates to:
+  /// **'Close version comparison'**
+  String get closeVersionComparison;
+
   /// No description provided for @cloudConflictSubtitle.
   ///
   /// In en, this message translates to:
@@ -823,6 +871,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Keep both versions'**
   String get keepBothVersions;
+
+  /// No description provided for @cloudNewOnThisDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'New on this device'**
+  String get cloudNewOnThisDevice;
+
+  /// No description provided for @cloudAvailableInCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Available in cloud'**
+  String get cloudAvailableInCloud;
+
+  /// No description provided for @cloudDifferentVersions.
+  ///
+  /// In en, this message translates to:
+  /// **'Different versions'**
+  String get cloudDifferentVersions;
+
+  /// No description provided for @chooseVersionToInspect.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which version you want to inspect.'**
+  String get chooseVersionToInspect;
+
+  /// No description provided for @enterMasterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your master password.'**
+  String get enterMasterPassword;
+
+  /// No description provided for @cloudVaultDecryptPasswordFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The cloud vault could not be decrypted. Check the master password and try again.'**
+  String get cloudVaultDecryptPasswordFailed;
+
+  /// No description provided for @confirmMasterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm master password'**
+  String get confirmMasterPassword;
+
+  /// No description provided for @cloudVaultMasterPasswordReason.
+  ///
+  /// In en, this message translates to:
+  /// **'This cloud vault was created separately, so the app needs your master password once to compare it with this device.'**
+  String get cloudVaultMasterPasswordReason;
+
+  /// No description provided for @unlockCloudVault.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock cloud vault'**
+  String get unlockCloudVault;
+
+  /// No description provided for @cloudVaultDecryptFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The cloud vault could not be decrypted.'**
+  String get cloudVaultDecryptFailed;
+
+  /// No description provided for @cloudMergedVaultSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save merged vault.'**
+  String get cloudMergedVaultSaveFailed;
+
+  /// No description provided for @cloudUploadAfterLocalSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved locally, but cloud upload failed.'**
+  String get cloudUploadAfterLocalSaveFailed;
+
+  /// No description provided for @cloudSyncChangesApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud sync changes applied.'**
+  String get cloudSyncChangesApplied;
+
+  /// No description provided for @cloudApplySelectedChangesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not apply selected changes.'**
+  String get cloudApplySelectedChangesFailed;
+
+  /// No description provided for @checkingCloudSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking cloud sync'**
+  String get checkingCloudSync;
+
+  /// No description provided for @checkingCloudSyncSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait while the encrypted vault is compared.'**
+  String get checkingCloudSyncSubtitle;
+
+  /// No description provided for @cloudSyncPausedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud sync is paused'**
+  String get cloudSyncPausedTitle;
+
+  /// No description provided for @resolveSyncIssueBeforeUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve the sync issue before changes can upload again.'**
+  String get resolveSyncIssueBeforeUpload;
+
+  /// No description provided for @cloudSyncNeedsAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud sync needs attention'**
+  String get cloudSyncNeedsAttention;
+
+  /// No description provided for @cloudSyncUpToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud sync is up to date'**
+  String get cloudSyncUpToDate;
+
+  /// No description provided for @noCloudSyncIssuesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No cloud sync issues were found.'**
+  String get noCloudSyncIssuesFound;
+
+  /// No description provided for @cloudReviewChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Review changes'**
+  String get cloudReviewChanges;
+
+  /// No description provided for @cloudAllChangesReviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'All changes have been reviewed.'**
+  String get cloudAllChangesReviewed;
+
+  /// No description provided for @cloudReviewDifferenceCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Review {undecidedCount} of {totalCount, plural, =1{1 difference} other{{totalCount} differences}}.'**
+  String cloudReviewDifferenceCount(int undecidedCount, int totalCount);
+
+  /// No description provided for @cloudApplyingChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Applying changes...'**
+  String get cloudApplyingChanges;
+
+  /// No description provided for @cloudApplyChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply changes'**
+  String get cloudApplyChanges;
+
+  /// No description provided for @cloudSelectForAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select for all:'**
+  String get cloudSelectForAll;
+
+  /// No description provided for @cloudKeepLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep local'**
+  String get cloudKeepLocal;
+
+  /// No description provided for @cloudKeepCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep cloud'**
+  String get cloudKeepCloud;
+
+  /// No description provided for @cloudUploadToCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload to cloud'**
+  String get cloudUploadToCloud;
+
+  /// No description provided for @cloudDeleteCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete cloud'**
+  String get cloudDeleteCloud;
+
+  /// No description provided for @cloudDeleteLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete local'**
+  String get cloudDeleteLocal;
+
+  /// No description provided for @cloudImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get cloudImport;
+
+  /// No description provided for @cloudUseCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Use cloud'**
+  String get cloudUseCloud;
+
+  /// No description provided for @cloudOnlyLocalDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This entry exists only on this device.'**
+  String get cloudOnlyLocalDescription;
+
+  /// No description provided for @cloudOnlyCloudDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This entry exists only in your cloud vault.'**
+  String get cloudOnlyCloudDescription;
+
+  /// No description provided for @cloudOnThisDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'On this device'**
+  String get cloudOnThisDevice;
+
+  /// No description provided for @cloudInCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'In cloud'**
+  String get cloudInCloud;
+
+  /// No description provided for @cloudFieldOnThisDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'{field} on this device'**
+  String cloudFieldOnThisDevice(Object field);
+
+  /// No description provided for @cloudFieldInCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'{field} in cloud'**
+  String cloudFieldInCloud(Object field);
+
+  /// No description provided for @cloudChangedFieldsFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'This entry has different local and cloud versions.'**
+  String get cloudChangedFieldsFallback;
+
+  /// No description provided for @cloudChangedFieldsList.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes: {fields}'**
+  String cloudChangedFieldsList(Object fields);
+
+  /// No description provided for @cloudChangedFieldsListWithMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes: {fields} +{count} more'**
+  String cloudChangedFieldsListWithMore(Object fields, int count);
 
   /// No description provided for @titleRequired.
   ///

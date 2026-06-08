@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 
 import "../../cloud/cloud_diff.dart";
+import "../../l10n/app_localizations.dart";
 
 import "../section_card.dart";
 
@@ -26,13 +27,14 @@ class CloudReviewSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final undecidedCount = _totalCount - selectionCount;
 
     return SectionCard(
-      title: "Review changes",
+      title: l10n.cloudReviewChanges,
       subtitle: undecidedCount == 0
-          ? "All changes have been reviewed."
-          : "$undecidedCount of $_totalCount differences.",
+          ? l10n.cloudAllChangesReviewed
+          : l10n.cloudReviewDifferenceCount(undecidedCount, _totalCount),
       icon: Icons.rule_rounded,
       children: [
         SizedBox(
@@ -46,12 +48,14 @@ class CloudReviewSummary extends StatelessWidget {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.done_all_rounded),
-            label: Text(isApplying ? "Applying changes..." : "Apply changes"),
+            label: Text(
+              isApplying ? l10n.cloudApplyingChanges : l10n.cloudApplyChanges,
+            ),
           ),
         ),
 
         const SizedBox(height: 16),
-        Text("Select for all:"),
+        Text(l10n.cloudSelectForAll),
         SizedBox(
           width: double.infinity,
           child: SegmentedButton<CloudEntryChoice>(
@@ -60,12 +64,12 @@ class CloudReviewSummary extends StatelessWidget {
               ButtonSegment(
                 value: CloudEntryChoice.keepLocal,
                 icon: Icon(Icons.phone_android_rounded),
-                label: Text("Keep local"),
+                label: Text(l10n.cloudKeepLocal),
               ),
               ButtonSegment(
                 value: CloudEntryChoice.useCloud,
                 icon: Icon(Icons.cloud_rounded),
-                label: Text("Keep cloud"),
+                label: Text(l10n.cloudKeepCloud),
               ),
             ],
             selected: const <CloudEntryChoice>{},

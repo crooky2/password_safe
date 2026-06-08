@@ -274,7 +274,7 @@ class AuthController extends ChangeNotifier {
       return false;
     }
   }
-  
+
   Future<bool> changeMasterPassword({
     required String currentPassword,
     required String newPassword,

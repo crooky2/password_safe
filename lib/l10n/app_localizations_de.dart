@@ -24,6 +24,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get passwordGeneratorNormalCharacters => 'Normale Zeichen';
 
   @override
+  String get passwordGeneratorUppercaseCharacters => 'Großbuchstaben';
+
+  @override
   String get passwordGeneratorSpecialCharacters => 'Sonderzeichen';
 
   @override
@@ -190,6 +193,21 @@ class AppLocalizationsDe extends AppLocalizations {
   String get oneDrive => 'OneDrive';
 
   @override
+  String get yes => 'Ja';
+
+  @override
+  String get no => 'Nein';
+
+  @override
+  String get favorite => 'Favorit';
+
+  @override
+  String get icon => 'Symbol';
+
+  @override
+  String get resolve => 'Lösen';
+
+  @override
   String get titleLabel => 'Titel';
 
   @override
@@ -209,6 +227,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get notSet => 'Nicht gesetzt';
+
+  @override
+  String get untitled => 'Ohne Titel';
 
   @override
   String copyLabel(Object label) {
@@ -409,6 +430,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Cloud-Synchronisierungskonflikt schließen';
 
   @override
+  String get closeVersionComparison => 'Versionsvergleich schließen';
+
+  @override
   String get cloudConflictSubtitle =>
       'Die Tresordatei auf diesem Gerät unterscheidet sich von der in der Cloud.';
 
@@ -420,6 +444,166 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get keepBothVersions => 'Beide Versionen behalten';
+
+  @override
+  String get cloudNewOnThisDevice => 'Neu auf diesem Gerät';
+
+  @override
+  String get cloudAvailableInCloud => 'In der Cloud verfügbar';
+
+  @override
+  String get cloudDifferentVersions => 'Unterschiedliche Versionen';
+
+  @override
+  String get chooseVersionToInspect =>
+      'Wähle, welche Version du ansehen möchtest.';
+
+  @override
+  String get enterMasterPassword => 'Gib dein Master-Passwort ein.';
+
+  @override
+  String get cloudVaultDecryptPasswordFailed =>
+      'Der Cloud-Tresor konnte nicht entschlüsselt werden. Prüfe das Master-Passwort und versuche es erneut.';
+
+  @override
+  String get confirmMasterPassword => 'Master-Passwort bestätigen';
+
+  @override
+  String get cloudVaultMasterPasswordReason =>
+      'Dieser Cloud-Tresor wurde separat erstellt, deshalb benötigt die App einmal dein Master-Passwort, um ihn mit diesem Gerät zu vergleichen.';
+
+  @override
+  String get unlockCloudVault => 'Cloud-Tresor entsperren';
+
+  @override
+  String get cloudVaultDecryptFailed =>
+      'Der Cloud-Tresor konnte nicht entschlüsselt werden.';
+
+  @override
+  String get cloudMergedVaultSaveFailed =>
+      'Der zusammengeführte Tresor konnte nicht gespeichert werden.';
+
+  @override
+  String get cloudUploadAfterLocalSaveFailed =>
+      'Lokal gespeichert, aber der Cloud-Upload ist fehlgeschlagen.';
+
+  @override
+  String get cloudSyncChangesApplied =>
+      'Cloud-Synchronisierungsänderungen angewendet.';
+
+  @override
+  String get cloudApplySelectedChangesFailed =>
+      'Ausgewählte Änderungen konnten nicht angewendet werden.';
+
+  @override
+  String get checkingCloudSync => 'Cloud-Synchronisierung wird geprüft';
+
+  @override
+  String get checkingCloudSyncSubtitle =>
+      'Bitte warte, während der verschlüsselte Tresor verglichen wird.';
+
+  @override
+  String get cloudSyncPausedTitle => 'Cloud-Synchronisierung ist pausiert';
+
+  @override
+  String get resolveSyncIssueBeforeUpload =>
+      'Behebe das Synchronisierungsproblem, bevor Änderungen wieder hochgeladen werden können.';
+
+  @override
+  String get cloudSyncNeedsAttention =>
+      'Cloud-Synchronisierung benötigt Aufmerksamkeit';
+
+  @override
+  String get cloudSyncUpToDate => 'Cloud-Synchronisierung ist aktuell';
+
+  @override
+  String get noCloudSyncIssuesFound =>
+      'Es wurden keine Cloud-Synchronisierungsprobleme gefunden.';
+
+  @override
+  String get cloudReviewChanges => 'Änderungen prüfen';
+
+  @override
+  String get cloudAllChangesReviewed => 'Alle Änderungen wurden geprüft.';
+
+  @override
+  String cloudReviewDifferenceCount(int undecidedCount, int totalCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      totalCount,
+      locale: localeName,
+      other: '$totalCount Unterschieden',
+      one: '1 Unterschied',
+    );
+    return 'Prüfe $undecidedCount von $_temp0.';
+  }
+
+  @override
+  String get cloudApplyingChanges => 'Änderungen werden angewendet...';
+
+  @override
+  String get cloudApplyChanges => 'Änderungen anwenden';
+
+  @override
+  String get cloudSelectForAll => 'Für alle auswählen:';
+
+  @override
+  String get cloudKeepLocal => 'Lokal behalten';
+
+  @override
+  String get cloudKeepCloud => 'Cloud behalten';
+
+  @override
+  String get cloudUploadToCloud => 'In Cloud hochladen';
+
+  @override
+  String get cloudDeleteCloud => 'Cloud-Version löschen';
+
+  @override
+  String get cloudDeleteLocal => 'Lokale Version löschen';
+
+  @override
+  String get cloudImport => 'Importieren';
+
+  @override
+  String get cloudUseCloud => 'Cloud verwenden';
+
+  @override
+  String get cloudOnlyLocalDescription =>
+      'Dieser Eintrag existiert nur auf diesem Gerät.';
+
+  @override
+  String get cloudOnlyCloudDescription =>
+      'Dieser Eintrag existiert nur in deinem Cloud-Tresor.';
+
+  @override
+  String get cloudOnThisDevice => 'Auf diesem Gerät';
+
+  @override
+  String get cloudInCloud => 'In der Cloud';
+
+  @override
+  String cloudFieldOnThisDevice(Object field) {
+    return '$field auf diesem Gerät';
+  }
+
+  @override
+  String cloudFieldInCloud(Object field) {
+    return '$field in der Cloud';
+  }
+
+  @override
+  String get cloudChangedFieldsFallback =>
+      'Dieser Eintrag hat unterschiedliche lokale und Cloud-Versionen.';
+
+  @override
+  String cloudChangedFieldsList(Object fields) {
+    return 'Änderungen: $fields';
+  }
+
+  @override
+  String cloudChangedFieldsListWithMore(Object fields, int count) {
+    return 'Änderungen: $fields +$count weitere';
+  }
 
   @override
   String get titleRequired => 'Titel ist erforderlich.';

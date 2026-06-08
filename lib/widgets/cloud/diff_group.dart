@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 
 import "../../cloud/cloud_diff.dart";
+import "../../l10n/app_localizations.dart";
 
 import "../section_card.dart";
 import "changed_fields.dart";
@@ -23,6 +24,8 @@ class CloudDiffGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (entries.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -35,6 +38,7 @@ class CloudDiffGroup extends StatelessWidget {
         for (final diff in entries)
           _CloudDiffRow(
             diff: diff,
+            l10n: l10n,
             selectedChoice: choices[diff.id] ?? CloudEntryChoice.undecided,
             onChoiceChanged: onChoiceChanged,
             onOpenDetails: onOpenDetails,
@@ -51,6 +55,7 @@ class CloudDiffGroup extends StatelessWidget {
 class _CloudDiffRow extends StatelessWidget {
   const _CloudDiffRow({
     required this.diff,
+    required this.l10n,
     required this.selectedChoice,
     required this.onChoiceChanged,
     required this.onOpenDetails,
@@ -58,6 +63,7 @@ class _CloudDiffRow extends StatelessWidget {
   });
 
   final CloudEntryDiff diff;
+  final AppLocalizations l10n;
   final CloudEntryChoice selectedChoice;
   final void Function(String entryId, CloudEntryChoice choice) onChoiceChanged;
   final void Function(CloudEntryDiff diff) onOpenDetails;
@@ -66,17 +72,17 @@ class _CloudDiffRow extends StatelessWidget {
 
   String _localChoiceLabel() {
     return switch (diff.type) {
-      CloudEntryDiffType.onlyLocal => "Upload to cloud",
-      CloudEntryDiffType.onlyCloud => "Delete cloud",
-      CloudEntryDiffType.changed => "Keep local",
+      CloudEntryDiffType.onlyLocal => l10n.cloudUploadToCloud,
+      CloudEntryDiffType.onlyCloud => l10n.cloudDeleteCloud,
+      CloudEntryDiffType.changed => l10n.cloudKeepLocal,
     };
   }
 
   String _cloudChoiceLabel() {
     return switch (diff.type) {
-      CloudEntryDiffType.onlyLocal => "Delete local",
-      CloudEntryDiffType.onlyCloud => "Import",
-      CloudEntryDiffType.changed => "Use cloud",
+      CloudEntryDiffType.onlyLocal => l10n.cloudDeleteLocal,
+      CloudEntryDiffType.onlyCloud => l10n.cloudImport,
+      CloudEntryDiffType.changed => l10n.cloudUseCloud,
     };
   }
 
@@ -104,11 +110,9 @@ class _CloudDiffRow extends StatelessWidget {
         onOpenDetails(diff);
       },
       subtitle: switch (diff.type) {
-        CloudEntryDiffType.onlyLocal =>
-          "This entry exists only on this device.",
-        CloudEntryDiffType.onlyCloud =>
-          "This entry exists only in your cloud vault.",
-        CloudEntryDiffType.changed => cloudChangedFieldsSummary(diff),
+        CloudEntryDiffType.onlyLocal => l10n.cloudOnlyLocalDescription,
+        CloudEntryDiffType.onlyCloud => l10n.cloudOnlyCloudDescription,
+        CloudEntryDiffType.changed => cloudChangedFieldsSummary(l10n, diff),
       },
       icon: switch (diff.type) {
         CloudEntryDiffType.onlyLocal => Icons.upload_rounded,

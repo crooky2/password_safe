@@ -14,7 +14,10 @@ class DetectedFolder {
   final List<PasswordEntry> entries;
 }
 
-List<DetectedFolder> detectFolders(List<PasswordEntry> entries) {
+List<DetectedFolder> detectFolders(
+  List<PasswordEntry> entries, {
+  required String untitledName,
+}) {
   final groups = <String, _FolderDraft>{};
 
   void addGroup({
@@ -36,7 +39,7 @@ List<DetectedFolder> detectFolders(List<PasswordEntry> entries) {
     if (titleKey.isNotEmpty) {
       addGroup(
         key: "title:$titleKey",
-        name: _prettyName(entry.title),
+        name: _prettyName(entry.title, untitledName),
         source: DetectedFolderSource.title,
         entry: entry,
       );
@@ -46,7 +49,7 @@ List<DetectedFolder> detectFolders(List<PasswordEntry> entries) {
     if (usernameDomain != null) {
       addGroup(
         key: "username:$usernameDomain",
-        name: _domainName(usernameDomain),
+        name: _domainName(usernameDomain, untitledName),
         source: DetectedFolderSource.usernameDomain,
         entry: entry,
       );
@@ -56,7 +59,7 @@ List<DetectedFolder> detectFolders(List<PasswordEntry> entries) {
     if (urlHost != null) {
       addGroup(
         key: "url:$urlHost",
-        name: _domainName(urlHost),
+        name: _domainName(urlHost, untitledName),
         source: DetectedFolderSource.urlHost,
         entry: entry,
       );
@@ -105,11 +108,11 @@ String _normalize(String value) {
   return value.trim().toLowerCase().replaceAll(RegExp(r"\s+"), " ");
 }
 
-String _prettyName(String value) {
+String _prettyName(String value, String untitledName) {
   final trimmed = value.trim();
 
   if (trimmed.isEmpty) {
-    return "Untitled";
+    return untitledName;
   }
 
   return trimmed[0].toUpperCase() + trimmed.substring(1);
@@ -144,11 +147,11 @@ String? _urlHost(String value) {
   return host;
 }
 
-String _domainName(String domain) {
+String _domainName(String domain, String untitledName) {
   final cleanDomain = domain
       .replaceFirst(RegExp(r"^www\."), "")
       .replaceFirst(RegExp(r"^mail\."), "");
 
   final firstPart = cleanDomain.split(".").first;
-  return _prettyName(firstPart);
+  return _prettyName(firstPart, untitledName);
 }
