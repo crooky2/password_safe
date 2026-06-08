@@ -18,11 +18,20 @@ import "../l10n/localized_messages.dart";
 
 import "../widgets/section_card.dart";
 import "../widgets/screen_frame.dart";
+import "../widgets/secret_text_field.dart";
 import "../widgets/home/popup_entry.dart";
 import "../widgets/screen_popup.dart";
 import "../widgets/cloud/review_summary.dart";
 import "../widgets/cloud/diff_group.dart";
 import "../widgets/cloud/changed_fields.dart";
+
+class _CloudVaultNeedsMasterPasswordException implements Exception {
+  const _CloudVaultNeedsMasterPasswordException();
+}
+
+class _CloudVaultMasterPasswordRejectedException implements Exception {
+  const _CloudVaultMasterPasswordRejectedException();
+}
 
 class CloudScreen extends StatefulWidget {
   const CloudScreen({
@@ -40,10 +49,13 @@ class CloudScreen extends StatefulWidget {
 
 class _CloudScreenState extends State<CloudScreen> {
   late Future<CloudDatabaseDiff?> _pendingDiffFuture;
+  final TextEditingController _cloudMasterPasswordController =
+      TextEditingController();
   final Map<String, CloudEntryChoice> _choices = {};
 
   CloudSyncConflict? _lastPendingConflict;
   PasswordDatabase? _lastLocalDatabase;
+  String? _cloudMasterPasswordInputError;
 
   bool _isApplying = false;
 
@@ -58,7 +70,9 @@ class _CloudScreenState extends State<CloudScreen> {
     };
   }
 
-  Future<CloudDatabaseDiff?> _loadPendingDiff() async {
+  Future<CloudDatabaseDiff?> _loadPendingDiff({
+    String? cloudMasterPassword,
+  }) async {
     final conflict = widget.cloudController.pendingConflict;
     final unlockedVault = widget.authController.unlockedVault;
     final localDatabase = widget.authController.database;
@@ -72,6 +86,7 @@ class _CloudScreenState extends State<CloudScreen> {
     final cloudVault = await _unlockCloud(
       cloudVaultFile,
       unlockedVault.vaultKey,
+      cloudMasterPassword: cloudMasterPassword,
     );
 
     return CloudDatabaseDiff.compare(
@@ -81,6 +96,10 @@ class _CloudScreenState extends State<CloudScreen> {
   }
 
   void _refreshPendingDiff() {
+    if (_isApplying) {
+      return;
+    }
+
     final conflict = widget.cloudController.pendingConflict;
     final localDatabase = widget.authController.database;
 
@@ -93,23 +112,75 @@ class _CloudScreenState extends State<CloudScreen> {
       _lastPendingConflict = conflict;
       _lastLocalDatabase = localDatabase;
       _choices.clear();
+      _cloudMasterPasswordController.clear();
+      _cloudMasterPasswordInputError = null;
       _pendingDiffFuture = _loadPendingDiff();
     });
   }
 
   Future<UnlockedVault> _unlockCloud(
     VaultFile cloudVaultFile,
-    Uint8List localVaultKey,
-  ) async {
-    return widget.authController.unlocker.unlockWithVaultKey(
-      vaultFile: cloudVaultFile,
-      vaultKey: localVaultKey,
-    );
+    Uint8List localVaultKey, {
+    String? cloudMasterPassword,
+  }) async {
+    final masterPassword =
+        cloudMasterPassword ??
+        widget.authController.currentSessionMasterPassword;
+
+    try {
+      return await widget.authController.unlocker.unlockWithVaultKey(
+        vaultFile: cloudVaultFile,
+        vaultKey: localVaultKey,
+      );
+    } catch (_) {
+      if (masterPassword == null) {
+        throw const _CloudVaultNeedsMasterPasswordException();
+      }
+    }
+
+    try {
+      return await widget.authController.unlocker.unlock(
+        vaultFile: cloudVaultFile,
+        masterPassword: masterPassword,
+      );
+    } catch (_) {
+      if (cloudMasterPassword == null) {
+        throw const _CloudVaultNeedsMasterPasswordException();
+      }
+
+      throw const _CloudVaultMasterPasswordRejectedException();
+    }
+  }
+
+  void _submitCloudMasterPassword() {
+    final password = _cloudMasterPasswordController.text;
+
+    if (password.trim().isEmpty) {
+      setState(() {
+        _cloudMasterPasswordInputError = "Enter your master password.";
+      });
+      return;
+    }
+
+    setState(() {
+      _cloudMasterPasswordInputError = null;
+      _pendingDiffFuture = _loadPendingDiff(cloudMasterPassword: password);
+    });
+
+    _cloudMasterPasswordController.clear();
   }
 
   void _chooseEntry(String entryId, CloudEntryChoice choice) {
     setState(() {
       _choices[entryId] = choice;
+    });
+  }
+
+  void _chooseAllEntries(CloudDatabaseDiff diff, CloudEntryChoice choice) {
+    setState(() {
+      for (final entryDiff in diff.all) {
+        _choices[entryDiff.id] = choice;
+      }
     });
   }
 
@@ -249,6 +320,7 @@ class _CloudScreenState extends State<CloudScreen> {
   void dispose() {
     widget.cloudController.removeListener(_refreshPendingDiff);
     widget.authController.removeListener(_refreshPendingDiff);
+    _cloudMasterPasswordController.dispose();
     super.dispose();
   }
 
@@ -278,12 +350,19 @@ class _CloudScreenState extends State<CloudScreen> {
                     }
 
                     if (snapshot.hasError) {
-                      return Text(
-                        "The cloud vault could not be decrypted.",
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      );
+                      final error = snapshot.error;
+
+                      if (error is _CloudVaultNeedsMasterPasswordException ||
+                          error is _CloudVaultMasterPasswordRejectedException) {
+                        return _buildCloudMasterPasswordPrompt(
+                          context,
+                          didRejectPassword:
+                              error
+                                  is _CloudVaultMasterPasswordRejectedException,
+                        );
+                      }
+
+                      return _buildCloudDecryptError(context);
                     }
 
                     final diff = snapshot.data!;
@@ -296,6 +375,9 @@ class _CloudScreenState extends State<CloudScreen> {
                           isApplying: _isApplying,
                           onApply: () {
                             _applySelectedChanges(diff);
+                          },
+                          onSelectAll: (choice) {
+                            _chooseAllEntries(diff, choice);
                           },
                         ),
                         CloudDiffGroup(
@@ -334,6 +416,49 @@ class _CloudScreenState extends State<CloudScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCloudMasterPasswordPrompt(
+    BuildContext context, {
+    required bool didRejectPassword,
+  }) {
+    final theme = Theme.of(context);
+    final errorMessage = didRejectPassword
+        ? "The cloud vault could not be decrypted. Check the master password and try again."
+        : _cloudMasterPasswordInputError;
+
+    return SectionCard(
+      title: "Confirm master password",
+      subtitle:
+          "This cloud vault was created separately, so the app needs your master password once to compare it with this device.",
+      icon: Icons.cloud_queue_rounded,
+      borderColor: didRejectPassword ? theme.colorScheme.error : null,
+      children: [
+        SecretTextField(
+          controller: _cloudMasterPasswordController,
+          labelText: "Master password",
+          enableBorder: true,
+          onSubmitted: (_) => _submitCloudMasterPassword(),
+        ),
+        if (errorMessage != null) ...[
+          const SizedBox(height: 12),
+          Text(errorMessage, style: TextStyle(color: theme.colorScheme.error)),
+        ],
+        const SizedBox(height: 12),
+        FilledButton.icon(
+          onPressed: _submitCloudMasterPassword,
+          icon: const Icon(Icons.lock_open_rounded),
+          label: const Text("Unlock cloud vault"),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCloudDecryptError(BuildContext context) {
+    return Text(
+      "The cloud vault could not be decrypted.",
+      style: TextStyle(color: Theme.of(context).colorScheme.error),
     );
   }
 
