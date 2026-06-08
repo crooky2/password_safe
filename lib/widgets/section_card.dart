@@ -8,6 +8,8 @@ class SectionCard extends StatelessWidget {
     this.title,
     this.subtitle,
     this.icon,
+    this.backgroundColor,
+    this.borderColor,
     this.action,
     this.additionalActionIconButton,
     this.contextMenuItems = const [],
@@ -17,6 +19,8 @@ class SectionCard extends StatelessWidget {
   final String? title;
   final String? subtitle;
   final IconData? icon;
+  final Color? backgroundColor;
+  final Color? borderColor;
   final VoidCallback? action;
   final IconButton? additionalActionIconButton;
   final List<SectionCardMenuItem> contextMenuItems;
@@ -66,6 +70,14 @@ class SectionCard extends StatelessWidget {
 
           return Card(
             clipBehavior: Clip.antiAlias,
+            color: backgroundColor,
+            borderOnForeground: true,
+            shape: RoundedRectangleBorder(
+              side: borderColor != null
+                  ? BorderSide(color: borderColor!)
+                  : BorderSide.none,
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: InkWell(
               onTap: isInteractive
                   ? () {

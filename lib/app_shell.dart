@@ -5,6 +5,7 @@ import "l10n/app_localizations.dart";
 
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/cloud_screen.dart';
 
 import "auth/auth_controller.dart";
 
@@ -33,7 +34,11 @@ class _AppShellState extends State<AppShell> {
 
   List<Widget> get _pages {
     return [
-      HomeScreen(authController: widget.authController),
+      HomeScreen(
+        authController: widget.authController, 
+        cloudController: widget.cloudController,
+        onOpenCloudScreen: _openCloudScreen,
+      ),
       SettingsScreen(
         authController: widget.authController,
         cloudController: widget.cloudController,
@@ -47,12 +52,12 @@ class _AppShellState extends State<AppShell> {
       NavigationDestination(
         icon: const Icon(Icons.home_outlined),
         selectedIcon: const Icon(Icons.home_rounded),
-        label: l10n.dashboard,
+        label: "",
       ),
       NavigationDestination(
         icon: const Icon(Icons.settings_outlined),
         selectedIcon: const Icon(Icons.settings_rounded),
-        label: l10n.settings,
+        label: "",
       ),
     ];
   }
@@ -62,6 +67,17 @@ class _AppShellState extends State<AppShell> {
       _previousIndex = _selectedIndex;
       _selectedIndex = index;
     });
+  }
+
+  void _openCloudScreen() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => CloudScreen(
+          authController: widget.authController,
+          cloudController: widget.cloudController,
+        ),
+      )
+    );
   }
 
   Widget _buildAnimatedPage(Widget page) {

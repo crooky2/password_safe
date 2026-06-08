@@ -1,7 +1,7 @@
 ## Download
-Download the latest Android APK from the GitHub Releases page:
+Download the latest Android APK or Windows EXE from the GitHub Releases page:
 
-[Download Password Safe for Android and Windows](https://github.com/crooky2/password_safe/releases/latest)
+[Download Password Safe for Android or Windows](https://github.com/crooky2/password_safe/releases/latest)
 
 
 ## PasswordSafe

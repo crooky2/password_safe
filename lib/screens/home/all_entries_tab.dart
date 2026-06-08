@@ -5,15 +5,12 @@ import "../../auth/auth_controller.dart";
 import "../../widgets/screen_frame.dart";
 import "../../widgets/section_card.dart";
 import "../../widgets/section_card_lightweight.dart";
-import "../../widgets/screen_popup.dart";
 import "../../widgets/home/entry_actions.dart";
+import "../../widgets/home/popup_entry.dart";
 
 import "../../vault/password_database.dart";
 import "../../l10n/app_localizations.dart";
 
-import "../../security/timed_clipboard.dart";
-
-enum _EntryPopupAction { edit, delete, clone }
 
 class AllEntriesTab extends StatefulWidget {
   const AllEntriesTab({
@@ -118,63 +115,13 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
   ) async {
     final l10n = AppLocalizations.of(context)!;
 
-    final action = await showGeneralDialog<_EntryPopupAction>(
+    final action = await showGeneralDialog<EntryDetailsPopupAction>(
       context: context,
       barrierDismissible: true,
       barrierLabel: l10n.closeEntryDetails,
       barrierColor: Colors.transparent,
       pageBuilder: (context, animation, secondaryAnimation) {
-        return ScreenPopup(
-          title: entry.title,
-          onClose: () {
-            Navigator.of(context).pop();
-          },
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop(_EntryPopupAction.edit);
-                    },
-                    icon: const Icon(Icons.edit, size: 18),
-                    label: Text(l10n.edit),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop(_EntryPopupAction.clone);
-                    },
-                    icon: const Icon(Icons.copy_sharp, size: 18),
-                    label: Text(l10n.clone),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop(_EntryPopupAction.delete);
-                    },
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.error,
-                      foregroundColor: Theme.of(context).colorScheme.onError,
-                    ),
-                    icon: const Icon(Icons.delete, size: 18),
-                    label: Text(l10n.delete),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            _EntryDetail(label: l10n.username, value: entry.username),
-            _EntrySecretDetail(label: l10n.password, value: entry.password),
-            _EntryDetail(label: l10n.url, value: entry.url),
-            _EntryDetail(label: l10n.notes, value: entry.notes),
-          ],
-        );
+        return EntryDetailsPopup(entry: entry);
       },
     );
 
@@ -183,7 +130,7 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
     }
 
     switch (action) {
-      case _EntryPopupAction.edit:
+      case EntryDetailsPopupAction.edit:
         final savedEntry = await EntryActions(
           authController: authController,
         ).openEntryForm(context, entry: entry);
@@ -192,7 +139,7 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
           await _showEntryPopup(context, savedEntry);
         }
         return;
-      case _EntryPopupAction.delete:
+      case EntryDetailsPopupAction.delete:
         final success = await EntryActions(
           authController: authController,
         ).deleteEntry(context, entry: entry);
@@ -204,7 +151,7 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
           await _showEntryPopup(context, entry);
         }
         return;
-      case _EntryPopupAction.clone:
+      case EntryDetailsPopupAction.clone:
         final savedEntry = await EntryActions(
           authController: authController,
         ).openEntryForm(context, entry: entry, clone: true);
@@ -391,133 +338,6 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
           ),
         );
       },
-    );
-  }
-}
-
-class _EntryDetail extends StatelessWidget {
-  const _EntryDetail({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final displayValue = value.trim().isEmpty ? l10n.notSet : value;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: Theme.of(context).textTheme.labelMedium),
-          const SizedBox(height: 2),
-
-          Row(
-            children: [
-              Expanded(child: SelectableText(displayValue)),
-              IconButton(
-                tooltip: l10n.copyLabel(label),
-                onPressed: value.trim().isEmpty
-                    ? null
-                    : () async {
-                        await TimedClipboard.copyText(value);
-                      
-
-                        if (!context.mounted) {
-                          return;
-                        }
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(l10n.labelCopied(label))),
-                        );
-                      },
-                icon: const Icon(Icons.copy_rounded, size: 18),
-              ),
-            ],
-          ),
-          const Divider(height: 1, thickness: 1),
-        ],
-      ),
-    );
-  }
-}
-
-class _EntrySecretDetail extends StatefulWidget {
-  const _EntrySecretDetail({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  State<_EntrySecretDetail> createState() => _EntrySecretDetailState();
-}
-
-class _EntrySecretDetailState extends State<_EntrySecretDetail> {
-  bool _obscureText = true;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final hasValue = widget.value.trim().isNotEmpty;
-    final displayValue = hasValue
-        ? _obscureText
-              ? "•" * widget.value.length
-              : widget.value
-        : l10n.notSet;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(child: SelectableText(displayValue)),
-              IconButton(
-                tooltip: _obscureText
-                    ? l10n.showLabel(widget.label)
-                    : l10n.hideLabel(widget.label),
-
-                onPressed: () {
-                  setState(() {
-                    _obscureText = !_obscureText;
-                  });
-                },
-
-                icon: Icon(
-                  _obscureText
-                      ? Icons.visibility_rounded
-                      : Icons.visibility_off_rounded,
-                  size: 18,
-                ),
-              ),
-
-              IconButton(
-                tooltip: l10n.copyLabel(widget.label),
-                onPressed: hasValue
-                    ? () async {
-                        await TimedClipboard.copyText(widget.value);
-
-                        if (!context.mounted) {
-                          return;
-                        }
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(l10n.labelCopied(widget.label)),
-                          ),
-                        );
-                      }
-                    : null,
-                icon: const Icon(Icons.copy_rounded, size: 18),
-              ),
-            ],
-          ),
-          const Divider(height: 1, thickness: 1),
-        ],
-      ),
     );
   }
 }

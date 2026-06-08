@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 
 import 'app_shell.dart';
@@ -6,6 +8,7 @@ import "l10n/app_localizations.dart";
 
 import 'screens/lock_screen.dart';
 import "screens/setup_screen.dart";
+import "screens/cloud_screen.dart";
 
 import "auth/auth_controller.dart";
 
@@ -23,17 +26,91 @@ class RootGate extends StatefulWidget {
 }
 
 class _RootGateState extends State<RootGate> with WidgetsBindingObserver {
-  final AuthController _authController = AuthController();
+  late final AuthController _authController;
   final CloudController _cloudController = CloudController();
 
   bool _isShowingCloudConflict = false;
 
+  bool get _canShowCloudConflictPopup {
+    return mounted &&
+        !_isShowingCloudConflict &&
+        !_cloudController.isBusy &&
+        _authController.state == AuthState.unlocked &&
+        _cloudController.hasPendingConflict;
+  }
+
+  void _handleCloudConflictMaybeChanged() {
+    if (!_canShowCloudConflictPopup) {
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_canShowCloudConflictPopup) {
+        return;
+      }
+
+      _showConflictPopup();
+    });
+  }
+
+  Future<void> _showConflictPopup() async {
+    _isShowingCloudConflict = true;
+
+    final l10n = AppLocalizations.of(context)!;
+
+    bool? shouldResolve;
+
+    try {
+      shouldResolve = await showGeneralDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        barrierLabel: l10n.closeCloudSyncConflict,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return const CloudSyncConflictPopup();
+        },
+      );
+    } finally {
+      if (mounted) {
+        _isShowingCloudConflict = false;
+      }
+    }
+
+    if (!mounted ||
+        shouldResolve != true ||
+        _authController.state != AuthState.unlocked ||
+        !_cloudController.hasPendingConflict) {
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => CloudScreen(
+          authController: _authController,
+          cloudController: _cloudController,
+        ),
+      ),
+    );
+  }
+
+  void _syncSavedDatabaseIfSafe() {
+    if (!_cloudController.canAutoSyncLocalChange) {
+      _handleCloudConflictMaybeChanged();
+      return;
+    }
+
+    unawaited(_cloudController.syncLocalChange());
+  }
+
   @override
   void initState() {
     super.initState();
+
+    _authController = AuthController(onDatabaseSaved: _syncSavedDatabaseIfSafe);
+
     WidgetsBinding.instance.addObserver(this);
 
-    _cloudController.addListener(_handleCloudControllerChanged);
+    _authController.addListener(_handleCloudConflictMaybeChanged);
+    _cloudController.addListener(_handleCloudConflictMaybeChanged);
 
     _authController.initialize();
     _cloudController.initialize();
@@ -41,7 +118,9 @@ class _RootGateState extends State<RootGate> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    _cloudController.removeListener(_handleCloudControllerChanged);
+    _authController.removeListener(_handleCloudConflictMaybeChanged);
+    _cloudController.removeListener(_handleCloudConflictMaybeChanged);
+
     _authController.dispose();
     _cloudController.dispose();
 
@@ -59,55 +138,6 @@ class _RootGateState extends State<RootGate> with WidgetsBindingObserver {
         _authController.lock();
       }
     }
-  }
-
-  void _handleCloudControllerChanged() {
-    if (_isShowingCloudConflict || !_cloudController.hasPendingConflict) {
-      return;
-    }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted ||
-          _isShowingCloudConflict ||
-          !_cloudController.hasPendingConflict) {
-        return;
-      }
-
-      _isShowingCloudConflict = true;
-      final l10n = AppLocalizations.of(context)!;
-
-      final choice = await showGeneralDialog<CloudConflictChoice>(
-        context: context,
-        barrierDismissible: false,
-        barrierLabel: l10n.closeCloudSyncConflict,
-        pageBuilder: (context, animation, secondaryAnimation) {
-          return const CloudSyncConflictPopup();
-        },
-      );
-
-      if (!mounted) {
-        _isShowingCloudConflict = false;
-        return;
-      }
-
-      switch (choice) {
-        case CloudConflictChoice.useLocal:
-          await _cloudController.useLocalVaultForConflict();
-          break;
-        case CloudConflictChoice.useCloud:
-          await _cloudController.useCloudVaultForConflict();
-          _authController.lock();
-          break;
-        case CloudConflictChoice.keepBoth:
-          // Treat dismissing the dialog as choosing the local version, to avoid data loss.
-          await _cloudController.keepBothVaultsForConflict();
-          break;
-        case null:
-          break;
-      }
-
-      _isShowingCloudConflict = false;
-    });
   }
 
   @override

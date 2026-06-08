@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter/foundation.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -64,6 +66,7 @@ class CloudController extends ChangeNotifier {
   static const _oneDriveProvider = "oneDrive";
   bool _isBusy = false;
   bool _syncHeld = false;
+  bool _localSyncQueued = false;
   CloudMessage? _message;
   CloudSyncConflict? _pendingConflict;
 
@@ -73,6 +76,9 @@ class CloudController extends ChangeNotifier {
   CloudMessage? get message => _message;
   CloudSyncConflict? get pendingConflict => _pendingConflict;
   bool get hasPendingConflict => _pendingConflict != null;
+  bool get hasUnresolvedSyncProblem => _syncHeld || _pendingConflict != null;
+  bool get canAutoSyncLocalChange =>
+      _mode != CloudSyncMode.disabled && !hasUnresolvedSyncProblem;
 
   Future<void> initialize() async {
     final preferences = await SharedPreferences.getInstance();
@@ -117,6 +123,44 @@ class CloudController extends ChangeNotifier {
     }
 
     await checkForCloudChanges();
+  }
+
+  Future<void> syncLocalChange() async {
+    if (_mode == CloudSyncMode.disabled ||
+        _syncHeld ||
+        _pendingConflict != null) {
+      return;
+    }
+
+    if (_isBusy) {
+      _localSyncQueued = true;
+      return;
+    }
+
+    _setBusy(true);
+
+    try {
+      switch (_mode) {
+        case CloudSyncMode.oneDrive:
+          await microsoftAuthService.connect();
+          _message = await _syncOneDriveLocalChange();
+          break;
+        case CloudSyncMode.disabled:
+          _message = CloudMessage.syncDisabled;
+          break;
+      }
+    } on MicrosoftSignInCanceledException {
+      _message = CloudMessage.signInCanceled;
+    } catch (_) {
+      _message = CloudMessage.syncFailed;
+    } finally {
+      _setBusy(false);
+
+      if (_localSyncQueued) {
+        _localSyncQueued = false;
+        unawaited(syncLocalChange());
+      }
+    }
   }
 
   Future<void> checkForCloudChanges() async {
@@ -236,6 +280,48 @@ class CloudController extends ChangeNotifier {
     }
   }
 
+  Future<bool> uploadCurrentLocalVaultForConflict() async {
+    if (_pendingConflict == null || _isBusy) {
+      return false;
+    }
+
+    _setBusy(true);
+
+    try {
+      switch (_mode) {
+        case CloudSyncMode.oneDrive:
+          await microsoftAuthService.connect();
+
+          final localText = await vaultFileStore.loadTextIfExists();
+
+          if (localText == null) {
+            _message = CloudMessage.syncFailed;
+            return false;
+          }
+
+          VaultFileValidator.parse(localText);
+
+          final info = await oneDriveVaultStore.uploadText(localText);
+          await _rememberOneDriveText(text: localText, info: info);
+
+          _message = CloudMessage.uploadedLocalConflict;
+          _pendingConflict = null;
+          await _setSyncHeld(false);
+
+          return true;
+
+        case CloudSyncMode.disabled:
+          _message = CloudMessage.syncDisabled;
+          return false;
+      }
+    } catch (_) {
+      _message = CloudMessage.syncFailed;
+      return false;
+    } finally {
+      _setBusy(false);
+    }
+  }
+
   Future<void> _enableOneDrive() async {
     _setBusy(true);
 
@@ -338,6 +424,46 @@ class CloudController extends ChangeNotifier {
     return CloudMessage.vaultsDiffer;
   }
 
+  Future<CloudMessage> _syncOneDriveLocalChange() async {
+    final localText = await vaultFileStore.loadTextIfExists();
+
+    if (localText == null) {
+      return CloudMessage.oneDriveConnectedNoVault;
+    }
+
+    VaultFileValidator.parse(localText);
+
+    final remoteInfo = await oneDriveVaultStore.getInfo();
+    final remoteText = remoteInfo == null
+        ? null
+        : await oneDriveVaultStore.downloadText();
+
+    if (remoteText != null) {
+      VaultFileValidator.parse(remoteText);
+    }
+
+    if (remoteText == localText) {
+      if (remoteInfo != null) {
+        await _rememberOneDriveText(text: localText, info: remoteInfo);
+      }
+
+      return CloudMessage.alreadyInSync;
+    }
+
+    if (remoteText != null && !await _remoteMatchesCheckpoint(remoteText)) {
+      _pendingConflict = CloudSyncConflict(
+        localText: localText,
+        remoteText: remoteText,
+        remoteETag: remoteInfo!.eTag,
+      );
+      return CloudMessage.vaultsDiffer;
+    }
+
+    final info = await oneDriveVaultStore.uploadText(localText);
+    await _rememberOneDriveText(text: localText, info: info);
+    return CloudMessage.uploadedToOneDrive;
+  }
+
   void _setBusy(bool value) {
     _isBusy = value;
     notifyListeners();
@@ -376,5 +502,16 @@ class CloudController extends ChangeNotifier {
 
     final remoteHash = await checkpointStore.hashText(remoteText);
     return remoteHash != checkpoint.remoteHash;
+  }
+
+  Future<bool> _remoteMatchesCheckpoint(String remoteText) async {
+    final checkpoint = await checkpointStore.read();
+
+    if (checkpoint == null || checkpoint.provider != _oneDriveProvider) {
+      return false;
+    }
+
+    final remoteHash = await checkpointStore.hashText(remoteText);
+    return remoteHash == checkpoint.remoteHash;
   }
 }
