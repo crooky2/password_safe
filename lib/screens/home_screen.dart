@@ -47,6 +47,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildCloudStatusButton(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     final statusColor = _cloudStatusColor(colorScheme);
 
     return statusColor == colorScheme.outline
@@ -54,7 +55,7 @@ class HomeScreen extends StatelessWidget {
         : Material(
             elevation: 4,
             child: IconButton(
-              tooltip: "Cloud Sync",
+              tooltip: l10n.cloudSync,
               onPressed: onOpenCloudScreen,
               icon: Icon(Icons.cloud_rounded, color: statusColor),
             ),
@@ -77,7 +78,10 @@ class HomeScreen extends StatelessWidget {
                 .toList();
             final customFolderCount =
                 authController.database?.folders.length ?? 0;
-            final detectedFolderCount = detectFolders(entries).length;
+            final detectedFolderCount = detectFolders(
+              entries,
+              untitledName: l10n.untitled,
+            ).length;
 
             return ScreenFrame(
               icon: Icons.dashboard_rounded,

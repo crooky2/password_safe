@@ -135,7 +135,7 @@ class _PasswordGeneratorPopupState extends State<PasswordGeneratorPopup> {
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: Text("include uppercase characters"), // TODO: l10n
+          title: Text(l10n.passwordGeneratorUppercaseCharacters),
           value: _includeUppercase,
           onChanged: (value) => setState(() {
             _includeUppercase = value;

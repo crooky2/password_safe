@@ -21,7 +21,7 @@ class CloudSyncConflictPopup extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).pop(true);
           },
-          child: Text("Resolve"),
+          child: Text(l10n.resolve),
         ),
       ],
     );

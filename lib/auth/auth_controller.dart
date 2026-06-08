@@ -70,6 +70,7 @@ class AuthController extends ChangeNotifier {
   DateTime? _unlockBlockedUntil;
   bool _unlockBlockedRequiresMasterPassword = false;
   bool _shouldAutoPromptFingerprint = false;
+  String? _sessionMasterPassword;
 
   AuthState get state => _state;
   UnlockedVault? get unlockedVault => _unlockedVault;
@@ -79,6 +80,7 @@ class AuthController extends ChangeNotifier {
   bool get unlockBlockedRequiresMasterPassword =>
       _unlockBlockedRequiresMasterPassword;
   bool get shouldAutoPromptFingerprint => _shouldAutoPromptFingerprint;
+  String? get currentSessionMasterPassword => _sessionMasterPassword;
 
   void _setState(AuthState newState) {
     _state = newState;
@@ -100,6 +102,7 @@ class AuthController extends ChangeNotifier {
     _unlockedVault = null;
     _errorMessage = null;
     _shouldAutoPromptFingerprint = autoPromptFingerprint;
+    _sessionMasterPassword = null;
     _setState(AuthState.locked);
   }
 
@@ -168,10 +171,12 @@ class AuthController extends ChangeNotifier {
       _unlockedVault = createdVault.unlockedVault;
       _errorMessage = null;
       _shouldAutoPromptFingerprint = false;
+      _sessionMasterPassword = masterPassword;
       _setState(AuthState.unlocked);
 
       return true;
     } catch (_) {
+      _sessionMasterPassword = null;
       _setErrorMessage(AuthMessage.couldNotCreateVault);
       _setState(AuthState.needsSetup);
 
@@ -196,6 +201,7 @@ class AuthController extends ChangeNotifier {
       _clearUnlockBlock();
       _errorMessage = null;
       _shouldAutoPromptFingerprint = false;
+      _sessionMasterPassword = masterPassword;
       _setState(AuthState.unlocked);
 
       return true;
@@ -207,6 +213,7 @@ class AuthController extends ChangeNotifier {
 
       _unlockedVault?.clearSecrets();
       _unlockedVault = null;
+      _sessionMasterPassword = null;
       _setErrorMessage(
         AuthMessage.tooManyPinAttemptsTryAgain,
         duration: error.remainingLockTime,
@@ -217,6 +224,7 @@ class AuthController extends ChangeNotifier {
     } catch (_) {
       _unlockedVault?.clearSecrets();
       _unlockedVault = null;
+      _sessionMasterPassword = null;
       _setErrorMessage(AuthMessage.wrongPassword);
       _setState(AuthState.locked);
 
@@ -266,7 +274,7 @@ class AuthController extends ChangeNotifier {
       return false;
     }
   }
-  
+
   Future<bool> changeMasterPassword({
     required String currentPassword,
     required String newPassword,

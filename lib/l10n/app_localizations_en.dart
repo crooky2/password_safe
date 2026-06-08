@@ -24,6 +24,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passwordGeneratorNormalCharacters => 'Normal characters';
 
   @override
+  String get passwordGeneratorUppercaseCharacters => 'Uppercase characters';
+
+  @override
   String get passwordGeneratorSpecialCharacters => 'Special characters';
 
   @override
@@ -189,6 +192,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get oneDrive => 'OneDrive';
 
   @override
+  String get yes => 'Yes';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get favorite => 'Favorite';
+
+  @override
+  String get icon => 'Icon';
+
+  @override
+  String get resolve => 'Resolve';
+
+  @override
   String get titleLabel => 'Title';
 
   @override
@@ -208,6 +226,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notSet => 'Not set';
+
+  @override
+  String get untitled => 'Untitled';
 
   @override
   String copyLabel(Object label) {
@@ -405,6 +426,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get closeCloudSyncConflict => 'Close cloud sync conflict';
 
   @override
+  String get closeVersionComparison => 'Close version comparison';
+
+  @override
   String get cloudConflictSubtitle =>
       'The vault file on this device differs from the one in the cloud.';
 
@@ -416,6 +440,162 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get keepBothVersions => 'Keep both versions';
+
+  @override
+  String get cloudNewOnThisDevice => 'New on this device';
+
+  @override
+  String get cloudAvailableInCloud => 'Available in cloud';
+
+  @override
+  String get cloudDifferentVersions => 'Different versions';
+
+  @override
+  String get chooseVersionToInspect =>
+      'Choose which version you want to inspect.';
+
+  @override
+  String get enterMasterPassword => 'Enter your master password.';
+
+  @override
+  String get cloudVaultDecryptPasswordFailed =>
+      'The cloud vault could not be decrypted. Check the master password and try again.';
+
+  @override
+  String get confirmMasterPassword => 'Confirm master password';
+
+  @override
+  String get cloudVaultMasterPasswordReason =>
+      'This cloud vault was created separately, so the app needs your master password once to compare it with this device.';
+
+  @override
+  String get unlockCloudVault => 'Unlock cloud vault';
+
+  @override
+  String get cloudVaultDecryptFailed =>
+      'The cloud vault could not be decrypted.';
+
+  @override
+  String get cloudMergedVaultSaveFailed => 'Could not save merged vault.';
+
+  @override
+  String get cloudUploadAfterLocalSaveFailed =>
+      'Saved locally, but cloud upload failed.';
+
+  @override
+  String get cloudSyncChangesApplied => 'Cloud sync changes applied.';
+
+  @override
+  String get cloudApplySelectedChangesFailed =>
+      'Could not apply selected changes.';
+
+  @override
+  String get checkingCloudSync => 'Checking cloud sync';
+
+  @override
+  String get checkingCloudSyncSubtitle =>
+      'Please wait while the encrypted vault is compared.';
+
+  @override
+  String get cloudSyncPausedTitle => 'Cloud sync is paused';
+
+  @override
+  String get resolveSyncIssueBeforeUpload =>
+      'Resolve the sync issue before changes can upload again.';
+
+  @override
+  String get cloudSyncNeedsAttention => 'Cloud sync needs attention';
+
+  @override
+  String get cloudSyncUpToDate => 'Cloud sync is up to date';
+
+  @override
+  String get noCloudSyncIssuesFound => 'No cloud sync issues were found.';
+
+  @override
+  String get cloudReviewChanges => 'Review changes';
+
+  @override
+  String get cloudAllChangesReviewed => 'All changes have been reviewed.';
+
+  @override
+  String cloudReviewDifferenceCount(int undecidedCount, int totalCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      totalCount,
+      locale: localeName,
+      other: '$totalCount differences',
+      one: '1 difference',
+    );
+    return 'Review $undecidedCount of $_temp0.';
+  }
+
+  @override
+  String get cloudApplyingChanges => 'Applying changes...';
+
+  @override
+  String get cloudApplyChanges => 'Apply changes';
+
+  @override
+  String get cloudSelectForAll => 'Select for all:';
+
+  @override
+  String get cloudKeepLocal => 'Keep local';
+
+  @override
+  String get cloudKeepCloud => 'Keep cloud';
+
+  @override
+  String get cloudUploadToCloud => 'Upload to cloud';
+
+  @override
+  String get cloudDeleteCloud => 'Delete cloud';
+
+  @override
+  String get cloudDeleteLocal => 'Delete local';
+
+  @override
+  String get cloudImport => 'Import';
+
+  @override
+  String get cloudUseCloud => 'Use cloud';
+
+  @override
+  String get cloudOnlyLocalDescription =>
+      'This entry exists only on this device.';
+
+  @override
+  String get cloudOnlyCloudDescription =>
+      'This entry exists only in your cloud vault.';
+
+  @override
+  String get cloudOnThisDevice => 'On this device';
+
+  @override
+  String get cloudInCloud => 'In cloud';
+
+  @override
+  String cloudFieldOnThisDevice(Object field) {
+    return '$field on this device';
+  }
+
+  @override
+  String cloudFieldInCloud(Object field) {
+    return '$field in cloud';
+  }
+
+  @override
+  String get cloudChangedFieldsFallback =>
+      'This entry has different local and cloud versions.';
+
+  @override
+  String cloudChangedFieldsList(Object fields) {
+    return 'Changes: $fields';
+  }
+
+  @override
+  String cloudChangedFieldsListWithMore(Object fields, int count) {
+    return 'Changes: $fields +$count more';
+  }
 
   @override
   String get titleRequired => 'Title is required.';

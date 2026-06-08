@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 
 import "../../cloud/cloud_diff.dart";
+import "../../l10n/app_localizations.dart";
 
 import "../home/entry_details.dart";
 
@@ -18,7 +19,10 @@ class CloudChangedFieldInfo {
   final bool isSecret;
 }
 
-List<CloudChangedFieldInfo> cloudChangedFieldsForDiff(CloudEntryDiff diff) {
+List<CloudChangedFieldInfo> cloudChangedFieldsForDiff(
+  AppLocalizations l10n,
+  CloudEntryDiff diff,
+) {
   final local = diff.localEntry;
   final cloud = diff.cloudEntry;
 
@@ -46,35 +50,38 @@ List<CloudChangedFieldInfo> cloudChangedFieldsForDiff(CloudEntryDiff diff) {
     );
   }
 
-  add("Title", local.title, cloud.title);
-  add("Username", local.username, cloud.username);
-  add("Password", local.password, cloud.password, isSecret: true);
-  add("URL", local.url, cloud.url);
-  add("Notes", local.notes, cloud.notes);
+  add(l10n.titleLabel, local.title, cloud.title);
+  add(l10n.username, local.username, cloud.username);
+  add(l10n.password, local.password, cloud.password, isSecret: true);
+  add(l10n.url, local.url, cloud.url);
+  add(l10n.notes, local.notes, cloud.notes);
   add(
-    "Favorite",
-    local.isFavorite ? "Yes" : "No",
-    cloud.isFavorite ? "Yes" : "No",
+    l10n.favorite,
+    local.isFavorite ? l10n.yes : l10n.no,
+    cloud.isFavorite ? l10n.yes : l10n.no,
   );
-  add("Icon", local.iconKey, cloud.iconKey);
+  add(l10n.icon, local.iconKey, cloud.iconKey);
 
   return fields;
 }
 
-String cloudChangedFieldsSummary(CloudEntryDiff diff) {
+String cloudChangedFieldsSummary(AppLocalizations l10n, CloudEntryDiff diff) {
   final labels = cloudChangedFieldsForDiff(
+    l10n,
     diff,
   ).map((field) => field.label).toList();
 
   if (labels.isEmpty) {
-    return "This entry has different local and cloud versions.";
+    return l10n.cloudChangedFieldsFallback;
   }
+
+  final visibleLabels = labels.take(3).join(", ");
 
   if (labels.length <= 3) {
-    return "Changes: ${labels.join(", ")}";
+    return l10n.cloudChangedFieldsList(visibleLabels);
   }
 
-  return "Changes: ${labels.take(3).join(", ")} +${labels.length - 3} more";
+  return l10n.cloudChangedFieldsListWithMore(visibleLabels, labels.length - 3);
 }
 
 class CloudChangedFields extends StatelessWidget {
@@ -84,7 +91,8 @@ class CloudChangedFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fields = cloudChangedFieldsForDiff(diff);
+    final l10n = AppLocalizations.of(context)!;
+    final fields = cloudChangedFieldsForDiff(l10n, diff);
 
     if (fields.isEmpty) {
       return const SizedBox.shrink();
@@ -93,21 +101,22 @@ class CloudChangedFields extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final field in fields) _ChangedFieldComparison(field: field),
+        for (final field in fields)
+          _ChangedFieldComparison(field: field, l10n: l10n),
       ],
     );
   }
 }
 
 class _ChangedFieldComparison extends StatelessWidget {
-  const _ChangedFieldComparison({required this.field});
+  const _ChangedFieldComparison({required this.field, required this.l10n});
 
   final CloudChangedFieldInfo field;
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final secretLabel = field.label.toLowerCase();
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
@@ -118,28 +127,22 @@ class _ChangedFieldComparison extends StatelessWidget {
           const SizedBox(height: 8),
 
           if (field.isSecret) ...[
-            Text("On this device", style: theme.textTheme.labelMedium),
+            Text(l10n.cloudOnThisDevice, style: theme.textTheme.labelMedium),
             EntrySecretDetail(
-              label: "$secretLabel on this device",
+              label: l10n.cloudFieldOnThisDevice(field.label),
               value: field.localValue,
             ),
 
             const SizedBox(height: 8),
 
-            Text("In cloud", style: theme.textTheme.labelMedium),
+            Text(l10n.cloudInCloud, style: theme.textTheme.labelMedium),
             EntrySecretDetail(
-              label: "$secretLabel in cloud",
+              label: l10n.cloudFieldInCloud(field.label),
               value: field.cloudValue,
             ),
           ] else ...[
-            EntryDetail(
-              label: "On this device",
-              value: field.localValue,
-            ),
-            EntryDetail(
-              label: "In cloud",
-              value: field.cloudValue,
-            ),
+            EntryDetail(label: l10n.cloudOnThisDevice, value: field.localValue),
+            EntryDetail(label: l10n.cloudInCloud, value: field.cloudValue),
           ],
         ],
       ),

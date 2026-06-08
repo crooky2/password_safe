@@ -35,7 +35,7 @@ class _AppShellState extends State<AppShell> {
   List<Widget> get _pages {
     return [
       HomeScreen(
-        authController: widget.authController, 
+        authController: widget.authController,
         cloudController: widget.cloudController,
         onOpenCloudScreen: _openCloudScreen,
       ),
@@ -52,12 +52,12 @@ class _AppShellState extends State<AppShell> {
       NavigationDestination(
         icon: const Icon(Icons.home_outlined),
         selectedIcon: const Icon(Icons.home_rounded),
-        label: "",
+        label: l10n.dashboard,
       ),
       NavigationDestination(
         icon: const Icon(Icons.settings_outlined),
         selectedIcon: const Icon(Icons.settings_rounded),
-        label: "",
+        label: l10n.settings,
       ),
     ];
   }
@@ -76,7 +76,7 @@ class _AppShellState extends State<AppShell> {
           authController: widget.authController,
           cloudController: widget.cloudController,
         ),
-      )
+      ),
     );
   }
 
@@ -121,6 +121,7 @@ class _AppShellState extends State<AppShell> {
       ),
       bottomNavigationBar: NavigationBar(
         height: _navigationBarHeight,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
         selectedIndex: _selectedIndex,
         onDestinationSelected: _selectTab,
         destinations: _destinations(l10n),

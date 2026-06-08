@@ -6,6 +6,7 @@
     "passwordGenerator": "Password generator",
     "closePasswordGenerator": "Close password generator",
     "passwordGeneratorNormalCharacters": "Normal characters",
+    "passwordGeneratorUppercaseCharacters": "Uppercase characters",
     "passwordGeneratorSpecialCharacters": "Special characters",
     "passwordGeneratorNumbers": "Numbers",
     "passwordGeneratorLength": "Length",
@@ -72,6 +73,11 @@
     "type": "Type",
     "provider": "Provider",
     "oneDrive": "OneDrive",
+    "yes": "Yes",
+    "no": "No",
+    "favorite": "Favorite",
+    "icon": "Icon",
+    "resolve": "Resolve",
 
     "titleLabel": "Title",
     "username": "Username",
@@ -80,6 +86,7 @@
     "url": "URL",
     "notes": "Notes",
     "notSet": "Not set",
+    "untitled": "Untitled",
     "copyLabel": "Copy {label}",
     "@copyLabel": {
         "placeholders": {
@@ -181,10 +188,88 @@
 
     "cloudSyncConflict": "Cloud sync conflict",
     "closeCloudSyncConflict": "Close cloud sync conflict",
+    "closeVersionComparison": "Close version comparison",
     "cloudConflictSubtitle": "The vault file on this device differs from the one in the cloud.",
     "useThisDevicesVersion": "Use this device's version",
     "useCloudVersion": "Use cloud version",
     "keepBothVersions": "Keep both versions",
+
+    "cloudNewOnThisDevice": "New on this device",
+    "cloudAvailableInCloud": "Available in cloud",
+    "cloudDifferentVersions": "Different versions",
+    "chooseVersionToInspect": "Choose which version you want to inspect.",
+    "enterMasterPassword": "Enter your master password.",
+    "cloudVaultDecryptPasswordFailed": "The cloud vault could not be decrypted. Check the master password and try again.",
+    "confirmMasterPassword": "Confirm master password",
+    "cloudVaultMasterPasswordReason": "This cloud vault was created separately, so the app needs your master password once to compare it with this device.",
+    "unlockCloudVault": "Unlock cloud vault",
+    "cloudVaultDecryptFailed": "The cloud vault could not be decrypted.",
+    "cloudMergedVaultSaveFailed": "Could not save merged vault.",
+    "cloudUploadAfterLocalSaveFailed": "Saved locally, but cloud upload failed.",
+    "cloudSyncChangesApplied": "Cloud sync changes applied.",
+    "cloudApplySelectedChangesFailed": "Could not apply selected changes.",
+    "checkingCloudSync": "Checking cloud sync",
+    "checkingCloudSyncSubtitle": "Please wait while the encrypted vault is compared.",
+    "cloudSyncPausedTitle": "Cloud sync is paused",
+    "resolveSyncIssueBeforeUpload": "Resolve the sync issue before changes can upload again.",
+    "cloudSyncNeedsAttention": "Cloud sync needs attention",
+    "cloudSyncUpToDate": "Cloud sync is up to date",
+    "noCloudSyncIssuesFound": "No cloud sync issues were found.",
+    "cloudReviewChanges": "Review changes",
+    "cloudAllChangesReviewed": "All changes have been reviewed.",
+    "cloudReviewDifferenceCount": "Review {undecidedCount} of {totalCount, plural, =1{1 difference} other{{totalCount} differences}}.",
+    "@cloudReviewDifferenceCount": {
+        "placeholders": {
+            "undecidedCount": {
+                "type": "int"
+            },
+            "totalCount": {
+                "type": "int"
+            }
+        }
+    },
+    "cloudApplyingChanges": "Applying changes...",
+    "cloudApplyChanges": "Apply changes",
+    "cloudSelectForAll": "Select for all:",
+    "cloudKeepLocal": "Keep local",
+    "cloudKeepCloud": "Keep cloud",
+    "cloudUploadToCloud": "Upload to cloud",
+    "cloudDeleteCloud": "Delete cloud",
+    "cloudDeleteLocal": "Delete local",
+    "cloudImport": "Import",
+    "cloudUseCloud": "Use cloud",
+    "cloudOnlyLocalDescription": "This entry exists only on this device.",
+    "cloudOnlyCloudDescription": "This entry exists only in your cloud vault.",
+    "cloudOnThisDevice": "On this device",
+    "cloudInCloud": "In cloud",
+    "cloudFieldOnThisDevice": "{field} on this device",
+    "@cloudFieldOnThisDevice": {
+        "placeholders": {
+            "field": {}
+        }
+    },
+    "cloudFieldInCloud": "{field} in cloud",
+    "@cloudFieldInCloud": {
+        "placeholders": {
+            "field": {}
+        }
+    },
+    "cloudChangedFieldsFallback": "This entry has different local and cloud versions.",
+    "cloudChangedFieldsList": "Changes: {fields}",
+    "@cloudChangedFieldsList": {
+        "placeholders": {
+            "fields": {}
+        }
+    },
+    "cloudChangedFieldsListWithMore": "Changes: {fields} +{count} more",
+    "@cloudChangedFieldsListWithMore": {
+        "placeholders": {
+            "fields": {},
+            "count": {
+                "type": "int"
+            }
+        }
+    },
 
     "titleRequired": "Title is required.",
     "editEntry": "Edit entry",
