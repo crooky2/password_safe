@@ -1,14 +1,14 @@
 name: password_safe
 description: "An lightweight password manager built with Flutter."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 1.1.1+3
+version: 1.1.2+3
 
 msix_config:
   display_name: Password Safe
   identity_name: crooky.PasswordSafeWindows
   publisher: CN=CA72CBB8-2F17-4B02-9FE8-944D53AAF8B3
   publisher_display_name: crooky
-  msix_version: 1.1.0.0
+  msix_version: 1.1.2.0
   store: true
   install_certificate: false
 
