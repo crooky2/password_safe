@@ -1,6 +1,7 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:flutter/foundation.dart";
 
 import 'app_shell.dart';
 import "theme_controller.dart";
@@ -131,12 +132,18 @@ class _RootGateState extends State<RootGate> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
+    final isNativeAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+    if (isNativeAndroid && state != AppLifecycleState.detached) {
+      return;
+    }
+
+    final shouldLock = state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden ||
-        state == AppLifecycleState.detached) {
-      if (_authController.state == AuthState.unlocked) {
-        _authController.lock();
-      }
+        state == AppLifecycleState.detached;
+
+    if (shouldLock && _authController.state == AuthState.unlocked) {
+      _authController.lock();
     }
   }
 
