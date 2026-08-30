@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
 import "../../l10n/app_localizations.dart";
+import "../../security/timed_clipboard.dart";
 
 import "../../vault/password_generator.dart";
 
@@ -107,7 +108,6 @@ class _PasswordGeneratorPopupState extends State<PasswordGeneratorPopup> {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
               IconButton(
                 tooltip: l10n.generatePassword,
                 onPressed: _hasCharacterSet
@@ -118,6 +118,25 @@ class _PasswordGeneratorPopupState extends State<PasswordGeneratorPopup> {
                       }
                     : null,
                 icon: const Icon(Icons.refresh_rounded),
+              ),
+              IconButton(
+                tooltip: l10n.copyLabel(l10n.password),
+                onPressed: _hasCharacterSet
+                    ? () async {
+                        await TimedClipboard.copyText(_password);
+
+                        if (!context.mounted) {
+                          return;
+                        }
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.labelCopied(l10n.password)),
+                          ),
+                        );
+                      }
+                    : null,
+                icon: const Icon(Icons.copy_rounded),
               ),
             ],
           ),

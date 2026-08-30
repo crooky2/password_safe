@@ -7,12 +7,21 @@ import "../screen_popup.dart";
 import "../secret_text_field.dart";
 
 import "popup_password_generator.dart";
+import "popup_folder_picker.dart";
 
 class EntryFormPopup extends StatefulWidget {
-  const EntryFormPopup({super.key, this.entry, this.clone = false});
+  const EntryFormPopup({
+    super.key,
+    this.entry,
+    this.clone = false,
+    required this.folders,
+    this.initialFolderIds = const <String>{},
+  });
 
   final PasswordEntry? entry;
   final bool clone;
+  final List<PasswordFolder> folders;
+  final Set<String> initialFolderIds;
 
   @override
   State<EntryFormPopup> createState() => _EntryFormPopupState();
@@ -27,6 +36,7 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
 
   String? _errorMessage;
   bool _hidePopup = false;
+  late Set<String> _selectedFolderIds;
 
   bool get _isEditing => widget.entry != null && !widget.clone;
 
@@ -41,6 +51,9 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
     _passwordController = TextEditingController(text: entry?.password ?? "");
     _urlController = TextEditingController(text: entry?.url ?? "");
     _notesController = TextEditingController(text: entry?.notes ?? "");
+
+    final validFolderIds = widget.folders.map((folder) => folder.id).toSet();
+    _selectedFolderIds = widget.initialFolderIds.intersection(validFolderIds);
   }
 
   @override
@@ -82,13 +95,18 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
       iconKey: widget.entry?.iconKey ?? "",
     );
 
-    Navigator.of(context).pop(entry);
+    Navigator.of(context).pop(
+      EntryFormResult(
+        entry: entry,
+        folderIds: Set.unmodifiable(_selectedFolderIds),
+      ),
+    );
   }
 
   Future<void> _openPasswordGenerator() async {
     final l10n = AppLocalizations.of(context)!;
 
-    setState((){
+    setState(() {
       _hidePopup = true;
     });
 
@@ -111,7 +129,31 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
 
       if (password != null) {
         _passwordController.text = password;
-      } 
+      }
+    });
+  }
+
+  Future<void> _openFolderPicker() async {
+    setState(() {
+      _hidePopup = true;
+    });
+
+    final selectedFolderIds = await showFolderPickerPopup(
+      context,
+      folders: widget.folders,
+      initiallySelectedFolderIds: _selectedFolderIds,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _hidePopup = false;
+
+      if (selectedFolderIds != null) {
+        _selectedFolderIds = selectedFolderIds;
+      }
     });
   }
 
@@ -123,6 +165,10 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
         : widget.clone
         ? l10n.cloneEntry
         : l10n.newEntry;
+
+    final selectedFolders = widget.folders.where((folder) {
+      return _selectedFolderIds.contains(folder.id);
+    }).toList();
 
     if (_hidePopup) {
       return const SizedBox.shrink();
@@ -152,7 +198,7 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
             tooltip: l10n.generatePassword,
             onPressed: _openPasswordGenerator,
             icon: const Icon(Icons.refresh_rounded),
-          )
+          ),
         ),
         const SizedBox(height: 12),
         TextField(
@@ -167,6 +213,43 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
             labelText: l10n.notes,
             border: OutlineInputBorder(),
           ),
+        ),
+
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            if (selectedFolders.isNotEmpty) ...[
+              for (final folder in selectedFolders)
+                InputChip(
+                  avatar: const Icon(Icons.folder_rounded, size: 18),
+                  label: Text(folder.name),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 4,
+                  ),
+                  onDeleted: () {
+                    setState(() {
+                      _selectedFolderIds.remove(folder.id);
+                    });
+                  },
+                ),
+            ],
+            InputChip(
+              avatar: Icon(
+                Icons.create_new_folder_rounded,
+                size: 18,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+              label: const Text(''),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+              onPressed: () {
+                _openFolderPicker();
+              },
+            ),
+          ],
         ),
 
         if (_errorMessage != null) ...[
@@ -197,4 +280,11 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
       ],
     );
   }
+}
+
+class EntryFormResult {
+  const EntryFormResult({required this.entry, required this.folderIds});
+
+  final PasswordEntry entry;
+  final Set<String> folderIds;
 }

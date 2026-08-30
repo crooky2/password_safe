@@ -316,7 +316,7 @@
         }
     },
     "detectedFolderSourceTitle": "Title",
-    "detectedFolderSourceUsernameDomain": "Same username domain",
+    "detectedFolderSourceUsername": "Same username",
     "detectedFolderSourceUrlHost": "Same website",
 
     "durationMinutesAndSeconds": "{minutes, plural, =1{1 minute} other{{minutes} minutes}} and {seconds, plural, =1{1 second} other{{seconds} seconds}}",

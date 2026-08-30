@@ -1310,11 +1310,11 @@ abstract class AppLocalizations {
   /// **'Title'**
   String get detectedFolderSourceTitle;
 
-  /// No description provided for @detectedFolderSourceUsernameDomain.
+  /// No description provided for @detectedFolderSourceUsername.
   ///
   /// In en, this message translates to:
-  /// **'Same username domain'**
-  String get detectedFolderSourceUsernameDomain;
+  /// **'Same username'**
+  String get detectedFolderSourceUsername;
 
   /// No description provided for @detectedFolderSourceUrlHost.
   ///

@@ -708,7 +708,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get detectedFolderSourceTitle => 'Titel';
 
   @override
-  String get detectedFolderSourceUsernameDomain => 'Gleiche Domain';
+  String get detectedFolderSourceUsername => 'Gleicher Benutzername';
 
   @override
   String get detectedFolderSourceUrlHost => 'Gleiche Website';

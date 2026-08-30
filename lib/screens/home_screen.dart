@@ -186,6 +186,13 @@ class HomeScreen extends StatelessWidget {
                               entryActions.openEntryForm(context, entry: entry);
                             },
                           ),
+                          SectionCardMenuItem(
+                            label: "addToFolder", //TODO: Localization
+                            icon: Icons.move_to_inbox,
+                            onSelected: () {
+                              entryActions.manageFolders(context, entry: entry);
+                            },
+                          ),
                         ],
                       ),
                   ],

@@ -1,6 +1,6 @@
 import "password_database.dart";
 
-enum DetectedFolderSource { title, usernameDomain, urlHost }
+enum DetectedFolderSource { title, username, urlHost }
 
 class DetectedFolder {
   const DetectedFolder({
@@ -45,13 +45,23 @@ List<DetectedFolder> detectFolders(
       );
     }
 
-    final usernameDomain = _emailDomain(entry.username);
-    if (usernameDomain != null) {
+    // final usernameDomain = _emailDomain(entry.username);
+    // if (usernameDomain != null) {
+    //   addGroup(
+    //     key: "username:$usernameDomain",
+    //     name: _domainName(usernameDomain, untitledName),
+    //     source: DetectedFolderSource.usernameDomain,
+    //     entry: entry,
+    //   );
+    // }
+
+    final usernameKey = _normalize(entry.username);
+    if (usernameKey.isNotEmpty) {
       addGroup(
-        key: "username:$usernameDomain",
-        name: _domainName(usernameDomain, untitledName),
-        source: DetectedFolderSource.usernameDomain,
-        entry: entry,
+        key: "username:$usernameKey",
+        name: entry.username.trim(),
+        source: DetectedFolderSource.username,
+        entry: entry
       );
     }
 
@@ -118,16 +128,16 @@ String _prettyName(String value, String untitledName) {
   return trimmed[0].toUpperCase() + trimmed.substring(1);
 }
 
-String? _emailDomain(String value) {
-  final trimmed = value.trim().toLowerCase();
-  final atIndex = trimmed.indexOf("@");
+// String? _emailDomain(String value) {
+//   final trimmed = value.trim().toLowerCase();
+//   final atIndex = trimmed.indexOf("@");
 
-  if (atIndex == -1 || atIndex == trimmed.length - 1) {
-    return null;
-  }
+//   if (atIndex == -1 || atIndex == trimmed.length - 1) {
+//     return null;
+//   }
 
-  return trimmed.substring(atIndex + 1);
-}
+//   return trimmed.substring(atIndex + 1);
+// }
 
 String? _urlHost(String value) {
   final trimmed = value.trim().toLowerCase();

@@ -35,27 +35,26 @@ class EntryDetailsPopup extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: FilledButton.icon(
+                child: IconButton.filled(
                   onPressed: () {
                     Navigator.of(context).pop(EntryDetailsPopupAction.edit);
                   },
                   icon: const Icon(Icons.edit, size: 18),
-                  label: Text(l10n.edit),
+                  tooltip: l10n.edit,
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: FilledButton.icon(
+                child: IconButton.filled(
                   onPressed: () {
                     Navigator.of(context).pop(EntryDetailsPopupAction.clone);
                   },
                   icon: const Icon(Icons.copy_sharp, size: 18),
-                  label: Text(l10n.clone),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: FilledButton.icon(
+                child: IconButton.filled(
                   onPressed: () {
                     Navigator.of(context).pop(EntryDetailsPopupAction.delete);
                   },
@@ -64,7 +63,7 @@ class EntryDetailsPopup extends StatelessWidget {
                     foregroundColor: Theme.of(context).colorScheme.onError,
                   ),
                   icon: const Icon(Icons.delete, size: 18),
-                  label: Text(l10n.delete),
+
                 ),
               ),
             ],

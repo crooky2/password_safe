@@ -11,20 +11,21 @@ import "../../widgets/home/popup_entry.dart";
 import "../../vault/password_database.dart";
 import "../../l10n/app_localizations.dart";
 
-
 class AllEntriesTab extends StatefulWidget {
   const AllEntriesTab({
     super.key,
     required this.authController,
     this.startInSearchMode = false,
     this.screenTitle,
+    this.folderId,
     this.entryIds,
     this.emptyMessage,
-  });
+  }) : assert(folderId == null || entryIds == null);
 
   final AuthController authController;
   final bool startInSearchMode;
   final String? screenTitle;
+  final String? folderId;
   final List<String>? entryIds;
   final String? emptyMessage;
 
@@ -201,14 +202,25 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
       builder: (context, _) {
         final l10n = AppLocalizations.of(context)!;
         final database = authController.database;
-
         final allEntries = database?.entries ?? const <PasswordEntry>[];
-        final entryIdFilter = widget.entryIds?.toSet();
+
+        final PasswordFolder? currentFolder =
+            widget.folderId == null || database == null
+            ? null
+            : database.folderById(widget.folderId!);
+
+        final Set<String>? entryIdFilter;
+
+        if (widget.folderId != null) {
+          entryIdFilter = currentFolder?.entryIds.toSet() ?? <String>{};
+        } else {
+          entryIdFilter = widget.entryIds?.toSet();
+        }
 
         final entries = entryIdFilter == null
             ? allEntries
             : allEntries
-                  .where((entry) => entryIdFilter.contains(entry.id))
+                  .where((entry) => entryIdFilter!.contains(entry.id))
                   .toList();
 
         final visibleEntries = _filterEntries(entries);
@@ -217,7 +229,8 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
         return Scaffold(
           body: SafeArea(
             child: ScreenFrame(
-              title: widget.screenTitle ?? l10n.allEntries,
+              title:
+                  currentFolder?.name ?? widget.screenTitle ?? l10n.allEntries,
               enableReturnButton: true,
               returnButtonAction: () {
                 Navigator.of(context).pop();
@@ -226,7 +239,12 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
                 IconButton(
                   tooltip: l10n.addEntry,
                   onPressed: () {
-                    entryActions.openEntryForm(context);
+                    entryActions.openEntryForm(
+                      context,
+                      initialFolderIds: currentFolder == null
+                          ? const <String>{}
+                          : <String>{currentFolder.id},
+                    );
                   },
                   icon: const Icon(Icons.add_rounded),
                 ),
@@ -309,6 +327,16 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
                             ),
                           ),
                           contextMenuItems: [
+                            SectionCardMenuItem(
+                              label: "addToFolder", // TODO: Localization
+                              icon: Icons.move_to_inbox_rounded,
+                              onSelected: () {
+                                entryActions.manageFolders(
+                                  context,
+                                  entry: entry,
+                                );
+                              },
+                            ),
                             SectionCardMenuItem(
                               label: l10n.edit,
                               icon: Icons.edit_rounded,
