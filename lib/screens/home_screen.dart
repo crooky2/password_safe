@@ -50,16 +50,16 @@ class HomeScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final statusColor = _cloudStatusColor(colorScheme);
 
-    return statusColor == colorScheme.outline
-        ? const SizedBox.shrink()
-        : Material(
-            elevation: 4,
-            child: IconButton(
-              tooltip: l10n.cloudSync,
-              onPressed: onOpenCloudScreen,
-              icon: Icon(Icons.cloud_rounded, color: statusColor),
-            ),
-          );
+    if (statusColor == colorScheme.outline) {
+      return const SizedBox.shrink();
+    }
+
+    return IconButton(
+      tooltip: l10n.cloudSync,
+      onPressed: onOpenCloudScreen,
+      color: statusColor,
+      icon: const Icon(Icons.cloud_rounded)
+    );
   }
 
   @override
@@ -167,6 +167,7 @@ class HomeScreen extends StatelessWidget {
                             ),
                           );
                         },
+                        key: ValueKey(entry.id),
                         contextMenuItems: [
                           SectionCardMenuItem(
                             label: l10n.unfavorite,
@@ -187,7 +188,7 @@ class HomeScreen extends StatelessWidget {
                             },
                           ),
                           SectionCardMenuItem(
-                            label: "addToFolder", //TODO: Localization
+                            label: l10n.addToFolder,
                             icon: Icons.move_to_inbox,
                             onSelected: () {
                               entryActions.manageFolders(context, entry: entry);

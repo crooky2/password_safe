@@ -664,6 +664,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get failedToCreateFolder => 'Failed to create folder.';
 
   @override
+  String get folderUpdated => 'Folder updated.';
+
+  @override
+  String get failedToUpdateFolder => 'Failed to update folder.';
+
+  @override
+  String get folderDeleted => 'Folder deleted.';
+
+  @override
+  String get failedToDeleteFolder => 'Failed to delete folder.';
+
+  @override
+  String get deleteFolder => 'Delete folder?';
+
+  @override
+  String deleteFolderConfirmation(Object name) {
+    return 'Delete \"$name\"?\n\nThis action cannot be undone.';
+  }
+
+  @override
+  String get editFolder => 'Edit folder';
+
+  @override
+  String get saveAsCustomFolder => 'Save as custom folder';
+
+  @override
+  String get addToFolder => 'Add to folder';
+
+  @override
+  String get folderMembershipUpdated => 'Folder membership updated.';
+
+  @override
+  String get failedToUpdateFolders => 'Failed to update folders.';
+
+  @override
   String get createNewFolder => 'Create new folder';
 
   @override
@@ -704,6 +739,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get detectedFolderSourceUrlHost => 'Same website';
+
+  @override
+  String get selectFolders => 'Select folders';
+
+  @override
+  String get searchFolders => 'Search folders';
+
+  @override
+  String get noFoldersMatchSearch => 'No folders match your search.';
+
+  @override
+  String get clearSelection => 'Clear selection';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get folderNameRequired => 'Folder name is required.';
+
+  @override
+  String get folderNameAlreadyExists => 'Folder name already exists.';
 
   @override
   String durationMinutesAndSeconds(int minutes, int seconds) {

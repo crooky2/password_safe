@@ -21,7 +21,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get closePasswordGenerator => 'Passwortgenerator schließen';
 
   @override
-  String get passwordGeneratorNormalCharacters => 'Normale Zeichen';
+  String get passwordGeneratorNormalCharacters => 'Kleinbuchstaben';
 
   @override
   String get passwordGeneratorUppercaseCharacters => 'Großbuchstaben';
@@ -172,7 +172,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get saveChanges => 'Änderungen speichern';
 
   @override
-  String get discard => 'Verwerfen';
+  String get discard => 'Änderungen verwerfen';
 
   @override
   String get show => 'Anzeigen';
@@ -672,6 +672,42 @@ class AppLocalizationsDe extends AppLocalizations {
   String get failedToCreateFolder => 'Ordner konnte nicht erstellt werden.';
 
   @override
+  String get folderUpdated => 'Ordner aktualisiert.';
+
+  @override
+  String get failedToUpdateFolder => 'Ordner konnte nicht aktualisiert werden.';
+
+  @override
+  String get folderDeleted => 'Ordner gelöscht.';
+
+  @override
+  String get failedToDeleteFolder => 'Ordner konnte nicht gelöscht werden.';
+
+  @override
+  String get deleteFolder => 'Ordner löschen?';
+
+  @override
+  String deleteFolderConfirmation(Object name) {
+    return '\"$name\" löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden.';
+  }
+
+  @override
+  String get editFolder => 'Ordner bearbeiten';
+
+  @override
+  String get saveAsCustomFolder => 'Als eigenen Ordner speichern';
+
+  @override
+  String get addToFolder => 'Zu Ordner hinzufügen';
+
+  @override
+  String get folderMembershipUpdated => 'Ordnerzugehörigkeit aktualisiert.';
+
+  @override
+  String get failedToUpdateFolders =>
+      'Ordner konnten nicht aktualisiert werden.';
+
+  @override
   String get createNewFolder => 'Neuen Ordner erstellen';
 
   @override
@@ -712,6 +748,28 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get detectedFolderSourceUrlHost => 'Gleiche Website';
+
+  @override
+  String get selectFolders => 'Ordner auswählen';
+
+  @override
+  String get searchFolders => 'Ordner suchen';
+
+  @override
+  String get noFoldersMatchSearch => 'Keine Ordner passen zu deiner Suche.';
+
+  @override
+  String get clearSelection => 'Auswahl leeren';
+
+  @override
+  String get done => 'Fertig';
+
+  @override
+  String get folderNameRequired => 'Ordnername ist erforderlich.';
+
+  @override
+  String get folderNameAlreadyExists =>
+      'Ein Ordner mit diesem Namen existiert bereits.';
 
   @override
   String durationMinutesAndSeconds(int minutes, int seconds) {

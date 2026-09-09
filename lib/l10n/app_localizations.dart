@@ -1256,6 +1256,72 @@ abstract class AppLocalizations {
   /// **'Failed to create folder.'**
   String get failedToCreateFolder;
 
+  /// No description provided for @folderUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder updated.'**
+  String get folderUpdated;
+
+  /// No description provided for @failedToUpdateFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update folder.'**
+  String get failedToUpdateFolder;
+
+  /// No description provided for @folderDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder deleted.'**
+  String get folderDeleted;
+
+  /// No description provided for @failedToDeleteFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete folder.'**
+  String get failedToDeleteFolder;
+
+  /// No description provided for @deleteFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete folder?'**
+  String get deleteFolder;
+
+  /// No description provided for @deleteFolderConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\"?\n\nThis action cannot be undone.'**
+  String deleteFolderConfirmation(Object name);
+
+  /// No description provided for @editFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit folder'**
+  String get editFolder;
+
+  /// No description provided for @saveAsCustomFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as custom folder'**
+  String get saveAsCustomFolder;
+
+  /// No description provided for @addToFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to folder'**
+  String get addToFolder;
+
+  /// No description provided for @folderMembershipUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder membership updated.'**
+  String get folderMembershipUpdated;
+
+  /// No description provided for @failedToUpdateFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update folders.'**
+  String get failedToUpdateFolders;
+
   /// No description provided for @createNewFolder.
   ///
   /// In en, this message translates to:
@@ -1321,6 +1387,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Same website'**
   String get detectedFolderSourceUrlHost;
+
+  /// No description provided for @selectFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Select folders'**
+  String get selectFolders;
+
+  /// No description provided for @searchFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Search folders'**
+  String get searchFolders;
+
+  /// No description provided for @noFoldersMatchSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'No folders match your search.'**
+  String get noFoldersMatchSearch;
+
+  /// No description provided for @clearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get clearSelection;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @folderNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder name is required.'**
+  String get folderNameRequired;
+
+  /// No description provided for @folderNameAlreadyExists.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder name already exists.'**
+  String get folderNameAlreadyExists;
 
   /// No description provided for @durationMinutesAndSeconds.
   ///

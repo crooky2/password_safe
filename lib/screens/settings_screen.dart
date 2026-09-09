@@ -109,6 +109,15 @@ class SettingsScreen extends StatelessWidget {
           ),
           child: Text(l10n.resetAppData),
         ),
+
+        Center(
+          child: Text(
+            'Version 1.2.3+3',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ),
+
+        
       ],
     );
   }

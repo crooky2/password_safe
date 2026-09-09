@@ -15,7 +15,7 @@ Future<Set<String>?> showFolderPickerPopup(
   return showGeneralDialog<Set<String>>(
     context: context,
     barrierDismissible: true,
-    barrierLabel: "Folders", // TODO: Localization
+    barrierLabel: l10n.folders,
     barrierColor: Colors.transparent,
     pageBuilder: (context, animation, secondaryAnimation) {
       return FolderPickerPopup(
@@ -69,13 +69,13 @@ class _FolderPickerPopupState extends State<FolderPickerPopup> {
     }).toList();
 
     return ScreenPopup(
-      title: "Select Folders", // TODO: Localization
+      title: l10n.selectFolders,
       onClose: () => Navigator.of(context).pop(),
       children: [
         if (widget.folders.isNotEmpty) ...[
           TextField(
             decoration: InputDecoration(
-              labelText: "searchFolders", // TODO: Localization
+              labelText: l10n.searchFolders,
               prefixIcon: const Icon(Icons.search_rounded),
             ),
             onChanged: (value) {
@@ -88,9 +88,9 @@ class _FolderPickerPopupState extends State<FolderPickerPopup> {
         ],
 
         if (widget.folders.isEmpty)
-          Text("noCustomFoldersYet") // TODO: Localization
+          Text(l10n.noCustomFoldersYet)
         else if (visibleFolders.isEmpty)
-          Text("noFoldersMatchSearch") // TODO: Localization
+          Text(l10n.noFoldersMatchSearch)
         else
           for (final folder in visibleFolders)
             CheckboxListTile(
@@ -122,13 +122,13 @@ class _FolderPickerPopupState extends State<FolderPickerPopup> {
                         _selectedFolderIds.clear();
                       });
                     },
-              child: Text("clearSelection"), // TODO: Localization
+              child: Text(l10n.clearSelection),
             ),
             const Spacer(),
             FilledButton.icon(
               onPressed: _finish,
               icon: const Icon(Icons.done_rounded),
-              label: Text("done"), // TODO: Localization
+              label: Text(l10n.done),
             ),
           ],
         ),

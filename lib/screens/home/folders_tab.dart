@@ -63,10 +63,11 @@ class FoldersTab extends StatelessWidget {
       return;
     }
 
-    // TODO: Localization
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(success ? "Folder created." : "Folder creation failed."),
+        content: Text(
+          success ? l10n.folderCreated : l10n.failedToCreateFolder,
+        ),
       ),
     );
   }
@@ -113,8 +114,8 @@ class FoldersTab extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          success ? "folderUpdated" : "failedToUpdateFolder",
-        ), // TODO: Localization
+          success ? l10n.folderUpdated : l10n.failedToUpdateFolder,
+        ),
       ),
     );
   }
@@ -128,10 +129,9 @@ class FoldersTab extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
-        //TODO: Localization
         return AlertDialog(
-          title: Text("deleteFolder"),
-          content: Text("deleteFolderConfirmation${folder.name}"),
+          title: Text(l10n.deleteFolder),
+          content: Text(l10n.deleteFolderConfirmation(folder.name)),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -172,7 +172,7 @@ class FoldersTab extends StatelessWidget {
         content: Text(
           success
               ? "folderDeleted"
-              : "failedToDeleteFolder", // TODO: Localization
+              : l10n.failedToDeleteFolder,
         ),
       ),
     );
@@ -221,7 +221,7 @@ class FoldersTab extends StatelessWidget {
                           icon: Icons.folder_rounded,
                           contextMenuItems: [
                             SectionCardMenuItem(
-                              label: "editFolder", //TODO: Localization
+                              label: l10n.editFolder,
                               icon: Icons.edit_rounded,
                               onSelected: () {
                                 _editFolder(context, folder);
@@ -236,6 +236,7 @@ class FoldersTab extends StatelessWidget {
                               },
                             ),
                           ],
+                          key: ValueKey("custom-folder-${folder.id}"),
                           action: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
@@ -268,7 +269,7 @@ class FoldersTab extends StatelessWidget {
                           icon: Icons.auto_awesome_rounded,
                           contextMenuItems: [
                             SectionCardMenuItem(
-                              label: "saveAsCustomFolder", //TODO: Localization,
+                              label: l10n.saveAsCustomFolder,
                               icon: Icons.create_new_folder_rounded,
                               onSelected: () {
                                 _createFolder(
@@ -281,6 +282,7 @@ class FoldersTab extends StatelessWidget {
                               },
                             ),
                           ],
+                          key: ValueKey("detected-${folder.source.name}-${folder.name}"),
                           action: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(

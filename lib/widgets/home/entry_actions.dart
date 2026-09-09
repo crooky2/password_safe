@@ -260,8 +260,8 @@ class EntryActions {
       SnackBar(
         content: Text(
           success
-              ? "folderMembershipUpdated" // TODO: Localization
-              : "failedToUpdateFolders"
+              ? l10n.folderMembershipUpdated
+              : l10n.failedToUpdateFolders
         )
       )
     );

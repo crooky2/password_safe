@@ -91,7 +91,7 @@ class _FolderFormPopupState extends State<FolderFormPopup> {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       setState(() {
-        _errorMessage = "Folder name is required."; // TODO: Localization
+        _errorMessage = l10n.folderNameRequired;
       });
       return;
     }
@@ -105,7 +105,7 @@ class _FolderFormPopupState extends State<FolderFormPopup> {
 
     if (nameExists) {
       setState(() {
-        _errorMessage = "Folder name already exists."; // TODO: Localization
+        _errorMessage = l10n.folderNameAlreadyExists;
       });
       return;
     }
@@ -123,7 +123,7 @@ class _FolderFormPopupState extends State<FolderFormPopup> {
     final l10n = AppLocalizations.of(context)!;
 
     return ScreenPopup(
-      title: _isEditing ? "Edit Folder" : "Create Folder",
+      title: _isEditing ? l10n.editFolder : l10n.createNewFolder,
       onClose: () => Navigator.of(context).pop(),
       children: [
         TextField(

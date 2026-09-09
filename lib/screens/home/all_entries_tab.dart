@@ -326,10 +326,11 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
                                   : Icons.star_border_rounded,
                             ),
                           ),
+                          key: ValueKey(entry.id),
                           contextMenuItems: [
                             SectionCardMenuItem(
-                              label: "addToFolder", // TODO: Localization
-                              icon: Icons.move_to_inbox_rounded,
+                              label: l10n.addToFolder,
+                              icon: Icons.folder,
                               onSelected: () {
                                 entryActions.manageFolders(
                                   context,
@@ -346,14 +347,6 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
                                   context,
                                   entry: entry,
                                 );
-                              },
-                            ),
-                            SectionCardMenuItem(
-                              label: l10n.delete,
-                              icon: Icons.delete_rounded,
-                              isDestructive: true,
-                              onSelected: () {
-                                entryActions.deleteEntry(context, entry: entry);
                               },
                             ),
                           ],
