@@ -7,16 +7,13 @@ import '../widgets/screen_frame.dart';
 import "../widgets/section_card.dart";
 
 import "../auth/auth_controller.dart";
-
-import "../storage/vault_file_store.dart";
-
-import "../cloud/microsoft_auth_service.dart";
 import "../cloud/cloud_controller.dart";
 
 import "settings/security_tab.dart";
 import "settings/debug_tab.dart";
 import "settings/appearance_tab.dart";
 import "../l10n/app_localizations.dart";
+import "../widgets/components/popups/reset_data_popup.dart";
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({
@@ -91,17 +88,35 @@ class SettingsScreen extends StatelessWidget {
 
         FilledButton(
           onPressed: () async {
-            await VaultFileStore().delete();
-            await authController.disableQuickUnlock();
-            await MicrosoftAuthService().signOut();
+            await showGeneralDialog<void>(
+              context: context,
+              barrierDismissible: false,
+              barrierColor: Colors.transparent,
+              pageBuilder: (dialogContext, animation, secondaryAnimation) {
+                return ResetDataPopup(
+                  onReset: (password) {
+                    return authController.resetLocalVault(
+                      masterPassword: password,
+                      beforeDelete: () async {
+                        if (cloudController.isBusy) {
+                          throw StateError("Cloud synchronization is running.");
+                        }
 
-            if (!context.mounted) {
-              return;
-            }
+                        await cloudController.setMode(CloudSyncMode.disabled);
 
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(l10n.resetAppDataMessage)));
+                        if (cloudController.isBusy ||
+                            cloudController.mode != CloudSyncMode.disabled) {
+                          throw StateError(
+                            "Cloud synchronization is still enabled.",
+                          );
+                        }
+                        await cloudController.microsoftAuthService.signOut();
+                      },
+                    );
+                  },
+                );
+              },
+            );
           },
           style: FilledButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.error,
@@ -116,8 +131,6 @@ class SettingsScreen extends StatelessWidget {
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ),
-
-        
       ],
     );
   }

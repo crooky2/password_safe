@@ -34,6 +34,7 @@ dependencies:
   local_auth: ^3.0.1
   msix: ^3.16.13
   flutter_launcher_icons: ^0.14.4
+  simple_icons: ^16.23.0
 
 dev_dependencies:
   flutter_test:

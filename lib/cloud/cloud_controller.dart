@@ -347,25 +347,28 @@ class CloudController extends ChangeNotifier {
   Future<void> _disable() async {
     _setBusy(true);
 
-    switch (_mode) {
-      case CloudSyncMode.oneDrive:
-        await microsoftAuthService.signOut();
-        break;
-      case CloudSyncMode.disabled:
-        break;
-    }
+    try {
+      switch (_mode) {
+        case CloudSyncMode.oneDrive:
+          await microsoftAuthService.signOut();
+          break;
+        case CloudSyncMode.disabled:
+          break;
+      }
 
-    final preferences = await SharedPreferences.getInstance();
-    await preferences.setString(_modeKey, "disabled");
-    await preferences.setBool(_syncHeldKey, false);
-    await checkpointStore.clear();
+      final preferences = await SharedPreferences.getInstance();
+      await preferences.setString(_modeKey, "disabled");
+      await preferences.setBool(_syncHeldKey, false);
+      await checkpointStore.clear();
 
-    _mode = CloudSyncMode.disabled;
-    _pendingConflict = null;
-    _message = CloudMessage.syncDisabled;
+      _mode = CloudSyncMode.disabled;
+      _pendingConflict = null;
+      _message = CloudMessage.syncDisabled;
 
-    await _setSyncHeld(false);
-    _setBusy(false);
+      await _setSyncHeld(false);
+    } finally {
+      _setBusy(false);
+    }    
   }
 
   Future<CloudMessage> _syncOneDrive() async {
