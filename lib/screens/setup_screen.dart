@@ -6,6 +6,8 @@ import "../auth/auth_controller.dart";
 import "../l10n/app_localizations.dart";
 import "../l10n/localized_messages.dart";
 
+enum _SetupError { passwordTooShort, passwordsDoNotMatch }
+
 class SetupScreen extends StatefulWidget {
   const SetupScreen({
     super.key,
@@ -24,7 +26,7 @@ class _SetupVaultScreenState extends State<SetupScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmController = TextEditingController();
 
-  String? _localError;
+  _SetupError? _localError;
 
   @override
   void dispose() {
@@ -34,7 +36,6 @@ class _SetupVaultScreenState extends State<SetupScreen> {
   }
 
   Future<void> _submit() async {
-    final l10n = AppLocalizations.of(context)!;
     final password = _passwordController.text;
     final confirm = _confirmController.text;
 
@@ -44,14 +45,14 @@ class _SetupVaultScreenState extends State<SetupScreen> {
 
     if (password.length < 12) {
       setState(() {
-        _localError = l10n.useAtLeast12Characters;
+        _localError = _SetupError.passwordTooShort;
       });
       return;
     }
 
     if (password != confirm) {
       setState(() {
-        _localError = l10n.passwordsDoNotMatch;
+        _localError = _SetupError.passwordsDoNotMatch;
       });
       return;
     }
@@ -71,11 +72,13 @@ class _SetupVaultScreenState extends State<SetupScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final errorMessage =
-        _localError ??
-        (widget.errorMessage == null
+    final errorMessage = switch (_localError) {
+      _SetupError.passwordTooShort => l10n.useAtLeast12Characters,
+      _SetupError.passwordsDoNotMatch => l10n.passwordsDoNotMatch,
+      null => widget.errorMessage == null
             ? null
-            : l10n.authFeedback(widget.errorMessage!));
+            : l10n.authFeedback(widget.errorMessage!),
+    };
 
     return ScreenFrame(
       title: l10n.setupVault,

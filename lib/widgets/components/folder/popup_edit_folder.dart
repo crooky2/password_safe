@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
 
-import "../../l10n/app_localizations.dart";
-import "../../vault/password_database.dart";
+import "../../../l10n/app_localizations.dart";
+import "../../../vault/password_database.dart";
 
-import "../screen_popup.dart";
+import "../../screen_popup.dart";
 
 class FolderFormResult {
   const FolderFormResult({required this.name, required this.entryIds});

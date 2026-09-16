@@ -13,7 +13,7 @@ import "settings/security_tab.dart";
 import "settings/debug_tab.dart";
 import "settings/appearance_tab.dart";
 import "../l10n/app_localizations.dart";
-import "../widgets/components/popups/reset_data_popup.dart";
+import "../widgets/components/popups/popup_reset_data.dart";
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({
@@ -127,7 +127,7 @@ class SettingsScreen extends StatelessWidget {
 
         Center(
           child: Text(
-            'Version 1.2.3+3',
+            l10n.appVersion('1.3.5+3'),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ),

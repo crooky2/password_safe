@@ -1,12 +1,12 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
-import "../../l10n/app_localizations.dart";
-import "../../security/timed_clipboard.dart";
+import "../../../l10n/app_localizations.dart";
+import "../../../security/timed_clipboard.dart";
 
-import "../../vault/password_generator.dart";
+import "../../../vault/password_generator.dart";
 
-import "../screen_popup.dart";
+import "../../screen_popup.dart";
 
 class PasswordGeneratorPopup extends StatefulWidget {
   const PasswordGeneratorPopup({super.key});

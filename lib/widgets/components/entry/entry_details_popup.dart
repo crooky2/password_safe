@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
-import "../screen_popup.dart";
+import "../../../widgets/screen_popup.dart";
 
-import "../../vault/password_database.dart";
+import "../../../vault/password_database.dart";
 
-import "../../l10n/app_localizations.dart";
+import "../../../l10n/app_localizations.dart";
 
 import "entry_details.dart";
+import "entry_icon.dart";
 
 enum EntryDetailsPopupAction { edit, delete, clone }
 
@@ -29,7 +30,7 @@ class EntryDetailsPopup extends StatelessWidget {
     return ScreenPopup(
       title: titlePrefix == null ? entry.title : "$titlePrefix: ${entry.title}",
       onClose: () => Navigator.of(context).pop(),
-
+      icon: EntryIconResolver().resolve(entry),
       children: [
         if (showActions) ...[
           Row(
@@ -50,6 +51,7 @@ class EntryDetailsPopup extends StatelessWidget {
                     Navigator.of(context).pop(EntryDetailsPopupAction.clone);
                   },
                   icon: const Icon(Icons.copy_sharp, size: 18),
+                  tooltip: l10n.clone,
                 ),
               ),
               const SizedBox(width: 8),
@@ -63,7 +65,7 @@ class EntryDetailsPopup extends StatelessWidget {
                     foregroundColor: Theme.of(context).colorScheme.onError,
                   ),
                   icon: const Icon(Icons.delete, size: 18),
-
+                  tooltip: l10n.delete,
                 ),
               ),
             ],

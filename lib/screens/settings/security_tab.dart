@@ -119,6 +119,7 @@ class _SecurityTabState extends State<SecurityTab> {
 
     final success = await widget.authController.enableFingerprintUnlock(
       promptTitle: l10n.confirmDeviceAuthForQuickUnlock,
+      localeName: l10n.localeName,
     );
 
     if (!mounted) {

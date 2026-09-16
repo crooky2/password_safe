@@ -36,7 +36,6 @@ class SectionCardLightweight extends StatelessWidget {
     final hasTitle = title != null && title!.trim().isNotEmpty;
     final hasSubtitle = subtitle != null && subtitle!.trim().isNotEmpty;
     final hasIcon = icon != null;
-    final hasContextMenu = contextMenuItems.isNotEmpty;
     final hasAdditionalAction = additionalActionIconButton != null;
     final menuController = MenuController();
 

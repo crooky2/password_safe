@@ -149,6 +149,7 @@ class _RootGateState extends State<RootGate> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AnimatedBuilder(
       animation: _authController,
 
@@ -172,7 +173,11 @@ class _RootGateState extends State<RootGate> with WidgetsBindingObserver {
               child: LockScreen(
                 onUnlock: _authController.unlock,
                 onUnlockWithPin: _authController.unlockWithPin,
-                onUnlockWithFingerprint: _authController.unlockWithFingerprint,
+                onUnlockWithFingerprint: ({required String promptTitle}) =>
+                    _authController.unlockWithFingerprint(
+                      promptTitle: promptTitle,
+                      localeName: l10n.localeName,
+                    ),
                 isPinUnlockEnabled: _authController.isPinUnlockEnabled,
                 isFingerprintUnlockEnabled:
                     _authController.isFingerprintUnlockEnabled,

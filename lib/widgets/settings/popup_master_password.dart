@@ -4,6 +4,8 @@ import "../../l10n/app_localizations.dart";
 import "../screen_popup.dart";
 import "../secret_text_field.dart";
 
+enum _MasterPasswordError { currentPasswordRequired, passwordTooShort, passwordsDoNotMatch }
+
 class MasterPasswordChange {
   const MasterPasswordChange({
     required this.currentPassword,
@@ -26,7 +28,7 @@ class _MasterPasswordPopupState extends State<MasterPasswordPopup> {
   final TextEditingController _newController = TextEditingController();
   final TextEditingController _confirmController = TextEditingController();
 
-  String? _errorMessage;
+  _MasterPasswordError? _error;
 
   @override
   void dispose() {
@@ -37,28 +39,27 @@ class _MasterPasswordPopupState extends State<MasterPasswordPopup> {
   }
 
   void _submit() {
-    final l10n = AppLocalizations.of(context)!;
     final currentPassword = _currentController.text;
     final newPassword = _newController.text;
     final confirmPassword = _confirmController.text;
 
     if (currentPassword.isEmpty) {
       setState(() {
-        _errorMessage = l10n.enterCurrentPassword;
+        _error = _MasterPasswordError.currentPasswordRequired;
       });
       return;
     }
 
     if (newPassword.length < 12) {
       setState(() {
-        _errorMessage = l10n.useAtLeast12Characters;
+        _error = _MasterPasswordError.passwordTooShort;
       });
       return;
     }
 
     if (newPassword != confirmPassword) {
       setState(() {
-        _errorMessage = l10n.passwordsDoNotMatch;
+        _error = _MasterPasswordError.passwordsDoNotMatch;
       });
       return;
     }
@@ -74,6 +75,12 @@ class _MasterPasswordPopupState extends State<MasterPasswordPopup> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final errorMessage = switch (_error) {
+      _MasterPasswordError.currentPasswordRequired => l10n.enterCurrentPassword,
+      _MasterPasswordError.passwordTooShort => l10n.useAtLeast12Characters,
+      _MasterPasswordError.passwordsDoNotMatch => l10n.passwordsDoNotMatch,
+      null => null,
+    };
 
     return ScreenPopup(
       title: l10n.changeMasterPassword,
@@ -96,10 +103,10 @@ class _MasterPasswordPopupState extends State<MasterPasswordPopup> {
           onSubmitted: (_) => _submit(),
         ),
 
-        if (_errorMessage != null) ...[
+        if (errorMessage != null) ...[
           const SizedBox(height: 12),
           Text(
-            _errorMessage!,
+            errorMessage,
             style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
         ],

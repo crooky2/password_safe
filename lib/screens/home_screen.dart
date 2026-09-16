@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import '../widgets/screen_frame.dart';
 import '../widgets/section_card.dart';
 import "../widgets/section_card_lightweight.dart";
+import "../widgets/components/entry/entry_icon.dart";
 
 import "../auth/auth_controller.dart";
 
 import "home/all_entries_tab.dart";
 import "home/folders_tab.dart";
 
-import "../widgets/home/entry_actions.dart";
+import "../widgets/components/entry/entry_actions.dart";
 
 import "../vault/password_database.dart";
 import "../vault/folder_detector.dart";
@@ -64,6 +65,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const iconResolver = EntryIconResolver();
+
     return Stack(
       children: [
         AnimatedBuilder(
@@ -90,7 +93,7 @@ class HomeScreen extends StatelessWidget {
                 IconButton(
                   tooltip: l10n.addEntry,
                   onPressed: () {
-                    entryActions.openEntryForm(context);
+                    entryActions.popupEntryEdit(context);
                   },
                   icon: const Icon(Icons.add_rounded),
                 ),
@@ -150,7 +153,7 @@ class HomeScreen extends StatelessWidget {
                         subtitle: entry.username.trim().isEmpty
                             ? null
                             : entry.username,
-                        icon: Icons.key_rounded,
+                        icon: iconResolver.resolve(entry),
                         border: entry.id == favoriteEntries.last.id
                             ? null
                             : Border(
@@ -160,12 +163,7 @@ class HomeScreen extends StatelessWidget {
                                 ),
                               ),
                         action: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  AllEntriesTab(authController: authController),
-                            ),
-                          );
+                          entryActions.popupEntryDetails(context, entry: entry);
                         },
                         key: ValueKey(entry.id),
                         contextMenuItems: [
@@ -184,7 +182,7 @@ class HomeScreen extends StatelessWidget {
                             label: l10n.edit,
                             icon: Icons.edit_rounded,
                             onSelected: () {
-                              entryActions.openEntryForm(context, entry: entry);
+                              entryActions.popupEntryEdit(context, entry: entry);
                             },
                           ),
                           SectionCardMenuItem(

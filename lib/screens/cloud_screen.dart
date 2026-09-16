@@ -19,7 +19,7 @@ import "../l10n/localized_messages.dart";
 import "../widgets/section_card.dart";
 import "../widgets/screen_frame.dart";
 import "../widgets/secret_text_field.dart";
-import "../widgets/home/popup_entry.dart";
+import "../widgets/components/entry/entry_details_popup.dart";
 import "../widgets/screen_popup.dart";
 import "../widgets/cloud/review_summary.dart";
 import "../widgets/cloud/diff_group.dart";

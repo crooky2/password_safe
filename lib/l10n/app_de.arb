@@ -1,6 +1,16 @@
 {
     "@@locale": "de",
     "appTitle": "Passwort-Safe",
+    "appVersion": "Version {version}",
+    "themeColor": "Akzentfarbe",
+    "themeColorDefault": "Standard",
+    "themeColorCustom": "Benutzerdefiniert",
+    "chooseThemeColor": "Akzentfarbe auswählen",
+    "closeThemeColor": "Farbauswahl schließen",
+    "resetDataUnavailable": "Die App-Daten können derzeit nicht zurückgesetzt werden. Entsperre deinen Tresor und versuche es erneut.",
+    "resetDataFailed": "Die App-Daten konnten nicht zurückgesetzt werden. Bitte versuche es erneut.",
+    "deviceAuthenticationRequired": "Authentifizierung erforderlich",
+    "verifyIdentity": "Bestätige deine Identität",
 
     "generatePassword": "Passwort generieren",
     "passwordGenerator": "Passwortgenerator",

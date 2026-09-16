@@ -184,17 +184,6 @@ class _LockScreenState extends State<LockScreen> {
     return _unlockMode == UnlockMode.pin;
   }
 
-  String _formatCountdown(Duration duration) {
-    final minutes = duration.inMinutes;
-    final seconds = duration.inSeconds.remainder(60);
-
-    if (minutes > 0) {
-      return "$minutes:${seconds.toString().padLeft(2, "0")}";
-    }
-
-    return "${seconds}s";
-  }
-
   void _syncCountdownTimer() {
     final hasCountdown =
         widget.unlockBlockedUntil?.isAfter(DateTime.now()) ?? false;
@@ -249,14 +238,14 @@ class _LockScreenState extends State<LockScreen> {
     final countdownMessage = remaining > Duration.zero
         ? widget.unlockBlockedRequiresMasterPassword
               ? l10n.lockScreenTooManyPinAttemptsMasterAvailable(
-                  _formatCountdown(remaining),
+                  l10n.durationLabel(remaining),
                 )
               : _unlockMode == UnlockMode.pin
               ? l10n.lockScreenWrongPinTryAgainUseMasterPassword(
-                  _formatCountdown(remaining),
+                  l10n.durationLabel(remaining),
                 )
               : l10n.lockScreenQuickUnlockDisabledFor(
-                  _formatCountdown(remaining),
+                  l10n.durationLabel(remaining),
                 )
         : null;
 

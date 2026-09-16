@@ -107,6 +107,7 @@ class ScreenFrame extends StatelessWidget {
                                         width: returnButtonSize,
                                         height: returnButtonSize,
                                         child: IconButton(
+                                          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
                                           padding: EdgeInsets.zero,
                                           constraints: const BoxConstraints(),
                                           visualDensity: VisualDensity.compact,

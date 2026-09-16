@@ -19,7 +19,7 @@ class SwipeAction {
 class SwipeActionCoordinator {
   static _SwipeActionOverlayState? _openOverlay;
 
-  static bool claim(_SwipeActionOverlayState overlay) {
+  static bool _claim(_SwipeActionOverlayState overlay) {
     if (identical(_openOverlay, overlay)) {
       return false;
     }
@@ -33,11 +33,11 @@ class SwipeActionCoordinator {
     return true;
   }
 
-  static bool owns(_SwipeActionOverlayState overlay) {
+  static bool _owns(_SwipeActionOverlayState overlay) {
     return identical(_openOverlay, overlay);
   }
 
-  static void release(_SwipeActionOverlayState overlay) {
+  static void _release(_SwipeActionOverlayState overlay) {
     if (identical(_openOverlay, overlay)) {
       _openOverlay = null;
     }
@@ -111,13 +111,13 @@ class _SwipeActionOverlayState extends State<SwipeActionOverlay>
 
   @override
   void dispose() {
-    SwipeActionCoordinator.release(this);
+    SwipeActionCoordinator._release(this);
     _progress.dispose();
     super.dispose();
   }
 
   void _claimCorrdinator() {
-    final becameActive = SwipeActionCoordinator.claim(this);
+    final becameActive = SwipeActionCoordinator._claim(this);
 
     if (becameActive) {
       widget.onWillOpen?.call();
@@ -136,7 +136,7 @@ class _SwipeActionOverlayState extends State<SwipeActionOverlay>
     if (open) {
       _claimCorrdinator();
     } else {
-      SwipeActionCoordinator.release(this);
+      SwipeActionCoordinator._release(this);
     }
 
     final target = open ? 1.0 : 0.0;
@@ -238,7 +238,7 @@ class _SwipeActionOverlayState extends State<SwipeActionOverlay>
     return TapRegion(
       onTapOutside: (_) {
         if (_progress.value > 0.0 ||
-          SwipeActionCoordinator.owns(this)) {
+          SwipeActionCoordinator._owns(this)) {
           _settle(open: false);
         }
       },

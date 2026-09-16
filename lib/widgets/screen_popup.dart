@@ -10,6 +10,8 @@ class ScreenPopup extends StatelessWidget {
     this.maxWidth = 640,
     this.maxHeightFactor = 0.9,
     this.barrierColor,
+    this.icon,
+    this.iconAction,
   });
 
   final List<Widget> children;
@@ -19,6 +21,8 @@ class ScreenPopup extends StatelessWidget {
   final double maxWidth;
   final double maxHeightFactor;
   final Color? barrierColor;
+  final IconData? icon;
+  final VoidCallback? iconAction;
 
   @override
   Widget build(BuildContext context) {
@@ -69,46 +73,80 @@ class ScreenPopup extends StatelessWidget {
                         if (hasHeaderText)
                           Padding(
                             padding: const EdgeInsets.fromLTRB(24, 22, 16, 16),
-                            child: Row(
+                            child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      if (title != null &&
-                                          title!.trim().isNotEmpty)
-                                        Text(
-                                          title!.trim(),
-                                          style: theme.textTheme.headlineSmall
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.w800,
-                                              ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    if (icon != null)
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: colorScheme.outline,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
-                                      if (subtitle != null &&
-                                          subtitle!.trim().isNotEmpty) ...[
-                                        if (title != null &&
-                                            title!.trim().isNotEmpty)
-                                          const SizedBox(height: 6),
-                                        Text(
-                                          subtitle!.trim(),
-                                          style: theme.textTheme.bodyMedium
-                                              ?.copyWith(
-                                                color: colorScheme
-                                                    .onSurfaceVariant,
-                                                height: 1.35,
-                                              ),
+                                        child: IconButton(
+                                          onPressed: iconAction,
+                                          icon: Icon(
+                                            icon,
+                                            size: 24,
+                                            color: colorScheme.onSurfaceVariant,
+                                          ),
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(
+                                            minWidth: 32,
+                                            minHeight: 32,
+                                          ),
                                         ),
-                                      ],
-                                    ],
-                                  ),
+                                      ),
+                                    if (icon != null &&
+                                        title != null &&
+                                        title!.trim().isNotEmpty)
+                                      const SizedBox(width: 8),
+                                    Expanded(
+                                      child:
+                                          title != null &&
+                                              title!.trim().isNotEmpty
+                                          ? Text(
+                                              title!.trim(),
+                                              style: theme
+                                                  .textTheme
+                                                  .headlineSmall
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w800,
+                                                  ),
+                                            )
+                                          : const SizedBox.shrink(),
+                                    ),
+                                    if (onClose != null)
+                                      IconButton(
+                                        onPressed: onClose,
+                                        tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                                        icon: const Icon(Icons.close_rounded),
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(
+                                          minWidth: 32,
+                                          minHeight: 32,
+                                        ),
+                                      ),
+                                  ],
                                 ),
-                                if (onClose != null)
-                                  IconButton(
-                                    onPressed: onClose,
-                                    icon: const Icon(Icons.close_rounded),
+                                if (subtitle != null &&
+                                    subtitle!.trim().isNotEmpty) ...[
+                                  if (title != null && title!.trim().isNotEmpty)
+                                    const SizedBox(height: 6),
+                                  Text(
+                                    subtitle!.trim(),
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                      height: 1.35,
+                                    ),
                                   ),
+                                ],
                               ],
                             ),
                           ),

@@ -5,8 +5,8 @@ import "../../auth/auth_controller.dart";
 import "../../widgets/screen_frame.dart";
 import "../../widgets/section_card.dart";
 import "../../widgets/section_card_lightweight.dart";
-import "../../widgets/home/entry_actions.dart";
-import "../../widgets/home/popup_entry.dart";
+import "../../widgets/components/entry/entry_actions.dart";
+import "../../widgets/components/entry/entry_icon.dart";
 
 import "../../vault/password_database.dart";
 import "../../l10n/app_localizations.dart";
@@ -110,62 +110,6 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
     return entries.where((entry) => _entryMatchesSearch(entry, query)).toList();
   }
 
-  Future<void> _showEntryPopup(
-    BuildContext context,
-    PasswordEntry entry,
-  ) async {
-    final l10n = AppLocalizations.of(context)!;
-
-    final action = await showGeneralDialog<EntryDetailsPopupAction>(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: l10n.closeEntryDetails,
-      barrierColor: Colors.transparent,
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return EntryDetailsPopup(entry: entry);
-      },
-    );
-
-    if (!context.mounted) {
-      return;
-    }
-
-    switch (action) {
-      case EntryDetailsPopupAction.edit:
-        final savedEntry = await EntryActions(
-          authController: authController,
-        ).openEntryForm(context, entry: entry);
-
-        if (savedEntry != null && context.mounted) {
-          await _showEntryPopup(context, savedEntry);
-        }
-        return;
-      case EntryDetailsPopupAction.delete:
-        final success = await EntryActions(
-          authController: authController,
-        ).deleteEntry(context, entry: entry);
-
-        if (!context.mounted) {
-          return;
-        }
-        if (!success) {
-          await _showEntryPopup(context, entry);
-        }
-        return;
-      case EntryDetailsPopupAction.clone:
-        final savedEntry = await EntryActions(
-          authController: authController,
-        ).openEntryForm(context, entry: entry, clone: true);
-
-        if (savedEntry != null && context.mounted) {
-          await _showEntryPopup(context, savedEntry);
-        }
-        return;
-      case null:
-        return;
-    }
-  }
-
   Widget _buildSearchField(AppLocalizations l10n) {
     return TextField(
       controller: _searchController,
@@ -197,6 +141,8 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
 
   @override
   Widget build(BuildContext context) {
+    const iconResolver = EntryIconResolver();
+
     return AnimatedBuilder(
       animation: authController,
       builder: (context, _) {
@@ -239,7 +185,7 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
                 IconButton(
                   tooltip: l10n.addEntry,
                   onPressed: () {
-                    entryActions.openEntryForm(
+                    entryActions.popupEntryEdit(
                       context,
                       initialFolderIds: currentFolder == null
                           ? const <String>{}
@@ -296,7 +242,7 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
                         return SectionCardLightweight(
                           title: entry.title,
                           subtitle: entry.username,
-                          icon: Icons.key_rounded,
+                          icon: iconResolver.resolve(entry),
                           border: isLast
                               ? null
                               : Border(
@@ -308,7 +254,7 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
                                   ),
                                 ),
                           action: () {
-                            _showEntryPopup(context, entry);
+                            entryActions.popupEntryDetails(context, entry: entry);
                           },
                           additionalActionIconButton: IconButton(
                             tooltip: entry.isFavorite
@@ -343,7 +289,7 @@ class _AllEntriesTabState extends State<AllEntriesTab> {
                               icon: Icons.edit_rounded,
                               isDestructive: false,
                               onSelected: () {
-                                entryActions.openEntryForm(
+                                entryActions.popupEntryEdit(
                                   context,
                                   entry: entry,
                                 );

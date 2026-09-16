@@ -1,16 +1,18 @@
 import "package:flutter/material.dart";
 
-import "../../vault/password_database.dart";
-import "../../l10n/app_localizations.dart";
+import "../../../vault/password_database.dart";
+import "../../../l10n/app_localizations.dart";
 
-import "../screen_popup.dart";
-import "../secret_text_field.dart";
+import "../../screen_popup.dart";
+import "../../secret_text_field.dart";
 
-import "popup_password_generator.dart";
-import "popup_folder_picker.dart";
+import "../popups/popup_password_generator.dart";
+import "../folder/popup_folder_picker.dart";
 
-class EntryFormPopup extends StatefulWidget {
-  const EntryFormPopup({
+import "../entry/entry_icon.dart";
+
+class EntryEditPopup extends StatefulWidget {
+  const EntryEditPopup({
     super.key,
     this.entry,
     this.clone = false,
@@ -24,10 +26,10 @@ class EntryFormPopup extends StatefulWidget {
   final Set<String> initialFolderIds;
 
   @override
-  State<EntryFormPopup> createState() => _EntryFormPopupState();
+  State<EntryEditPopup> createState() => _EntryEditPopupState();
 }
 
-class _EntryFormPopupState extends State<EntryFormPopup> {
+class _EntryEditPopupState extends State<EntryEditPopup> {
   late final TextEditingController _titleController;
   late final TextEditingController _usernameController;
   late final TextEditingController _passwordController;
@@ -160,11 +162,11 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final title = _isEditing
+    final subtitle = _isEditing
         ? l10n.editEntry
         : widget.clone
         ? l10n.cloneEntry
-        : l10n.newEntry;
+        : null;
 
     final selectedFolders = widget.folders.where((folder) {
       return _selectedFolderIds.contains(folder.id);
@@ -175,8 +177,15 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
     }
 
     return ScreenPopup(
-      title: title,
+      title: widget.entry?.title ?? l10n.newEntry,
+      subtitle: subtitle,
       onClose: () {
+        Navigator.of(context).pop();
+      },
+      icon: widget.entry == null
+          ? null
+          : EntryIconResolver().resolve(widget.entry!),
+      iconAction: () {
         Navigator.of(context).pop();
       },
       children: [
@@ -243,6 +252,7 @@ class _EntryFormPopupState extends State<EntryFormPopup> {
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
               label: const Text(''),
+              tooltip: l10n.selectFolders,
               backgroundColor: Theme.of(context).colorScheme.primary,
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
               onPressed: () {

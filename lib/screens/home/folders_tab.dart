@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "package:password_safe/widgets/home/popup_folder_form.dart";
+import "package:password_safe/widgets/components/folder/popup_edit_folder.dart";
 
 import "../../auth/auth_controller.dart";
 
@@ -171,7 +171,7 @@ class FoldersTab extends StatelessWidget {
       SnackBar(
         content: Text(
           success
-              ? "folderDeleted"
+              ? l10n.folderDeleted
               : l10n.failedToDeleteFolder,
         ),
       ),

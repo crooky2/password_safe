@@ -502,7 +502,10 @@ class AuthController extends ChangeNotifier {
     return localUnlockService.isFingerprintUnlockEnabled();
   }
 
-  Future<bool> enableFingerprintUnlock({required String promptTitle}) async {
+  Future<bool> enableFingerprintUnlock({
+    required String promptTitle,
+    String localeName = "en",
+  }) async {
     final unlockedVault = _unlockedVault;
 
     if (unlockedVault == null) {
@@ -520,6 +523,7 @@ class AuthController extends ChangeNotifier {
     try {
       final authenticated = await localAuthGate.authenticateFingerprint(
         reason: promptTitle,
+        localeName: localeName,
       );
 
       if (!authenticated) {
@@ -549,7 +553,10 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> unlockWithFingerprint({required String promptTitle}) async {
+  Future<bool> unlockWithFingerprint({
+    required String promptTitle,
+    String localeName = "en",
+  }) async {
     _shouldAutoPromptFingerprint = false;
     _errorMessage = null;
     notifyListeners();
@@ -557,6 +564,7 @@ class AuthController extends ChangeNotifier {
     try {
       final authenticated = await localAuthGate.authenticateFingerprint(
         reason: promptTitle,
+        localeName: localeName,
       );
 
       if (!authenticated) {

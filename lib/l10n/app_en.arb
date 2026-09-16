@@ -1,6 +1,21 @@
 {
     "@@locale": "en",
     "appTitle": "Password Safe",
+    "appVersion": "Version {version}",
+    "@appVersion": {
+        "placeholders": {
+            "version": {"type": "String"}
+        }
+    },
+    "themeColor": "Theme color",
+    "themeColorDefault": "Default",
+    "themeColorCustom": "Custom",
+    "chooseThemeColor": "Choose theme color",
+    "closeThemeColor": "Close theme color picker",
+    "resetDataUnavailable": "App data cannot be reset right now. Unlock your vault and try again.",
+    "resetDataFailed": "Could not reset app data. Please try again.",
+    "deviceAuthenticationRequired": "Authentication required",
+    "verifyIdentity": "Verify your identity",
 
     "generatePassword": "Generate password",
     "passwordGenerator": "Password generator",

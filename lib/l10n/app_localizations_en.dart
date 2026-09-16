@@ -12,6 +12,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Password Safe';
 
   @override
+  String appVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get themeColor => 'Theme color';
+
+  @override
+  String get themeColorDefault => 'Default';
+
+  @override
+  String get themeColorCustom => 'Custom';
+
+  @override
+  String get chooseThemeColor => 'Choose theme color';
+
+  @override
+  String get closeThemeColor => 'Close theme color picker';
+
+  @override
+  String get resetDataUnavailable =>
+      'App data cannot be reset right now. Unlock your vault and try again.';
+
+  @override
+  String get resetDataFailed => 'Could not reset app data. Please try again.';
+
+  @override
+  String get deviceAuthenticationRequired => 'Authentication required';
+
+  @override
+  String get verifyIdentity => 'Verify your identity';
+
+  @override
   String get generatePassword => 'Generate password';
 
   @override

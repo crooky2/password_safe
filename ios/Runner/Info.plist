@@ -3,11 +3,16 @@
 <plist version="1.0">
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<key>NSFaceIDUsageDescription</key>
-		<string>Use Face ID to protect quick unlock.</string>
 	<true/>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Use Face ID to protect quick unlock.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>de</string>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>Password Safe</string>
 	<key>CFBundleExecutable</key>

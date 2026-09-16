@@ -12,6 +12,40 @@ class AppLocalizationsDe extends AppLocalizations {
   String get appTitle => 'Passwort-Safe';
 
   @override
+  String appVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get themeColor => 'Akzentfarbe';
+
+  @override
+  String get themeColorDefault => 'Standard';
+
+  @override
+  String get themeColorCustom => 'Benutzerdefiniert';
+
+  @override
+  String get chooseThemeColor => 'Akzentfarbe auswählen';
+
+  @override
+  String get closeThemeColor => 'Farbauswahl schließen';
+
+  @override
+  String get resetDataUnavailable =>
+      'Die App-Daten können derzeit nicht zurückgesetzt werden. Entsperre deinen Tresor und versuche es erneut.';
+
+  @override
+  String get resetDataFailed =>
+      'Die App-Daten konnten nicht zurückgesetzt werden. Bitte versuche es erneut.';
+
+  @override
+  String get deviceAuthenticationRequired => 'Authentifizierung erforderlich';
+
+  @override
+  String get verifyIdentity => 'Bestätige deine Identität';
+
+  @override
   String get generatePassword => 'Passwort generieren';
 
   @override

@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
 
-import "../../l10n/app_localizations.dart";
-import "../../vault/password_database.dart";
+import "../../../l10n/app_localizations.dart";
+import "../../../vault/password_database.dart";
 
-import "../screen_popup.dart";
+import "../../screen_popup.dart";
 
 Future<Set<String>?> showFolderPickerPopup(
   BuildContext context, {

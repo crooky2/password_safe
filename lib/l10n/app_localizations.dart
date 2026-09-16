@@ -94,8 +94,8 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
-    Locale('de'),
     Locale('en'),
+    Locale('de'),
   ];
 
   /// No description provided for @appTitle.
@@ -103,6 +103,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Password Safe'**
   String get appTitle;
+
+  /// No description provided for @appVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String appVersion(String version);
+
+  /// No description provided for @themeColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme color'**
+  String get themeColor;
+
+  /// No description provided for @themeColorDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get themeColorDefault;
+
+  /// No description provided for @themeColorCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get themeColorCustom;
+
+  /// No description provided for @chooseThemeColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose theme color'**
+  String get chooseThemeColor;
+
+  /// No description provided for @closeThemeColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Close theme color picker'**
+  String get closeThemeColor;
+
+  /// No description provided for @resetDataUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'App data cannot be reset right now. Unlock your vault and try again.'**
+  String get resetDataUnavailable;
+
+  /// No description provided for @resetDataFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reset app data. Please try again.'**
+  String get resetDataFailed;
+
+  /// No description provided for @deviceAuthenticationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication required'**
+  String get deviceAuthenticationRequired;
+
+  /// No description provided for @verifyIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your identity'**
+  String get verifyIdentity;
 
   /// No description provided for @generatePassword.
   ///

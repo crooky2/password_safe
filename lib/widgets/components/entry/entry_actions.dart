@@ -1,21 +1,75 @@
 import "package:flutter/material.dart";
 import "package:flutter/foundation.dart";
 
-import "../../auth/auth_controller.dart";
+import "../../../auth/auth_controller.dart";
 
-import "../../vault/password_database.dart";
-import "../../l10n/app_localizations.dart";
-import "../../l10n/localized_messages.dart";
+import "../../../vault/password_database.dart";
+import "../../../l10n/app_localizations.dart";
+import "../../../l10n/localized_messages.dart";
 
-import "popup_entry_form.dart";
-import "popup_folder_picker.dart";
+import "../folder/popup_folder_picker.dart";
+
+import "entry_details_popup.dart";
+import "entry_edit_popup.dart";
 
 class EntryActions {
   const EntryActions({required this.authController});
 
   final AuthController authController;
 
-  Future<PasswordEntry?> openEntryForm(
+  Future<void> popupEntryDetails(
+    BuildContext context, {
+    required PasswordEntry entry,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    final action = await showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: l10n.closeEntryDetails,
+      barrierColor: Colors.transparent,
+      pageBuilder: (dialogContext, animation, secondaryAnimation) {
+        return EntryDetailsPopup(entry: entry);
+      },
+    );
+
+    if (!context.mounted) return;
+
+    switch (action) {
+      case EntryDetailsPopupAction.edit:
+        final savedEntry = await popupEntryEdit(context, entry: entry);
+
+        if (context.mounted && authController.database != null) {
+          await popupEntryDetails(context, entry: savedEntry ?? entry);
+        }
+        return;
+
+      case EntryDetailsPopupAction.delete:
+        final success = await deleteEntry(context, entry: entry);
+
+        if (!success && context.mounted) {
+          await popupEntryDetails(context, entry: entry);
+        }
+        return;
+
+      case EntryDetailsPopupAction.clone:
+        final savedEntry = await popupEntryEdit(
+          context,
+          entry: entry,
+          clone: true,
+        );
+
+        if (savedEntry != null && context.mounted) {
+          await popupEntryDetails(context, entry: savedEntry);
+        }
+        return;
+
+      case null:
+        return;
+    }
+  }
+
+  Future<PasswordEntry?> popupEntryEdit(
     BuildContext context, {
     PasswordEntry? entry,
     bool clone = false,
@@ -43,7 +97,7 @@ class EntryActions {
       barrierLabel: l10n.closeEntryForm,
       barrierColor: Colors.transparent,
       pageBuilder: (context, animation, secondaryAnimation) {
-        return EntryFormPopup(
+        return EntryEditPopup(
           entry: entry,
           clone: clone,
           folders: initialDatabase.folders,
@@ -249,7 +303,10 @@ class EntryActions {
       return false;
     }
 
-    final updatedDatabase = latestDatabase.setEntryFolderMembership(entryId: entry.id, folderIds: selectedFolderIds);
+    final updatedDatabase = latestDatabase.setEntryFolderMembership(
+      entryId: entry.id,
+      folderIds: selectedFolderIds,
+    );
     final success = await authController.saveDatabase(updatedDatabase);
 
     if (!context.mounted) {
@@ -259,11 +316,9 @@ class EntryActions {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          success
-              ? l10n.folderMembershipUpdated
-              : l10n.failedToUpdateFolders
-        )
-      )
+          success ? l10n.folderMembershipUpdated : l10n.failedToUpdateFolders,
+        ),
+      ),
     );
     return success;
   }
