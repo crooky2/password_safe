@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:password_safe/widgets/components/folder/popup_edit_folder.dart";
 
 import "../../auth/auth_controller.dart";
 
@@ -8,7 +9,6 @@ import "../../vault/password_database.dart";
 import "../../widgets/screen_frame.dart";
 import "../../widgets/section_card.dart";
 import "../../widgets/section_card_lightweight.dart";
-import "../../widgets/screen_popup.dart";
 
 import "all_entries_tab.dart";
 import "../../l10n/app_localizations.dart";
@@ -19,99 +19,148 @@ class FoldersTab extends StatelessWidget {
 
   final AuthController authController;
 
-  Future<void> _createFolder(BuildContext context) async {
+  Future<void> _createFolder(
+    BuildContext context, {
+    String initialName = "",
+    Set<String> initialEntryIds = const <String>{},
+  }) async {
     final l10n = AppLocalizations.of(context)!;
-    final nameController = TextEditingController();
-    final selectedEntryIds = <String>{};
-    final entries = authController.database?.entries ?? const <PasswordEntry>[];
+    final database = authController.database;
 
-    final result = await showGeneralDialog<_FolderFormResult>(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: l10n.closeFolderForm,
-      barrierColor: Colors.transparent,
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return StatefulBuilder(
-          builder: (context, setPopupState) {
-            return ScreenPopup(
-              title: l10n.newFolder,
-              onClose: () {
-                Navigator.of(context).pop();
-              },
-              children: [
-                TextField(
-                  controller: nameController,
-                  autofocus: true,
-                  decoration: InputDecoration(labelText: l10n.folderName),
-                ),
-                const SizedBox(height: 16),
-
-                Text(
-                  l10n.entries,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                if (entries.isEmpty)
-                  Text(l10n.noEntriesAvailableToAddToFolder)
-                else
-                  for (final entry in entries)
-                    CheckboxListTile(
-                      contentPadding: EdgeInsets.zero,
-                      value: selectedEntryIds.contains(entry.id),
-                      title: Text(entry.title),
-                      subtitle: entry.username.trim().isEmpty
-                          ? null
-                          : Text(entry.username),
-                      onChanged: (isSelected) {
-                        setPopupState(() {
-                          if (isSelected == true) {
-                            selectedEntryIds.add(entry.id);
-                          } else {
-                            selectedEntryIds.remove(entry.id);
-                          }
-                        });
-                      },
-                    ),
-
-                const SizedBox(height: 16),
-                FilledButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop(
-                      _FolderFormResult(
-                        name: nameController.text.trim(),
-                        entryIds: selectedEntryIds.toList(),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.create_new_folder_rounded),
-                  label: Text(l10n.create),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    if (result == null || result.name.isEmpty) {
-      nameController.dispose();
+    if (database == null) {
       return;
     }
 
-    final database = authController.database;
-    if (database == null) {
-      nameController.dispose();
+    final result = await showFolderFormPopup(
+      context,
+      entries: database.entries,
+      folders: database.folders,
+      initialName: initialName,
+      initialEntryIds: initialEntryIds,
+    );
+
+    if (result == null || !context.mounted) {
+      return;
+    }
+
+    final latestDatabase = authController.database;
+
+    if (latestDatabase == null) {
       return;
     }
 
     final folder = PasswordFolder(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
       name: result.name,
-      entryIds: result.entryIds,
+      entryIds: result.entryIds.toList(),
     );
 
     final success = await authController.saveDatabase(
-      database.addFolder(folder),
+      latestDatabase.addFolder(folder),
+    );
+
+    if (!context.mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success ? l10n.folderCreated : l10n.failedToCreateFolder,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _editFolder(BuildContext context, PasswordFolder folder) async {
+    final l10n = AppLocalizations.of(context)!;
+    final database = authController.database;
+
+    if (database == null) {
+      return;
+    }
+
+    final result = await showFolderFormPopup(
+      context,
+      entries: database.entries,
+      folders: database.folders,
+      folder: folder,
+    );
+
+    if (result == null || !context.mounted) {
+      return;
+    }
+
+    final latestDatabase = authController.database;
+    final latestFolder = latestDatabase?.folderById(folder.id);
+
+    if (latestDatabase == null || latestFolder == null) {
+      return;
+    }
+
+    final updatedFolder = latestFolder.copyWith(
+      name: result.name,
+      entryIds: result.entryIds.toList(),
+    );
+
+    final success = await authController.saveDatabase(
+      latestDatabase.updateFolder(updatedFolder),
+    );
+
+    if (!context.mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success ? l10n.folderUpdated : l10n.failedToUpdateFolder,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _deleteFolder(
+    BuildContext context,
+    PasswordFolder folder,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(l10n.deleteFolder),
+          content: Text(l10n.deleteFolderConfirmation(folder.name)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(dialogContext).colorScheme.error,
+              ),
+              child: Text(l10n.delete),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !context.mounted) {
+      return;
+    }
+
+    final latestDatabase = authController.database;
+
+    if (latestDatabase == null) {
+      return;
+    }
+
+    final success = await authController.saveDatabase(
+      latestDatabase.removeFolder(folder.id),
     );
 
     if (!context.mounted) {
@@ -122,14 +171,11 @@ class FoldersTab extends StatelessWidget {
       SnackBar(
         content: Text(
           success
-              ? l10n.folderCreated
-              : authController.errorMessage == null
-              ? l10n.failedToCreateFolder
-              : l10n.authFeedback(authController.errorMessage!),
+              ? l10n.folderDeleted
+              : l10n.failedToDeleteFolder,
         ),
       ),
     );
-    nameController.dispose();
   }
 
   @override
@@ -173,13 +219,31 @@ class FoldersTab extends StatelessWidget {
                           title: folder.name,
                           subtitle: l10n.entryCount(folder.entryIds.length),
                           icon: Icons.folder_rounded,
+                          contextMenuItems: [
+                            SectionCardMenuItem(
+                              label: l10n.editFolder,
+                              icon: Icons.edit_rounded,
+                              onSelected: () {
+                                _editFolder(context, folder);
+                              },
+                            ),
+                            SectionCardMenuItem(
+                              label: l10n.delete,
+                              icon: Icons.delete_rounded,
+                              isDestructive: true,
+                              onSelected: () {
+                                _deleteFolder(context, folder);
+                              },
+                            ),
+                          ],
+                          key: ValueKey("custom-folder-${folder.id}"),
                           action: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (_) => AllEntriesTab(
                                   authController: authController,
                                   screenTitle: folder.name,
-                                  entryIds: folder.entryIds,
+                                  folderId: folder.id,
                                   emptyMessage: l10n.thisFolderIsEmpty,
                                 ),
                               ),
@@ -203,6 +267,22 @@ class FoldersTab extends StatelessWidget {
                             l10n.detectedFolderSourceLabel(folder.source),
                           ),
                           icon: Icons.auto_awesome_rounded,
+                          contextMenuItems: [
+                            SectionCardMenuItem(
+                              label: l10n.saveAsCustomFolder,
+                              icon: Icons.create_new_folder_rounded,
+                              onSelected: () {
+                                _createFolder(
+                                  context,
+                                  initialName: folder.name,
+                                  initialEntryIds: folder.entries
+                                      .map((entry) => entry.id)
+                                      .toSet(),
+                                );
+                              },
+                            ),
+                          ],
+                          key: ValueKey("detected-${folder.source.name}-${folder.name}"),
                           action: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
@@ -227,11 +307,4 @@ class FoldersTab extends StatelessWidget {
       },
     );
   }
-}
-
-class _FolderFormResult {
-  const _FolderFormResult({required this.name, required this.entryIds});
-
-  final String name;
-  final List<String> entryIds;
 }

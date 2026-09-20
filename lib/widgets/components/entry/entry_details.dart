@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import "../../l10n/app_localizations.dart";
+import "../../../l10n/app_localizations.dart";
 
-import "../../security/timed_clipboard.dart";
+import "../../../security/timed_clipboard.dart";
 
 class EntryDetail extends StatelessWidget {
   const EntryDetail({super.key, required this.label, required this.value});

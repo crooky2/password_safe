@@ -79,7 +79,7 @@ extension LocalizedMessages on AppLocalizations {
   String detectedFolderSourceLabel(DetectedFolderSource source) {
     return switch (source) {
       DetectedFolderSource.title => detectedFolderSourceTitle,
-      DetectedFolderSource.usernameDomain => detectedFolderSourceUsernameDomain,
+      DetectedFolderSource.username => detectedFolderSourceUsername,
       DetectedFolderSource.urlHost => detectedFolderSourceUrlHost,
     };
   }

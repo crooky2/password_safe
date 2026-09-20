@@ -187,7 +187,14 @@ class PasswordDatabase {
   }
 
   PasswordDatabase removeEntry(String id) {
-    return copyWith(entries: entries.where((entry) => entry.id != id).toList());
+    return copyWith(
+      entries: entries.where((entry) => entry.id != id).toList(),
+      folders: folders.map((folder) {
+        return folder.copyWith(
+          entryIds: folder.entryIds.where((entryId) => entryId != id).toList(),
+        );
+      }).toList(),
+    );
   }
 
   PasswordDatabase addFolder(PasswordFolder folder) {
@@ -209,6 +216,50 @@ class PasswordDatabase {
   PasswordDatabase removeFolder(String id) {
     return copyWith(
       folders: folders.where((folder) => folder.id != id).toList(),
+    );
+  }
+
+  PasswordFolder? folderById(String id) {
+    for (final folder in folders) {
+      if (folder.id == id) {
+        return folder;
+      }
+    }
+
+    return null;
+  }
+
+  Set<String> folderIdsForEntry(String entryId) {
+    return {
+      for (final folder in folders)
+        if (folder.entryIds.contains(entryId)) folder.id,
+    };
+  }
+
+  PasswordDatabase setEntryFolderMembership({
+    required String entryId,
+    required Set<String> folderIds,
+  }) {
+    if (!entries.any((entry) => entry.id == entryId)) {
+      throw ArgumentError.value(
+        entryId,
+        "entryId",
+        "The entry does not exist.",
+      );
+    }
+
+    return copyWith(
+      folders: folders.map((folder) {
+        final updatedEntryIds = folder.entryIds
+            .where((existingId) => existingId != entryId)
+            .toList();
+
+        if (folderIds.contains(folder.id)) {
+          updatedEntryIds.add(entryId);
+        }
+
+        return folder.copyWith(entryIds: updatedEntryIds);
+      }).toList(),
     );
   }
 }

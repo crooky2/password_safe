@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import '../widgets/screen_frame.dart';
 import '../widgets/section_card.dart';
 import "../widgets/section_card_lightweight.dart";
+import "../widgets/components/entry/entry_icon.dart";
 
 import "../auth/auth_controller.dart";
 
 import "home/all_entries_tab.dart";
 import "home/folders_tab.dart";
 
-import "../widgets/home/entry_actions.dart";
+import "../widgets/components/entry/entry_actions.dart";
 
 import "../vault/password_database.dart";
 import "../vault/folder_detector.dart";
@@ -50,20 +51,22 @@ class HomeScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final statusColor = _cloudStatusColor(colorScheme);
 
-    return statusColor == colorScheme.outline
-        ? const SizedBox.shrink()
-        : Material(
-            elevation: 4,
-            child: IconButton(
-              tooltip: l10n.cloudSync,
-              onPressed: onOpenCloudScreen,
-              icon: Icon(Icons.cloud_rounded, color: statusColor),
-            ),
-          );
+    if (statusColor == colorScheme.outline) {
+      return const SizedBox.shrink();
+    }
+
+    return IconButton(
+      tooltip: l10n.cloudSync,
+      onPressed: onOpenCloudScreen,
+      color: statusColor,
+      icon: const Icon(Icons.cloud_rounded)
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    const iconResolver = EntryIconResolver();
+
     return Stack(
       children: [
         AnimatedBuilder(
@@ -90,7 +93,7 @@ class HomeScreen extends StatelessWidget {
                 IconButton(
                   tooltip: l10n.addEntry,
                   onPressed: () {
-                    entryActions.openEntryForm(context);
+                    entryActions.popupEntryEdit(context);
                   },
                   icon: const Icon(Icons.add_rounded),
                 ),
@@ -150,7 +153,7 @@ class HomeScreen extends StatelessWidget {
                         subtitle: entry.username.trim().isEmpty
                             ? null
                             : entry.username,
-                        icon: Icons.key_rounded,
+                        icon: iconResolver.resolve(entry),
                         border: entry.id == favoriteEntries.last.id
                             ? null
                             : Border(
@@ -160,13 +163,9 @@ class HomeScreen extends StatelessWidget {
                                 ),
                               ),
                         action: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  AllEntriesTab(authController: authController),
-                            ),
-                          );
+                          entryActions.popupEntryDetails(context, entry: entry);
                         },
+                        key: ValueKey(entry.id),
                         contextMenuItems: [
                           SectionCardMenuItem(
                             label: l10n.unfavorite,
@@ -183,7 +182,14 @@ class HomeScreen extends StatelessWidget {
                             label: l10n.edit,
                             icon: Icons.edit_rounded,
                             onSelected: () {
-                              entryActions.openEntryForm(context, entry: entry);
+                              entryActions.popupEntryEdit(context, entry: entry);
+                            },
+                          ),
+                          SectionCardMenuItem(
+                            label: l10n.addToFolder,
+                            icon: Icons.move_to_inbox,
+                            onSelected: () {
+                              entryActions.manageFolders(context, entry: entry);
                             },
                           ),
                         ],

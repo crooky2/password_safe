@@ -5,6 +5,8 @@ import "../../l10n/app_localizations.dart";
 import "../screen_popup.dart";
 import "../secret_text_field.dart";
 
+enum _PinSetupError { pinTooShort, pinsDoNotMatch }
+
 class PinSetupPopup extends StatefulWidget {
   const PinSetupPopup({
     super.key,
@@ -21,7 +23,7 @@ class _PinSetupPopupState extends State<PinSetupPopup> {
   final TextEditingController _pinController = TextEditingController();
   final TextEditingController _confirmController = TextEditingController();
 
-  String? _errorMessage;
+  _PinSetupError? _error;
 
   @override
   void dispose() {
@@ -31,20 +33,19 @@ class _PinSetupPopupState extends State<PinSetupPopup> {
   }
 
   void _submit() {
-    final l10n = AppLocalizations.of(context)!;
     final pin = _pinController.text;
     final confirm = _confirmController.text;
 
     if (pin.length < 4) {
       setState(() {
-        _errorMessage = l10n.useAtLeast4Characters;
+        _error = _PinSetupError.pinTooShort;
       });
       return;
     }
 
     if (pin != confirm) {
       setState(() {
-        _errorMessage = l10n.pinsDoNotMatch;
+        _error = _PinSetupError.pinsDoNotMatch;
       });
       return;
     }
@@ -55,6 +56,11 @@ class _PinSetupPopupState extends State<PinSetupPopup> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final errorMessage = switch (_error) {
+      _PinSetupError.pinTooShort => l10n.useAtLeast4Characters,
+      _PinSetupError.pinsDoNotMatch => l10n.pinsDoNotMatch,
+      null => null,
+    };
 
     return ScreenPopup(
       title: l10n.setPin,
@@ -80,10 +86,10 @@ class _PinSetupPopupState extends State<PinSetupPopup> {
           onSubmitted: (_) => _submit(),
         ),
 
-        if (_errorMessage != null) ...[
+        if (errorMessage != null) ...[
           const SizedBox(height: 12),
           Text(
-            _errorMessage!,
+            errorMessage,
             style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
         ],

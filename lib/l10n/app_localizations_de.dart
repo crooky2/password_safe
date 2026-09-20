@@ -12,6 +12,40 @@ class AppLocalizationsDe extends AppLocalizations {
   String get appTitle => 'Passwort-Safe';
 
   @override
+  String appVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get themeColor => 'Akzentfarbe';
+
+  @override
+  String get themeColorDefault => 'Standard';
+
+  @override
+  String get themeColorCustom => 'Benutzerdefiniert';
+
+  @override
+  String get chooseThemeColor => 'Akzentfarbe auswählen';
+
+  @override
+  String get closeThemeColor => 'Farbauswahl schließen';
+
+  @override
+  String get resetDataUnavailable =>
+      'Die App-Daten können derzeit nicht zurückgesetzt werden. Entsperre deinen Tresor und versuche es erneut.';
+
+  @override
+  String get resetDataFailed =>
+      'Die App-Daten konnten nicht zurückgesetzt werden. Bitte versuche es erneut.';
+
+  @override
+  String get deviceAuthenticationRequired => 'Authentifizierung erforderlich';
+
+  @override
+  String get verifyIdentity => 'Bestätige deine Identität';
+
+  @override
   String get generatePassword => 'Passwort generieren';
 
   @override
@@ -21,7 +55,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get closePasswordGenerator => 'Passwortgenerator schließen';
 
   @override
-  String get passwordGeneratorNormalCharacters => 'Normale Zeichen';
+  String get passwordGeneratorNormalCharacters => 'Kleinbuchstaben';
 
   @override
   String get passwordGeneratorUppercaseCharacters => 'Großbuchstaben';
@@ -172,7 +206,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get saveChanges => 'Änderungen speichern';
 
   @override
-  String get discard => 'Verwerfen';
+  String get discard => 'Änderungen verwerfen';
 
   @override
   String get show => 'Anzeigen';
@@ -672,6 +706,42 @@ class AppLocalizationsDe extends AppLocalizations {
   String get failedToCreateFolder => 'Ordner konnte nicht erstellt werden.';
 
   @override
+  String get folderUpdated => 'Ordner aktualisiert.';
+
+  @override
+  String get failedToUpdateFolder => 'Ordner konnte nicht aktualisiert werden.';
+
+  @override
+  String get folderDeleted => 'Ordner gelöscht.';
+
+  @override
+  String get failedToDeleteFolder => 'Ordner konnte nicht gelöscht werden.';
+
+  @override
+  String get deleteFolder => 'Ordner löschen?';
+
+  @override
+  String deleteFolderConfirmation(Object name) {
+    return '\"$name\" löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden.';
+  }
+
+  @override
+  String get editFolder => 'Ordner bearbeiten';
+
+  @override
+  String get saveAsCustomFolder => 'Als eigenen Ordner speichern';
+
+  @override
+  String get addToFolder => 'Zu Ordner hinzufügen';
+
+  @override
+  String get folderMembershipUpdated => 'Ordnerzugehörigkeit aktualisiert.';
+
+  @override
+  String get failedToUpdateFolders =>
+      'Ordner konnten nicht aktualisiert werden.';
+
+  @override
   String get createNewFolder => 'Neuen Ordner erstellen';
 
   @override
@@ -708,10 +778,32 @@ class AppLocalizationsDe extends AppLocalizations {
   String get detectedFolderSourceTitle => 'Titel';
 
   @override
-  String get detectedFolderSourceUsernameDomain => 'Gleiche Domain';
+  String get detectedFolderSourceUsername => 'Gleicher Benutzername';
 
   @override
   String get detectedFolderSourceUrlHost => 'Gleiche Website';
+
+  @override
+  String get selectFolders => 'Ordner auswählen';
+
+  @override
+  String get searchFolders => 'Ordner suchen';
+
+  @override
+  String get noFoldersMatchSearch => 'Keine Ordner passen zu deiner Suche.';
+
+  @override
+  String get clearSelection => 'Auswahl leeren';
+
+  @override
+  String get done => 'Fertig';
+
+  @override
+  String get folderNameRequired => 'Ordnername ist erforderlich.';
+
+  @override
+  String get folderNameAlreadyExists =>
+      'Ein Ordner mit diesem Namen existiert bereits.';
 
   @override
   String durationMinutesAndSeconds(int minutes, int seconds) {

@@ -94,8 +94,8 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
-    Locale('de'),
     Locale('en'),
+    Locale('de'),
   ];
 
   /// No description provided for @appTitle.
@@ -103,6 +103,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Password Safe'**
   String get appTitle;
+
+  /// No description provided for @appVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String appVersion(String version);
+
+  /// No description provided for @themeColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme color'**
+  String get themeColor;
+
+  /// No description provided for @themeColorDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get themeColorDefault;
+
+  /// No description provided for @themeColorCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get themeColorCustom;
+
+  /// No description provided for @chooseThemeColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose theme color'**
+  String get chooseThemeColor;
+
+  /// No description provided for @closeThemeColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Close theme color picker'**
+  String get closeThemeColor;
+
+  /// No description provided for @resetDataUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'App data cannot be reset right now. Unlock your vault and try again.'**
+  String get resetDataUnavailable;
+
+  /// No description provided for @resetDataFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reset app data. Please try again.'**
+  String get resetDataFailed;
+
+  /// No description provided for @deviceAuthenticationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication required'**
+  String get deviceAuthenticationRequired;
+
+  /// No description provided for @verifyIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your identity'**
+  String get verifyIdentity;
 
   /// No description provided for @generatePassword.
   ///
@@ -1256,6 +1316,72 @@ abstract class AppLocalizations {
   /// **'Failed to create folder.'**
   String get failedToCreateFolder;
 
+  /// No description provided for @folderUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder updated.'**
+  String get folderUpdated;
+
+  /// No description provided for @failedToUpdateFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update folder.'**
+  String get failedToUpdateFolder;
+
+  /// No description provided for @folderDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder deleted.'**
+  String get folderDeleted;
+
+  /// No description provided for @failedToDeleteFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete folder.'**
+  String get failedToDeleteFolder;
+
+  /// No description provided for @deleteFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete folder?'**
+  String get deleteFolder;
+
+  /// No description provided for @deleteFolderConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\"?\n\nThis action cannot be undone.'**
+  String deleteFolderConfirmation(Object name);
+
+  /// No description provided for @editFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit folder'**
+  String get editFolder;
+
+  /// No description provided for @saveAsCustomFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as custom folder'**
+  String get saveAsCustomFolder;
+
+  /// No description provided for @addToFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to folder'**
+  String get addToFolder;
+
+  /// No description provided for @folderMembershipUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder membership updated.'**
+  String get folderMembershipUpdated;
+
+  /// No description provided for @failedToUpdateFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update folders.'**
+  String get failedToUpdateFolders;
+
   /// No description provided for @createNewFolder.
   ///
   /// In en, this message translates to:
@@ -1310,17 +1436,59 @@ abstract class AppLocalizations {
   /// **'Title'**
   String get detectedFolderSourceTitle;
 
-  /// No description provided for @detectedFolderSourceUsernameDomain.
+  /// No description provided for @detectedFolderSourceUsername.
   ///
   /// In en, this message translates to:
-  /// **'Same username domain'**
-  String get detectedFolderSourceUsernameDomain;
+  /// **'Same username'**
+  String get detectedFolderSourceUsername;
 
   /// No description provided for @detectedFolderSourceUrlHost.
   ///
   /// In en, this message translates to:
   /// **'Same website'**
   String get detectedFolderSourceUrlHost;
+
+  /// No description provided for @selectFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Select folders'**
+  String get selectFolders;
+
+  /// No description provided for @searchFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Search folders'**
+  String get searchFolders;
+
+  /// No description provided for @noFoldersMatchSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'No folders match your search.'**
+  String get noFoldersMatchSearch;
+
+  /// No description provided for @clearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get clearSelection;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @folderNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder name is required.'**
+  String get folderNameRequired;
+
+  /// No description provided for @folderNameAlreadyExists.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder name already exists.'**
+  String get folderNameAlreadyExists;
 
   /// No description provided for @durationMinutesAndSeconds.
   ///

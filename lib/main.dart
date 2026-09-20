@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import "package:flutter_localizations/flutter_localizations.dart";
 
 import "l10n/app_localizations.dart";
 
@@ -34,7 +33,7 @@ class _PasswordSafeAppState extends State<PasswordSafeApp> {
   @override
   Widget build(BuildContext context) {
     ThemeData buildTheme(Brightness brightness) {
-      const seedColor = Color.fromARGB(255, 31, 111, 120);
+      final seedColor = widget.themeController.seedColor;
 
       final baseColorScheme = ColorScheme.fromSeed(
         seedColor: seedColor,
@@ -75,12 +74,7 @@ class _PasswordSafeAppState extends State<PasswordSafeApp> {
 
           locale: widget.themeController.locale,
           onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
 
           themeMode: widget.themeController.themeMode,

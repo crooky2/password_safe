@@ -3,7 +3,7 @@ import "package:flutter/material.dart";
 import "../../cloud/cloud_diff.dart";
 import "../../l10n/app_localizations.dart";
 
-import "../home/entry_details.dart";
+import "../components/entry/entry_details.dart";
 
 class CloudChangedFieldInfo {
   const CloudChangedFieldInfo({

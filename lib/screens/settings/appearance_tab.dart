@@ -5,6 +5,7 @@ import "../../theme_controller.dart";
 import "../../widgets/screen_frame.dart";
 import "../../widgets/section_card.dart";
 import "../../widgets/settings/settings_dropdown.dart";
+import "../../widgets/components/appearance/theme_color.dart";
 
 import "../../l10n/app_localizations.dart";
 
@@ -56,6 +57,9 @@ class _AppearanceTabState extends State<AppearanceTab> {
                     );
                   },
                 ),
+                // const SizedBox(height: 16),
+                ThemeColorSetting(themeController: widget.themeController),
+                // const SizedBox(height: 16),
                 SettingsDropdown<AppLanguage>(
                   title: l10n.language,
                   value: widget.themeController.language,

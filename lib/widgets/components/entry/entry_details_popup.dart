@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
-import "../screen_popup.dart";
+import "../../../widgets/screen_popup.dart";
 
-import "../../vault/password_database.dart";
+import "../../../vault/password_database.dart";
 
-import "../../l10n/app_localizations.dart";
+import "../../../l10n/app_localizations.dart";
 
 import "entry_details.dart";
+import "entry_icon.dart";
 
 enum EntryDetailsPopupAction { edit, delete, clone }
 
@@ -29,33 +30,33 @@ class EntryDetailsPopup extends StatelessWidget {
     return ScreenPopup(
       title: titlePrefix == null ? entry.title : "$titlePrefix: ${entry.title}",
       onClose: () => Navigator.of(context).pop(),
-
+      icon: EntryIconResolver().resolve(entry),
       children: [
         if (showActions) ...[
           Row(
             children: [
               Expanded(
-                child: FilledButton.icon(
+                child: IconButton.filled(
                   onPressed: () {
                     Navigator.of(context).pop(EntryDetailsPopupAction.edit);
                   },
                   icon: const Icon(Icons.edit, size: 18),
-                  label: Text(l10n.edit),
+                  tooltip: l10n.edit,
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: FilledButton.icon(
+                child: IconButton.filled(
                   onPressed: () {
                     Navigator.of(context).pop(EntryDetailsPopupAction.clone);
                   },
                   icon: const Icon(Icons.copy_sharp, size: 18),
-                  label: Text(l10n.clone),
+                  tooltip: l10n.clone,
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: FilledButton.icon(
+                child: IconButton.filled(
                   onPressed: () {
                     Navigator.of(context).pop(EntryDetailsPopupAction.delete);
                   },
@@ -64,7 +65,7 @@ class EntryDetailsPopup extends StatelessWidget {
                     foregroundColor: Theme.of(context).colorScheme.onError,
                   ),
                   icon: const Icon(Icons.delete, size: 18),
-                  label: Text(l10n.delete),
+                  tooltip: l10n.delete,
                 ),
               ),
             ],

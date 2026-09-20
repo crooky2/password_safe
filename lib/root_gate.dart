@@ -1,6 +1,7 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:flutter/foundation.dart";
 
 import 'app_shell.dart';
 import "theme_controller.dart";
@@ -131,17 +132,24 @@ class _RootGateState extends State<RootGate> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
+    final isNativeAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+    if (isNativeAndroid && state != AppLifecycleState.detached) {
+      return;
+    }
+
+    final shouldLock = state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden ||
-        state == AppLifecycleState.detached) {
-      if (_authController.state == AuthState.unlocked) {
-        _authController.lock();
-      }
+        state == AppLifecycleState.detached;
+
+    if (shouldLock && _authController.state == AuthState.unlocked) {
+      _authController.lock();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AnimatedBuilder(
       animation: _authController,
 
@@ -165,7 +173,11 @@ class _RootGateState extends State<RootGate> with WidgetsBindingObserver {
               child: LockScreen(
                 onUnlock: _authController.unlock,
                 onUnlockWithPin: _authController.unlockWithPin,
-                onUnlockWithFingerprint: _authController.unlockWithFingerprint,
+                onUnlockWithFingerprint: ({required String promptTitle}) =>
+                    _authController.unlockWithFingerprint(
+                      promptTitle: promptTitle,
+                      localeName: l10n.localeName,
+                    ),
                 isPinUnlockEnabled: _authController.isPinUnlockEnabled,
                 isFingerprintUnlockEnabled:
                     _authController.isFingerprintUnlockEnabled,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import "section_card.dart";
 
 import "context_menu_coordinator.dart";
+import "components/swipe_action.dart";
 
 class SectionCardLightweight extends StatelessWidget {
   const SectionCardLightweight({
@@ -14,6 +15,8 @@ class SectionCardLightweight extends StatelessWidget {
     this.additionalActionIconButton,
     this.border,
     this.contextMenuItems = const [],
+    this.swipePanelColor,
+    this.swipePanelForegroundColor,
   });
 
   final String? title;
@@ -23,6 +26,8 @@ class SectionCardLightweight extends StatelessWidget {
   final IconButton? additionalActionIconButton;
   final BoxBorder? border;
   final List<SectionCardMenuItem> contextMenuItems;
+  final Color? swipePanelColor;
+  final Color? swipePanelForegroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +36,6 @@ class SectionCardLightweight extends StatelessWidget {
     final hasTitle = title != null && title!.trim().isNotEmpty;
     final hasSubtitle = subtitle != null && subtitle!.trim().isNotEmpty;
     final hasIcon = icon != null;
-    final hasContextMenu = contextMenuItems.isNotEmpty;
     final hasAdditionalAction = additionalActionIconButton != null;
     final menuController = MenuController();
 
@@ -41,7 +45,7 @@ class SectionCardLightweight extends StatelessWidget {
         for (final item in contextMenuItems)
           MenuItemButton(
             onPressed: () {
-              ContextMenuCoordinator.close(menuController);
+              SwipeActionOverlay.closeOpen();
               item.onSelected();
             },
             leadingIcon: item.icon == null
@@ -60,23 +64,34 @@ class SectionCardLightweight extends StatelessWidget {
       ],
 
       builder: (context, controller, child) {
-        return Container(
-          decoration: border != null ? BoxDecoration(border: border) : null,
-          child: ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: hasIcon ? Icon(icon) : null,
-            title: hasTitle ? Text(title!) : null,
-            subtitle: hasSubtitle ? Text(subtitle!) : null,
-            trailing: hasAdditionalAction ? additionalActionIconButton : null,
-            onTap: isInteractive
-                ? () {
-                    ContextMenuCoordinator.closeOpenMenu();
-                    action!();
-                  }
-                : null,
-            onLongPress: hasContextMenu
-                ? () => ContextMenuCoordinator.open(controller)
-                : null,
+        return SwipeActionOverlay(
+          onWillOpen: ContextMenuCoordinator.closeOpenMenu,
+          actions: [
+            for (final item in contextMenuItems)
+              if (item.icon != null)
+                SwipeAction(
+                  label: item.label,
+                  icon: item.icon!,
+                  isDestructive: item.isDestructive,
+                  onPressed: item.onSelected,
+                ),
+          ],
+
+          child: Container(
+            decoration: border != null ? BoxDecoration(border: border) : null,
+            child: ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: hasIcon ? Icon(icon) : null,
+              title: hasTitle ? Text(title!) : null,
+              subtitle: hasSubtitle ? Text(subtitle!) : null,
+              trailing: hasAdditionalAction ? additionalActionIconButton : null,
+              onTap: isInteractive
+                  ? () {
+                      SwipeActionOverlay.closeOpen();
+                      action!();
+                    }
+                  : null,
+            ),
           ),
         );
       },
