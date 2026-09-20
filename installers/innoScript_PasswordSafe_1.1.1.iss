@@ -2,19 +2,16 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 ; Non-commercial use only
 
-#define MyAppName "PasswordSafe"
-#define MyAppVersion "1.1"
+#define MyAppName "Password Safe"
+#define MyAppVersion "1.1.1"
 #define MyAppPublisher "Christopher Bach"
 #define MyAppURL "https://github.com/crooky2/password_safe"
 #define MyAppExeName "password_safe.exe"
-#define MyAppAssocName MyAppName + " File"
-#define MyAppAssocExt ".myp"
-#define MyAppAssocKey StringChange(MyAppAssocName, " ", "") + MyAppAssocExt
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{1E2D62D8-7749-4A7B-94A2-6199C540CC9D}
+AppId={{47AD6A99-872E-4DC9-BCFD-01ED6205465F}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -34,13 +31,12 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 ; Uncomment the following line to use a 64-bit installer.
 ;SetupArchitecture=x64
-ChangesAssociations=yes
 DisableProgramGroupPage=yes
 ; Remove the following line to run in administrative install mode (install for all users).
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputDir=C:\Users\chris\OneDrive\Desktop
-OutputBaseFilename=PasswordSafe_1.1.0
+OutputDir=D:\GitHub\password_safe\installers
+OutputBaseFilename=PasswordSafe_1.1.1
 SolidCompression=yes
 WizardStyle=modern dynamic
 
@@ -61,14 +57,8 @@ Source: "D:\GitHub\password_safe\build\windows\x64\runner\Release\local_auth_win
 Source: "D:\GitHub\password_safe\build\windows\x64\runner\Release\url_launcher_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "D:\GitHub\password_safe\build\windows\x64\runner\Release\Webview2Loader.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "D:\GitHub\password_safe\build\windows\x64\runner\Release\window_to_front_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\GitHub\password_safe\build\windows\x64\runner\Release\data\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "D:\GitHub\password_safe\build\windows\x64\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
-
-[Registry]
-Root: HKA; Subkey: "Software\Classes\{#MyAppAssocExt}\OpenWithProgids"; ValueType: string; ValueName: "{#MyAppAssocKey}"; ValueData: ""; Flags: uninsdeletevalue
-Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}"; ValueType: string; ValueName: ""; ValueData: "{#MyAppAssocName}"; Flags: uninsdeletekey
-Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppExeName},0"
-Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
